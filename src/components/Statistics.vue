@@ -28,8 +28,8 @@
 </template>
 
 <script>
-  import scatterplotView from './visView/scatterplotView'
-  import ConfusionMatrix from './visView/ConfusionMatrix'
+  import scatterplotView from './visView/scatterplotView.vue'
+  import ConfusionMatrix from './visView/ConfusionMatrix.vue'
 
   export default {
     name: "DataView",

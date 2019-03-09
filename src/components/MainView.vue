@@ -7,7 +7,6 @@
         </div>
 
       </el-col>
-
       <el-col :span="12" class="horizontal_stripe">
         <div class="grid-content bg-purple">
           <div class = 'sequence_container boundary'>
@@ -40,12 +39,12 @@
 
 
 <script>
-  import StatisticsView from './Statistics'
-  import ControlView from './Control'
+  import StatisticsView from './Statistics.vue'
+  import ControlView from './Control.vue'
 
-  import LineChart from './visView/LineChart'
+  import LineChart from './visView/LineChart.vue'
 
-  import dataService from '../service/dataService'
+  import dataService from '../service/dataService.js'
 
   export default {
     name: "MainView",

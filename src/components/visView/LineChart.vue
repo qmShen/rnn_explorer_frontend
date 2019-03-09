@@ -3,8 +3,8 @@
 </template>
 
 <script>
-  import * as d3 from 'd3'
-  import BrushLineChart from './linechart'
+
+  import BrushLineChart from './linechart.js'
 
   export default {
     name: "LineChart",

@@ -7,9 +7,9 @@
 
 <script>
 
-  import HelloWorld from './components/HelloWorld'
-  import MainView from './components/MainView'
-  import Navbar  from './components/Navbar'
+  import HelloWorld from './components/HelloWorld.vue'
+  import MainView from './components/MainView.vue'
+  import Navbar  from './components/Navbar.vue'
 
   export default {
     name: 'App',
