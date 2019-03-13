@@ -28,11 +28,11 @@
 </template>
 
 <script>
-  import scatterplotView from './visView/scatterplotView.vue'
+  import scatterplotView from './visView/ScatterplotView.vue'
   import ConfusionMatrix from './visView/ConfusionMatrix.vue'
 
   export default {
-    name: "DataView",
+    name: "StatisticsView",
     props:['input_scatter','trend_data'],
     components: {
       scatterplotView,
