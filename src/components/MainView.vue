@@ -63,6 +63,10 @@
       dataService.getInitScatter(function(records){
         _this.input_scatter = records
       });
+      dataService.getUnitsStats('GRU_1',function(records){
+        console.log('post', records)
+      });
+
     },
 
 
