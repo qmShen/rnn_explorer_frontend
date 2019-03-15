@@ -179,7 +179,7 @@ DistributionMatrix.prototype.render_untis = function(){
 
 DistributionMatrix.prototype.update_units_render = function(data){
   let n_cell= data.length;
-
+  let _this = this;
   this.row_num = 8;
   this.column_num = Math.ceil(n_cell / this.row_num);
 
@@ -218,7 +218,7 @@ DistributionMatrix.prototype.update_units_render = function(data){
     .attr('height', this.cell_render_config['height'])
     .attr('fill', 'white').attr('stroke', 'red').attr('stroke-opacity', '0.2')
     .attr('rx', 5)
-    .attr('ry', 5)
+    .attr('ry', 5).attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.5)
   boundary_rect.append('title').text(d=>d.uid)
 
   let cell_x = d3.scaleLinear()
@@ -297,7 +297,9 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('ry', 3)
     .attr('width', this.cell_render_config['width'])
     .attr('height', this.cell_render_config['height'])
-    .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.2).attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.5);
+    .attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.5)
+    .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.5)
+
   boundary_rect.append('title').text(d=>d.fid);
 
   let cell_x = d3.scaleLinear()

@@ -78,25 +78,17 @@
     },
     mounted: function(){
       let _this = this;
-      dataService.getTemporal(function(records){
-        _this.trend_data_json = records
-      });
-      dataService.getInitScatter(function(records){
-        _this.input_scatter = records
-      });
-      // dataService.getUnitsStats('GRU_1',function(records){
-      //   _this.all_units_stats = records;
+      // dataService.getTemporal(function(records){
+      //   _this.trend_data_json = records
       // });
-      //
-      // dataService.getFeatureStats('GRU_1',function(records){
-      //   _this.all_feature_stats = records;
+      // dataService.getInitScatter(function(records){
+      //   _this.input_scatter = records
       // });
+
       dataService.getAllStats('GRU_1','15', function(records){
         console.log('here');
         _this.allStats = records;
-        // _this.all_units_stats = records['units'];
-        // _this.all_feature_stats = records['features'];
-        // _this.biClusterMap = records['bicluster']
+
 
       });
       dataService.getGradientsAndIO('GRU_1',
