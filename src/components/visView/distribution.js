@@ -45,11 +45,35 @@ let DistributionMatrix = function(el){
     .attr('stroke', 'blue').attr('stroke-width', 0.2).attr('stroke', 'blue');
 
 
+  this.selected_features = {};
+  this.selected_units = {};
 
 
   this.units_data_sign = false;
   this.feature_data_sign = false;
 };
+
+DistributionMatrix.prototype.register_function = function(select_call_back){
+  this.select_call_back = select_call_back
+};
+DistributionMatrix.prototype.register_selected_data = function(domain, d){
+  this.selected_features[d['id']] = null;
+
+  if(d['fid'] != undefined){
+    if(domain == 0)
+      delete this.selected_features[d['id']]
+    else
+      this.selected_features[d['id']] = [parseInt(domain[0]), Math.ceil(domain[1])];
+  }else{
+    if(domain == 0)
+      delete this.selected_units[d['id']]
+    else
+      this.selected_units[d['id']] = [int(domain[0]), Math.ceil(domain[1])];
+  }
+  this.select_call_back(this.selected_features, this.selected_units)
+};
+
+
 
 DistributionMatrix.prototype.add_feature_stats = function(data){
   this.feature_stats_data = data;
@@ -60,42 +84,25 @@ DistributionMatrix.prototype.add_feature_stats = function(data){
   }
 };
 DistributionMatrix.prototype.color = function(d){
-  console.log('cid',d.cid)
   const scale = d3.scaleOrdinal(d3.schemeCategory20);
   return scale(d.cid);
 };
 
 DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
 
-DistributionMatrix.prototype.add_untis_stats = function(data){
-  this.units_stats_data = data;
-  this.units_data_sign = true;
-
-  if(this.feature_data_sign == true){
-    console.log('udpate units_data_sign');
-    this.update_render()
-  }
-};
 
 
-DistributionMatrix.prototype.update_render = function(){
+
+DistributionMatrix.prototype.set_feature_and_unit_states = function(feature_units_stats){
   console.log('render all distribution');
   console.log('data', this.feature_stats_data, this.units_stats_data);
 
+};
 
-  let n_unit_cell = this.units_stats_data.length;
-
-
+DistributionMatrix.prototype.calc_position = function(){
 
 };
 
-DistributionMatrix.prototype.calc_unit_position = function(){
-
-};
-
-DistributionMatrix.prototype.calc_feature_position = function(){
-
-};
 
 
 DistributionMatrix.prototype.render_untis = function(){
@@ -174,7 +181,7 @@ DistributionMatrix.prototype.render_untis = function(){
       .attr("stroke-linejoin", "round")
       .attr("d",line)
   })
-}
+};
 
 
 DistributionMatrix.prototype.update_units_render = function(data){
@@ -282,6 +289,13 @@ DistributionMatrix.prototype.update_features_render = function(data){
       'y': r_index * this.cell_height
     }
   }
+
+
+
+
+  //
+
+
   this.feature_cell_containers = this.featureContainer.selectAll('.cell_container').data(data)
     .enter()
     .append('g')
@@ -297,14 +311,15 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('ry', 3)
     .attr('width', this.cell_render_config['width'])
     .attr('height', this.cell_render_config['height'])
-    .attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.5)
-    .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.5)
+    .attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 1)
+    .attr('fill', 'none');
+  // .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.0)
 
   boundary_rect.append('title').text(d=>d.fid);
 
   let cell_x = d3.scaleLinear()
     .domain([0, 50])
-    .range([this.cell_margin_x, this.cell_render_config['width']- this.cell_margin_x])
+    .range([this.cell_margin_x, this.cell_render_config['width'] - this.cell_margin_x])
 
   let cell_y = d3.scaleLinear()
     .range([this.cell_render_config['height'], this.cell_margin_y + 2]);
@@ -324,11 +339,45 @@ DistributionMatrix.prototype.update_features_render = function(data){
       .datum(d['kde_point'])
       .attr("fill", "none")
       .attr("opacity", ".8")
-      .attr("stroke", "#08b5fa")
+      // .attr("stroke", "#08b5fa")
+      .attr("stroke", _this.bicluster_colorScale(d.cid))
       .attr("stroke-width", 1)
       .attr("stroke-linejoin", "round")
       .attr("d",line)
-  })
+  });
+
+  var brush = d3.brushX()
+    .extent([[0, 0], [this.cell_render_config['width'], this.cell_render_config['height']]])
+    .on("start brush", brushmoved)
+    .on("end", function(d){
+      let range = d3.event.selection;
+      if(range){
+        let domain = range.map(cell_x.invert);
+        _this.register_selected_data(domain, d);
+      }else{
+        _this.register_selected_data(0, d);
+      }
+    });
+
+
+
+  function brushmoved(x){
+
+    var s = d3.event.selection;
+    if (s == null) {
+      // handle.attr("display", "none");
+
+    } else {
+
+      // console.log('x',s, sx);
+      // _this.register_selected_data(x, sx);
+    }
+  }
+  let brush_containers = this.feature_cell_containers.append('g')
+    .attr('transform', 'translate(' + this.cell_render_config['offset_x'] +',' +this.cell_render_config['offset_y'] +')')
+    .attr('class', 'brush').call(brush);
+
+  brush_containers.append('title').text(d=>d.uid)
 };
 
 export default DistributionMatrix

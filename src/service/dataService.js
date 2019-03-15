@@ -97,7 +97,17 @@ function getFeatureValues(mid, features, callback) {
     console.log(errResponse)
   })
 }
-//
+
+
+function getSubgroupStats(mid, selectFeatures, selectUnits, callback) {
+  const url = `${dataServerUrl}/subgroup_stats`
+  $http.post(url, {'mid': mid, 'features': selectFeatures, 'units':'selectUnits'}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+//get_subgroup_stats
 
 // function getAllRecordsForOneCity(cityId, callback) {
 //   const url = `${dataServerUrl}/getallrecords`
@@ -157,6 +167,7 @@ export default{
   getFeatureValues,
   getTestData,
   getGradientsAndIO,
+  getSubgroupStats,
   getTemporal,
   getInitScatter,
   getUnitsStats,
