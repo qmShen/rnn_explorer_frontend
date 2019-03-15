@@ -63,7 +63,10 @@ DistributionMatrix.prototype.color = function(d){
   console.log('cid',d.cid)
   const scale = d3.scaleOrdinal(d3.schemeCategory20);
   return scale(d.cid);
-}
+};
+
+DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
+
 DistributionMatrix.prototype.add_untis_stats = function(data){
   this.units_stats_data = data;
   this.units_data_sign = true;
@@ -285,6 +288,8 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('class', 'cell_container')
     .attr('transform', d=>'translate(' + d['render_config']['x']+ ',' + d['render_config']['y'] + ')');
 
+
+
   let boundary_rect = this.feature_cell_containers.append('rect').attr('class' ,'container_rect')
     .attr('x', this.cell_render_config['offset_x'])
     .attr('y', this.cell_render_config['offset_y'])
@@ -292,7 +297,7 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('ry', 3)
     .attr('width', this.cell_render_config['width'])
     .attr('height', this.cell_render_config['height'])
-    .attr('fill', 'white').attr('stroke', "#08b5fa").attr('stroke-opacity', '0.8');
+    .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.2).attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.5);
   boundary_rect.append('title').text(d=>d.fid);
 
   let cell_x = d3.scaleLinear()
