@@ -8,6 +8,7 @@
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
                             :all_units_stats="all_units_stats"
+                            :allStats="allStats"
 
 
           ></DistributionView>
@@ -69,7 +70,9 @@
         input_scatter: null,
         all_feature_stats: null,
         all_units_stats: null,
-        gradients_io: null
+        gradients_io: null,
+        biClusterMap: null,
+        allStats: null,
 
       }
     },
@@ -81,14 +84,21 @@
       dataService.getInitScatter(function(records){
         _this.input_scatter = records
       });
-      dataService.getUnitsStats('GRU_1',function(records){
-        _this.all_units_stats = records;
-      });
+      // dataService.getUnitsStats('GRU_1',function(records){
+      //   _this.all_units_stats = records;
+      // });
+      //
+      // dataService.getFeatureStats('GRU_1',function(records){
+      //   _this.all_feature_stats = records;
+      // });
+      dataService.getAllStats('GRU_1','15', function(records){
+        console.log('here');
+        _this.allStats = records;
+        // _this.all_units_stats = records['units'];
+        // _this.all_feature_stats = records['features'];
+        // _this.biClusterMap = records['bicluster']
 
-      dataService.getFeatureStats('GRU_1',function(records){
-        _this.all_feature_stats = records;
       });
-
       dataService.getGradientsAndIO('GRU_1',
         ["1514736000",
           "1514757600",

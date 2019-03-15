@@ -44,6 +44,9 @@ let DistributionMatrix = function(el){
     .attr('width', this.unit_box['width']).attr('height', this.feature_box['height']).attr('fill', 'none')
     .attr('stroke', 'blue').attr('stroke-width', 0.2).attr('stroke', 'blue');
 
+
+
+
   this.units_data_sign = false;
   this.feature_data_sign = false;
 };
@@ -56,7 +59,11 @@ DistributionMatrix.prototype.add_feature_stats = function(data){
     this.update_render();
   }
 };
-
+DistributionMatrix.prototype.color = function(d){
+  console.log('cid',d.cid)
+  const scale = d3.scaleOrdinal(d3.schemeCategory20);
+  return scale(d.cid);
+}
 DistributionMatrix.prototype.add_untis_stats = function(data){
   this.units_stats_data = data;
   this.units_data_sign = true;
@@ -246,7 +253,7 @@ DistributionMatrix.prototype.update_units_render = function(data){
 };
 
 DistributionMatrix.prototype.update_features_render = function(data){
-
+  let _this = this;
   let n_cell= data.length;
 
   this.row_num = 15;
@@ -285,7 +292,7 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('ry', 3)
     .attr('width', this.cell_render_config['width'])
     .attr('height', this.cell_render_config['height'])
-    .attr('fill', 'white').attr('stroke', 'blue').attr('stroke-opacity', '0.2');
+    .attr('fill', 'white').attr('stroke', "#08b5fa").attr('stroke-opacity', '0.8');
   boundary_rect.append('title').text(d=>d.fid);
 
   let cell_x = d3.scaleLinear()

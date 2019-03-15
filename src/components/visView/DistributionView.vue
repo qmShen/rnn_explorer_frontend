@@ -34,7 +34,7 @@
   //  });
   export default {
     name: "DistributionView",
-    props:['all_units_stats', 'all_feature_stats'],
+    props:['all_units_stats', 'all_feature_stats','allStats'],
     components:{
       FilterPCP
     },
@@ -66,6 +66,24 @@
       selected_feature_values:function(new_val, old_val){
         console.log('erer')
       },
+      allStats:function(new_val){
+        console.log('enw',new_val);
+
+        let unit_cluster_map = new_val['bicluster']['unit2cluster'];
+        let feature_cluster_map = new_val['bicluster']['featrue2cluster']
+        let units = new_val['units'];
+        let features = new_val['features'];
+        for(let i = 0, ilen = units.length; i < ilen; i++){
+          units[i]['cid'] = unit_cluster_map[units[i]['uid']]
+        }
+        for(let i = 0, ilen = features.length; i < ilen; i++){
+          features[i]['cid'] = feature_cluster_map[features[i]['fid']]
+        }
+        console.log('here', features, units)
+        this.distributionMatrix.update_units_render(units);
+        this.distributionMatrix.update_features_render(features);
+
+      }
     },
     methods:{
       handleClose(done) {
@@ -77,7 +95,7 @@
         dataService.getFeatureValues('GRU_1',this.selected_features, function(records){
           _this.dialogVisible = true;
           _this.selected_feature_values = records;
-          console.log('rec', records);
+
         });
       }
     },

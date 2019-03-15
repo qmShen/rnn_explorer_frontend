@@ -68,6 +68,17 @@ function getFeatureStats(mid, callback) {
   })
 }
 
+function getAllStats(mid, nc, callback) {
+  const url = `${dataServerUrl}/all_stats`
+  $http.post(url, {'mid': mid, 'nc': nc}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+
+
 function getGradientsAndIO(mid, tid, callback) {
   const url = `${dataServerUrl}/cell_input_output`
   $http.post(url, {'mid': mid, 'tid': tid}).then(response => {
@@ -149,6 +160,7 @@ export default{
   getTemporal,
   getInitScatter,
   getUnitsStats,
-  getFeatureStats
+  getFeatureStats,
+  getAllStats
 
 }

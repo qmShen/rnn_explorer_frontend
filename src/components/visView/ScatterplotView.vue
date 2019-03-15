@@ -1,14 +1,13 @@
 <template>
   <div>
-    <svg></svg>
-
+    <svg class="scatter_plot_container"></svg>
     <el-row>
-    <el-col :span="12" :offset="6">
-      <div class="block">
-        <span class="demonstration"></span>
-        <el-slider v-model="value" :show-tooltip="false" input-size="20"></el-slider>
-      </div>
-    </el-col>
+      <el-col :span="12" :offset="6">
+        <div class="block">
+          <span class="demonstration"></span>
+          <el-slider v-model="value" :show-tooltip="false" input-size="20"></el-slider>
+        </div>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -59,4 +58,7 @@
 </script>
 
 <style scoped>
+  .scatter_plot_container{
+    height: 100%
+  }
 </style>

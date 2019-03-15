@@ -58,8 +58,8 @@
   .scatter_container{
     height: calc(100%);
   }
-  .input_scatter .unit_container{
-    height: calc(100% - 20px);
+  .input_scatter{
+    height: calc(100% - 38px - 20px - 10px);
   }
   .unit_container{
     height: calc(100% - 20px);
