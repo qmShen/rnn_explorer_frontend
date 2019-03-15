@@ -17,7 +17,7 @@
           return
         }
 
-        console.log('new_val', new_val);
+        // console.log('new_val', new_val);
         let values = [];
         for(let i = 0, ilen = new_val.length; i < ilen; i++){
           let item = new_val[i];
@@ -25,12 +25,6 @@
         }
 
         let option = {
-          // title:{
-          //   text:"Confusion plot   (Prediction, GroundTruth)",
-          //   textStyle:{
-          //     align: 'right',
-          //     fontSize: 15}
-          // },
           xAxis: {
             scale: true,
             name:"Prediction"

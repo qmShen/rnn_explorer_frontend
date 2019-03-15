@@ -53,7 +53,7 @@ function getTestData (callback) {
 function getUnitsStats(mid, callback) {
   const url = `${dataServerUrl}/all_units_stats`
   $http.post(url, {'mid': mid}).then(response => {
-    callback(JSON.parse(response.data))
+    callback(response.data)
   }, errResponse => {
     console.log(errResponse)
   })
@@ -62,11 +62,31 @@ function getUnitsStats(mid, callback) {
 function getFeatureStats(mid, callback) {
   const url = `${dataServerUrl}/all_feature_stats`
   $http.post(url, {'mid': mid}).then(response => {
-    callback(JSON.parse(response.data))
+    callback(response.data)
   }, errResponse => {
     console.log(errResponse)
   })
 }
+
+function getGradientsAndIO(mid, tid, callback) {
+  const url = `${dataServerUrl}/cell_input_output`
+  $http.post(url, {'mid': mid, 'tid': tid}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+
+function getFeatureValues(mid, features, callback) {
+  const url = `${dataServerUrl}/feature_values`
+  $http.post(url, {'mid': mid, 'features': features}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+//
 
 // function getAllRecordsForOneCity(cityId, callback) {
 //   const url = `${dataServerUrl}/getallrecords`
@@ -123,9 +143,9 @@ function getFeatureStats(mid, callback) {
 // }
 
 export default{
-  getTestScatterPlot,
+  getFeatureValues,
   getTestData,
-
+  getGradientsAndIO,
   getTemporal,
   getInitScatter,
   getUnitsStats,

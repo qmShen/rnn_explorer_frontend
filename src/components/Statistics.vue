@@ -8,22 +8,16 @@
                        :scatter_data = 'input_scatter'>
       </scatterplotView>
     </div>
-    <div class = "scatter_container boundary">
-      <div class="mini_head">
-        <div class = 'mini_title'>Layers</div>
-      </div>
-      <scatterplotView class='unit_container'>
-      </scatterplotView>
-    </div>
-    <div class = "scatter_container boundary">
-      <div class="mini_head">
-        <div class = 'mini_title'>Confusion matrix</div>
-      </div>
-      <ConfusionMatrix :trend_data = "trend_data"
-                       class='matrix_container'>
 
-      </ConfusionMatrix>
-    </div>
+    <!--<div class = "scatter_container boundary">-->
+      <!--<div class="mini_head">-->
+        <!--<div class = 'mini_title'>Confusion matrix</div>-->
+      <!--</div>-->
+      <!--<ConfusionMatrix :trend_data = "trend_data"-->
+                       <!--class='matrix_container'>-->
+
+      <!--</ConfusionMatrix>-->
+    <!--</div>-->
   </div>
 </template>
 
@@ -62,7 +56,7 @@
 <style scoped>
 
   .scatter_container{
-    height: calc(33.33%);
+    height: calc(100%);
   }
   .input_scatter .unit_container{
     height: calc(100% - 20px);

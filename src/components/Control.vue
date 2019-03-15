@@ -38,11 +38,7 @@
         </el-table>
       </div>
     </div>
-    <div class = 'feature_unit boundary'>
-      <div class="mini_head">
-        <div class = 'mini_title'>Feature Unit</div>
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -82,15 +78,11 @@
 </script>
 
 <style scoped>
-  .control_main{
+
+  .model{
     height: 100%;
   }
-  .model{
-    height: 30%;
-  }
-  .feature_unit{
-    height: 70%;
-  }
+
 
   .select_box{
     max-width: 80%;
