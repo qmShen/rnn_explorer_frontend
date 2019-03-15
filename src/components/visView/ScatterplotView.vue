@@ -1,10 +1,15 @@
 <template>
   <div>
     <svg></svg>
-    <div class="block">
-      <span class="demonstration"></span>
-      <el-slider v-model="value" :show-tooltip="false"></el-slider>
-    </div>
+
+    <el-row>
+    <el-col :span="12" :offset="6">
+      <div class="block">
+        <span class="demonstration"></span>
+        <el-slider v-model="value" :show-tooltip="false" input-size="20"></el-slider>
+      </div>
+    </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -54,5 +59,4 @@
 </script>
 
 <style scoped>
-
 </style>
