@@ -51,4 +51,8 @@
     border-color: #d3dce6;
     border-width: 1px;
   }
+
+  .el-dialog__body{
+    height: 60vh
+  }
 </style>

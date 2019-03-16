@@ -5,12 +5,10 @@
     </div>
     <svg class="distribution_svg"></svg>
     <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
-    <el-dialog
+    <el-dialog class = "popup_dialog"
       title="Filter"
       :visible.sync="dialogVisible"
-      width="80%"
-      height="80%"
-      margin=0px
+      width="90%"
       :close="handleClose">
       <FilterPCP :selected_feature_values="selected_feature_values" class="pcp"></FilterPCP>
       <span slot="footer" class="dialog-footer">
