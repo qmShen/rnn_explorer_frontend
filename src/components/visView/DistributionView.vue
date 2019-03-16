@@ -5,7 +5,7 @@
     </div>
     <svg class="distribution_svg"></svg>
     <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
-    <el-dialog
+    <el-dialog class = "popup_dialog"
       title="Filter"
       :visible.sync="dialogVisible"
       width="50%"
@@ -111,7 +111,7 @@
   }
 </script>
 
-<style scoped>
+<style >
   .distribution_svg{
     height: calc(100% - 20px);
     width: 100%
@@ -125,6 +125,7 @@
   .local_container{
     position: relative;
   }
+
   /*.el-dialog__wrapper{*/
 
   /*opacity: 0.4;*/
