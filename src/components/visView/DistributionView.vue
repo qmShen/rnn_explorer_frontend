@@ -4,12 +4,13 @@
       <div class = 'mini_title'>Distribution</div>
     </div>
     <svg class="distribution_svg"></svg>
+    <el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>
     <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
     <el-dialog class = "popup_dialog"
-      title="Filter"
-      :visible.sync="dialogVisible"
-      width="50%"
-      :close="handleClose">
+               title="Filter"
+               :visible.sync="dialogVisible"
+               width="50%"
+               :close="handleClose">
       <FilterPCP :selected_feature_values="selected_feature_values"></FilterPCP>
       <span slot="footer" class="dialog-footer">
     <el-button size="mini" @click="dialogVisible = false">Cancel</el-button>
@@ -50,7 +51,7 @@
     },
     mounted:function(){
       this.distributionMatrix = new DistributionMatrix(this.$el);
-      this.distributionMatrix.register_function(this.handleSelectedData)
+      // this.distributionMatrix.register_function(this.handleSelectedData)
     },
     watch:{
       all_units_stats: function(new_val, old_val){
@@ -83,8 +84,9 @@
           features[i]['id'] = features[i]['fid'];
         }
         // this.distributionMatrix.set_feature_and_unit_states(new_val);
-        this.distributionMatrix.update_units_render(units);
         this.distributionMatrix.update_features_render(features);
+        this.distributionMatrix.update_units_render(units);
+
 
       }
     },
@@ -102,9 +104,23 @@
         });
 
       },
-      handleSelectedData(selected_features, selected_units){
-        console.log('select from vue', selected_features, selected_units);
-        dataService.getSubgroupStats(selected_features, selected_units);
+      handleUpdateDistribution(){
+
+      },
+      handleSelectedData(){
+        console.log('selected_features',selected_features);
+        let _this = this;
+        let x = this.distributionMatrix.get_selected_data();
+        let selected_features = x[0];
+        let selected_units = x[1];
+        dataService.getSubgroupStats("GRU_1", selected_features, selected_units, 50, 'ks', function(sub_group_data){
+
+          for(let i = 0, ilen = sub_group_data.length; i < ilen; i++){
+            if(sub_group_data[i])
+              sub_group_data[i]['id'] = sub_group_data[i]['uid']
+          }
+          _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
+        });
       }
     },
 
@@ -120,7 +136,11 @@
     position: absolute;
     bottom: 10px;
     right: 10px;
-
+  }
+  .dist_confirm_button{
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
   }
   .local_container{
     position: relative;

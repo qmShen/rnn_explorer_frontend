@@ -99,9 +99,9 @@ function getFeatureValues(mid, features, callback) {
 }
 
 
-function getSubgroupStats(mid, selectFeatures, selectUnits, callback) {
+function getSubgroupStats(mid, selectFeatures, selectUnits, r_len,  dif_type, callback) {
   const url = `${dataServerUrl}/subgroup_stats`
-  $http.post(url, {'mid': mid, 'features': selectFeatures, 'units':'selectUnits'}).then(response => {
+  $http.post(url, {'mid': mid, 'feature_scales': selectFeatures, 'units':'selectUnits',  "r_len": r_len, "dif_type": dif_type}).then(response => {
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)

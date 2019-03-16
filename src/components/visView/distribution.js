@@ -70,7 +70,7 @@ DistributionMatrix.prototype.register_selected_data = function(domain, d){
     else
       this.selected_units[d['id']] = [int(domain[0]), Math.ceil(domain[1])];
   }
-  this.select_call_back(this.selected_features, this.selected_units)
+  // this.select_call_back(this.selected_features, this.selected_units)
 };
 
 
@@ -103,7 +103,9 @@ DistributionMatrix.prototype.calc_position = function(){
 
 };
 
-
+DistributionMatrix.prototype.get_selected_data = function(){
+  return [this.selected_features, this.selected_units]
+};
 
 DistributionMatrix.prototype.render_untis = function(){
 
@@ -178,13 +180,79 @@ DistributionMatrix.prototype.render_untis = function(){
       .attr("opacity", ".8")
       .attr("stroke", "#08b5fa")
       .attr("stroke-width", 1)
+      .style("stroke-dasharray", "4,4")
       .attr("stroke-linejoin", "round")
       .attr("d",line)
   })
 };
 
 
+DistributionMatrix.prototype.update_units_distribution_difference = function(updated_units_stats){
+  if(updated_units_stats == null || updated_units_stats.length == 0){
+    return
+  }
+  let _this = this;
+  console.log("sub", updated_units_stats);
+  // Reformat data
+  let unitid2stats = {};
+  for(let i = 0, ilen = updated_units_stats.length; i < ilen; i++){
+    if(updated_units_stats[i])
+      unitid2stats[updated_units_stats[i]['id']] = updated_units_stats[i];
+  }
+
+  this.unit_statistics.forEach(function(d){
+    d['update_records'] = unitid2stats[d['id']]
+  });
+  console.log("unit_statistics.", this.unit_statistics);
+
+
+
+  this.cell_render_config = {
+    offset_x: this.cell_margin_x,
+    offset_y: this.cell_margin_y,
+    height: (this.unit_box.height / this.row_num) - 2 * this.cell_margin_y,
+    width: (this.unit_box.width / this.column_num) - 2 * this.cell_margin_x
+  };
+
+
+  let cell_x = d3.scaleLinear()
+
+    .range([this.cell_margin_x, this.cell_render_config['width']- this.cell_margin_x])
+
+  let cell_y = d3.scaleLinear()
+
+    .range([this.cell_render_config['height'], this.cell_margin_y + 2]);
+
+  let line = d3.line()
+    .x((d, i) => { return cell_x(i); })
+    .y((d, i) => { return cell_y(d); });
+
+  this.unit_cell_container.each(function(d){
+    if(!d['kde_point']){
+      return
+    }
+    let update_stats = d['update_records'];
+    cell_x.domain([0, update_stats['kde_point'].length]);
+
+    cell_y.domain([0,  d3.max(update_stats['kde_point'])]);
+
+    d3.select(this).select('.update_path').remove();
+    d3.select(this).append('path')
+      .datum(update_stats['kde_point'])
+      .attr("fill", "none")
+      .attr('class', 'update_path')
+      .attr("opacity", ".8")
+      .attr("stroke",  _this.bicluster_colorScale(d.cid))
+      .attr("stroke-width", 0.8)
+      .style("stroke-dasharray", "2,2")
+      // .attr("stroke-linejoin", "round")
+      .attr("d",line)
+  })
+};
+
+
 DistributionMatrix.prototype.update_units_render = function(data){
+  this.unit_statistics = data;
   let n_cell= data.length;
   let _this = this;
   this.row_num = 8;
@@ -215,17 +283,17 @@ DistributionMatrix.prototype.update_units_render = function(data){
     .attr('class', 'cell_container')
     .attr('transform', d=>'translate(' + d['render_config']['x']+ ',' + d['render_config']['y'] + ')')
 
-
-
-
   let boundary_rect = this.unit_cell_container.append('rect').attr('class' ,'container_rect')
     .attr('x', this.cell_render_config['offset_x'])
     .attr('y', this.cell_render_config['offset_y'])
     .attr('width', this.cell_render_config['width'])
     .attr('height', this.cell_render_config['height'])
-    .attr('fill', 'white').attr('stroke', 'red').attr('stroke-opacity', '0.2')
-    .attr('rx', 5)
-    .attr('ry', 5).attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.5)
+    .attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-width', 0.5)
+    .attr('rx', 3)
+    .attr('ry', 3)
+    .attr('fill', d=>_this.bicluster_colorScale(d.cid)).attr('fill-opacity', 0.5)
+    .attr('fill', 'white')
+
   boundary_rect.append('title').text(d=>d.uid)
 
   let cell_x = d3.scaleLinear()
@@ -245,16 +313,16 @@ DistributionMatrix.prototype.update_units_render = function(data){
       return
     }
 
-    cell_x.domain([0, d['kde_point'].length])
+    cell_x.domain([0, d['kde_point'].length]);
 
-    cell_y.domain([0,  d3.max(d['kde_point'])])
+    cell_y.domain([0,  d3.max(d['kde_point'])]);
 
 
     d3.select(this).append('path')
       .datum(d['kde_point'])
       .attr("fill", "none")
       .attr("opacity", ".8")
-      .attr("stroke", "#08b5fa")
+      .attr("stroke", _this.bicluster_colorScale(d.cid))
       .attr("stroke-width", 1)
       .attr("stroke-linejoin", "round")
       .attr("d",line)
@@ -302,7 +370,7 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('class', 'cell_container')
     .attr('transform', d=>'translate(' + d['render_config']['x']+ ',' + d['render_config']['y'] + ')');
 
-
+  this.feature_cell_containers.append('text').text(d=>d.id.split('_')[2]).style("font-size", "10px").attr('y', 20)
 
   let boundary_rect = this.feature_cell_containers.append('rect').attr('class' ,'container_rect')
     .attr('x', this.cell_render_config['offset_x'])
