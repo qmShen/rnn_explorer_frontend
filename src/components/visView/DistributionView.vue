@@ -69,7 +69,6 @@
         console.log('erer')
       },
       allStats:function(new_val){
-        console.log('enw',new_val);
 
         let unit_cluster_map = new_val['bicluster']['unit2cluster'];
         let feature_cluster_map = new_val['bicluster']['featrue2cluster'];
@@ -83,7 +82,9 @@
           features[i]['cid'] = feature_cluster_map[features[i]['fid']];
           features[i]['id'] = features[i]['fid'];
         }
-        // this.distributionMatrix.set_feature_and_unit_states(new_val);
+
+        this.distributionMatrix.set_feature_and_unit_states(new_val);
+
         this.distributionMatrix.update_features_render(features);
         this.distributionMatrix.update_units_render(units);
 

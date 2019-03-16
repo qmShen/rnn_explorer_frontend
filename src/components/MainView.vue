@@ -78,18 +78,15 @@
     },
     mounted: function(){
       let _this = this;
-      // dataService.getTemporal(function(records){
-      //   _this.trend_data_json = records
-      // });
-      // dataService.getInitScatter(function(records){
-      //   _this.input_scatter = records
-      // });
+      dataService.getTemporal(function(records){
+        _this.trend_data_json = records
+      });
+      dataService.getInitScatter(function(records){
+        _this.input_scatter = records
+      });
 
       dataService.getAllStats('GRU_1','15', function(records){
-        console.log('here');
         _this.allStats = records;
-
-
       });
       dataService.getGradientsAndIO('GRU_1',
         ["1514736000",
@@ -97,10 +94,7 @@
           "1514804400",
         ],function(records){
           _this.gradients_io = records;
-
         });
-
-
     },
     components: {
       StatisticsView,
@@ -108,7 +102,6 @@
       LineChart,
       DistributionView,
       SequenceView
-
     },
     watch:{
 

@@ -94,13 +94,39 @@ DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeC
 
 
 DistributionMatrix.prototype.set_feature_and_unit_states = function(feature_units_stats){
-  console.log('render all distribution');
-  console.log('data', this.feature_stats_data, this.units_stats_data);
+  console.log('Get all distribution');
+  console.log('data',feature_units_stats);
+
+  let bicluster = feature_units_stats['bicluster']['bi_clusters'];
+  this.group_n_column = 14;
+
+  let cluster_groups = [];
+  for(let cid in bicluster){
+    let _obj = {
+      'cid': cid,
+      'size': bicluster[cid]['f_ids'].length + bicluster[cid]['u_ids'].length,
+      'f_ids': bicluster[cid]['f_ids'],
+      'u_ids': bicluster[cid]['u_ids']
+    };
+
+    cluster_groups.push(_obj);
+  }
+
+  this.calc_position(cluster_groups);
+
+  console.log('size', cluster_groups);
 
 };
 
-DistributionMatrix.prototype.calc_position = function(){
-
+DistributionMatrix.prototype.calc_position = function(cluster_groups){
+  let _this = this;
+  let canvas_width = this.canvas_width;
+  let canvas_height = this.canvas_height;
+  let row_n = 0;
+  cluster_groups.forEach(function(cluster){
+    row_n += Math.ceil(cluster['size'] / _this.group_n_column)
+  });
+  console.log('row_n', row_n);
 };
 
 DistributionMatrix.prototype.get_selected_data = function(){
@@ -192,7 +218,7 @@ DistributionMatrix.prototype.update_units_distribution_difference = function(upd
     return
   }
   let _this = this;
-  console.log("sub", updated_units_stats);
+
   // Reformat data
   let unitid2stats = {};
   for(let i = 0, ilen = updated_units_stats.length; i < ilen; i++){
@@ -370,7 +396,28 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('class', 'cell_container')
     .attr('transform', d=>'translate(' + d['render_config']['x']+ ',' + d['render_config']['y'] + ')');
 
-  this.feature_cell_containers.append('text').text(d=>d.id.split('_')[2]).style("font-size", "10px").attr('y', 20)
+  this.feature_cell_containers.append('text').text(function(d){
+    let title_list = d.id.split('_')
+    if(title_list.length >=2){
+      let feature = d.id.split('_')[2];
+      if(feature == 'SeaLevelPressure'){
+        feature = "SLP"
+      }else if(feature == 'StationPresure'){
+        feature = "SP"
+      }else if(feature == "WindDirection"){
+        feature = "WD"
+      }else if(feature == "CloudCover"){
+        feature = "CC"
+      }
+      return feature
+
+    }else{
+      return d.id
+    }
+
+  }).style("font-size", "8px")
+    .attr('y', this.cell_render_config['height'] - 8)
+    .attr('x', 2);
 
   let boundary_rect = this.feature_cell_containers.append('rect').attr('class' ,'container_rect')
     .attr('x', this.cell_render_config['offset_x'])
