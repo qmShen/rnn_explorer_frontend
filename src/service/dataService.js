@@ -51,7 +51,7 @@ function getTestData (callback) {
 
 
 function getUnitsStats(mid, callback) {
-  const url = `${dataServerUrl}/all_units_stats`
+  const url = `${dataServerUrl}/all_units_stats`;
   $http.post(url, {'mid': mid}).then(response => {
     callback(response.data)
   }, errResponse => {
@@ -69,8 +69,9 @@ function getFeatureStats(mid, callback) {
 }
 
 function getAllStats(mid, nc, callback) {
-  const url = `${dataServerUrl}/all_stats`
+  const url = `${dataServerUrl}/all_stats`;
   $http.post(url, {'mid': mid, 'nc': nc}).then(response => {
+    console.log("response data:",response.data)
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)

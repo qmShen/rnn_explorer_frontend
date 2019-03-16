@@ -8,13 +8,15 @@
     <el-dialog
       title="Filter"
       :visible.sync="dialogVisible"
-      width="50%"
+      width="80%"
+      height="80%"
+      margin=0px
       :close="handleClose">
-      <FilterPCP :selected_feature_values="selected_feature_values"></FilterPCP>
+      <FilterPCP :selected_feature_values="selected_feature_values" class="pcp"></FilterPCP>
       <span slot="footer" class="dialog-footer">
-    <el-button size="mini" @click="dialogVisible = false">Cancel</el-button>
-    <el-button size="mini" type="primary" @click="dialogVisible = false">Confirm</el-button>
-  </span>
+      <el-button size="mini" @click="dialogVisible = false">Cancel</el-button>
+      <el-button size="mini" type="primary" @click="dialogVisible = false">Confirm</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -117,6 +119,10 @@
   .local_container{
     position: relative;
   }
+  .pcp{
+    height: 100%;
+  }
+
   /*.el-dialog__wrapper{*/
 
   /*opacity: 0.4;*/
