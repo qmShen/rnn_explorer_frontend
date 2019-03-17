@@ -53,6 +53,8 @@
   }
 
   .el-dialog__body{
-    height: 50vh
+
+    height: 60vh
+
   }
 </style>
