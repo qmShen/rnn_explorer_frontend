@@ -29,76 +29,71 @@ let DistributionMatrix = function(el){
     'height':this.canvas_height / 2 - this.f_u_gap
   };
 
-  this.featureContainer = this.svg.append('g').attr('class', 'feature_container')
-    .attr('transform', 'translate(' + this.feature_box['x']+ ',' + this.feature_box['y'] + ')');
-  this.unitContainer = this.svg.append('g').attr('class', 'unit_container')
-    .attr('transform', 'translate(' + this.unit_box['x']+ ',' + this.unit_box['y'] + ')');
 
-  // render the boundary, remove latter
-  this.featureContainer.append('rect')
-    .attr('width', this.feature_box['width'])
-    .attr('height', this.feature_box['height'])
-    .attr('stroke', 'red').attr('stroke-width', 0.2).attr('fill', 'none');
-
-  this.unitContainer.append('rect')
-    .attr('width', this.unit_box['width']).attr('height', this.feature_box['height']).attr('fill', 'none')
-    .attr('stroke', 'blue').attr('stroke-width', 0.2).attr('stroke', 'blue');
 
 
   this.selected_features = {};
   this.selected_units = {};
 
+  this.selected_extend_units = {};
 
   this.units_data_sign = false;
   this.feature_data_sign = false;
 };
 
+
 DistributionMatrix.prototype.register_function = function(select_call_back){
   this.select_call_back = select_call_back
 };
 DistributionMatrix.prototype.register_selected_data = function(domain, d){
+
   this.selected_features[d['id']] = null;
 
   if(d['fid'] != undefined){
     if(domain == 0)
-      delete this.selected_features[d['id']]
+      delete this.selected_features[d['id']];
     else
       this.selected_features[d['id']] = [parseInt(domain[0]), Math.ceil(domain[1])];
   }else{
     if(domain == 0)
-      delete this.selected_units[d['id']]
+      delete this.selected_units[d['id']];
     else
       this.selected_units[d['id']] = [int(domain[0]), Math.ceil(domain[1])];
   }
+  console.log('rrrrr', this.selected_units, this.selected_features);
   // this.select_call_back(this.selected_features, this.selected_units)
 };
 
 
-
-DistributionMatrix.prototype.add_feature_stats = function(data){
-  this.feature_stats_data = data;
-  this.feature_data_sign = true;
-  if(this.units_data_sign == true){
-    console.log('udpate add_feature_stats');
-    this.update_render();
-  }
-};
-DistributionMatrix.prototype.color = function(d){
-  const scale = d3.scaleOrdinal(d3.schemeCategory20);
-  return scale(d.cid);
-};
-
 DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
 
-
-
-
-DistributionMatrix.prototype.set_feature_and_unit_states = function(feature_units_stats){
+DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
   console.log('Get all distribution');
   console.log('data',feature_units_stats);
 
+
+  this.id_map = {};
+
+  let features = feature_units_stats['features'];
+  let units = feature_units_stats['units'];
+
+  features.forEach(d=>{
+    if(this.id_map[d['id']] != undefined){
+      console.log('id', d['id'], 'existed!')
+    }
+    this.id_map[d['id']] = d;
+  });
+
+  units.forEach(d=>{
+    if(this.id_map[d['id']] != undefined){
+      console.log('id', d['id'], 'existed!')
+    }
+    this.id_map[d['id']] = d;
+  });
+
+
   let bicluster = feature_units_stats['bicluster']['bi_clusters'];
-  this.group_n_column = 14;
+
 
   let cluster_groups = [];
   for(let cid in bicluster){
@@ -112,25 +107,473 @@ DistributionMatrix.prototype.set_feature_and_unit_states = function(feature_unit
     cluster_groups.push(_obj);
   }
 
-  this.calc_position(cluster_groups);
+  this.cluster_groups = cluster_groups;
 
-  console.log('size', cluster_groups);
+  this.link_region_width = this.canvas_width * 0.15;
+  this.remain_width=  this.canvas_width - this.link_region_width;
+  this.top_unit_width = this.remain_width * 0.15;
+  this.top_feature_width = this.remain_width * 0.15;
+  this.unit_region_width = this.remain_width * 0.3;
+  this.feature_region_width = this.remain_width * 0.4;
 
+  this.root_container = this.svg.append('g').attr('class', 'root_container');
+
+  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container');
+
+  // this.top_unit_container.append('rect')
+  //   .attr('width', this.top_unit_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+
+  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ 0 + ')');
+  // this.unit_container.append('rect')
+  //   .attr('width', this.unit_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'red').attr('stroke-width', 0.2);
+
+  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ 0 + ')');
+  // this.link_region_container.append('rect')
+  //   .attr('width', this.link_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ 0 + ')');
+  // this.feature_container.append('rect')
+  //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'red').attr('stroke-width', 0.2);
+
+  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ 0 + ')');
+  // this.selected_feature_container.append('rect')
+  //   .attr('x', 3)
+  //   .attr('y', 3)
+  //   .attr('width', this.top_feature_width - 2 * 3).attr('height', this.canvas_height - 2 * 3).attr('fill', 'none').attr('stroke-dasharray', '10,5')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+  this.selected_feature_plot_conatiner = this.selected_feature_container.append('g').attr('class', 'selected_feature_container').selectAll('.selected_feature');
+
+  this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
+  // this.selected_feature_plot_conatiner.selectAll('.selected_feature')
+  this.calc_position(cluster_groups)
 };
 
 DistributionMatrix.prototype.calc_position = function(cluster_groups){
   let _this = this;
-  let canvas_width = this.canvas_width;
-  let canvas_height = this.canvas_height;
-  let row_n = 0;
-  cluster_groups.forEach(function(cluster){
-    row_n += Math.ceil(cluster['size'] / _this.group_n_column)
+  this.f_col_max_n = 10;
+  this.u_col_max_n = 5;
+
+  console.log('f_col_max_n', this.f_col_max_n);
+  console.log('u_col_max_n', this.u_col_max_n);
+
+  this.u_cell_gap = 10;
+  this.f_cell_gap = 10;
+
+  this.u_total_gap = this.u_cell_gap * (cluster_groups.length + 1);
+  this.f_total_gap = this.f_cell_gap * (cluster_groups.length + 1);
+
+
+  let u_total_row = 0;
+  let f_total_row = 0;
+  cluster_groups.forEach(cluster=>{
+    u_total_row += Math.ceil(cluster['u_ids'].length / this.u_col_max_n);
+    f_total_row += Math.ceil(cluster['f_ids'].length / this.f_col_max_n);
   });
-  console.log('row_n', row_n);
+
+  let u_cell_height = (this.canvas_height - this.u_total_gap) / u_total_row;
+  let f_cell_height = (this.canvas_height - this.f_total_gap) / f_total_row;
+  this.u_cell_height = u_cell_height;
+  this.f_cell_height = f_cell_height;
+
+
+  let u_c_y = this.u_cell_gap;
+  let f_c_y = this.f_cell_gap;
+
+  cluster_groups.forEach((cluster, i)=>{
+    let _u_height = Math.ceil(cluster['u_ids'].length / this.u_col_max_n) * u_cell_height;
+    let _f_height = Math.ceil(cluster['f_ids'].length / this.f_col_max_n) * f_cell_height;
+    cluster.u_render = {
+      x: 0,
+      y: u_c_y,
+      height: _u_height,
+      width: this.unit_region_width
+    };
+    cluster.f_render = {
+      x: 0,
+      y: f_c_y,
+      height: _f_height,
+      width: this.feature_region_width
+    };
+    u_c_y += (_u_height + this.u_cell_gap);
+    f_c_y += (_f_height + this.f_cell_gap);
+  });
+
+
+  this.single_unit_container = this.unit_container.selectAll('unit_group').data(cluster_groups).enter().append('g').attr('class', '.unit_group')
+    .attr('transform', (d, i) => 'translate(' + d.u_render.x + ',' + d.u_render.y +')');
+
+  let _margin = 0;
+  this.single_unit_container.append('rect').attr('x', _margin).attr('y', _margin).attr('rx', 1).attr('ry', 1)
+    .attr('width', d=>d.u_render.width - 2* _margin)
+    .attr('height', d=>d.u_render.height -  2* _margin)
+    .attr('fill', 'none')
+    .attr('stroke', d=>this.bicluster_colorScale(d.cid)).attr('stroke-width', 1.5);
+
+  this.single_feature_container = this.feature_container.selectAll('.feature_group').data(cluster_groups).enter().append('g').attr('class','feature_group')
+    .attr('transform', (d, i) => 'translate(' + d.f_render.x + ',' + d.f_render.y +')');
+
+  this.single_feature_container.append('rect').attr('x', _margin).attr('y', _margin).attr('rx', 1).attr('ry', 1)
+    .attr('width', d=>d.f_render.width - 2 * _margin).attr('height', d=>d.f_render.height -  2* _margin).attr('fill', 'none')
+    .attr('stroke', d=>this.bicluster_colorScale(d.cid)).attr('stroke-width', 1.5);
+
+};
+
+DistributionMatrix.prototype.layout_cells = function(){
+  let _this = this;
+
+  // Layout unit containers
+
+  this.single_unit_container.each(function(d, i){
+
+    let _unit_group_container = d3.select(this);
+    let _uids = d['u_ids'];
+    let _margin = 2 ;
+
+
+    let _cell_width = (d.u_render.width / _this.u_col_max_n) - 2 * _margin;
+    let _cell_height = _this.u_cell_height - 2 * _margin
+
+    let cell_x = d3.scaleLinear().range([_margin, _cell_width - _margin]);
+
+    let cell_y = d3.scaleLinear().range([_cell_height, _margin]);
+
+
+    let line = d3.line()
+      .x((d, i) => { return cell_x(i); })
+      .y((d, i) => { return cell_y(d); });
+
+    let unit_cells = _unit_group_container.selectAll('.unit_cell').data(_uids).enter()
+      .append('g')
+      .attr('class','unit_cell')
+      .attr('transform', (_, i) =>{
+        let _x = i % _this.u_col_max_n * (d.u_render.width / _this.u_col_max_n);
+        let _y = parseInt(i / _this.u_col_max_n ) * _this.u_cell_height;
+        return 'translate(' + _x + ',' + _y +')';
+      });
+
+    unit_cells.each(function(uid){
+      let d = _this.id_map[uid];
+      if(d == undefined || d == null || d['kde_point'] == undefined) return;
+
+      cell_x.domain([0, d['kde_point'].length]);
+
+      cell_y.domain([0,  d3.max(d['kde_point'])]);
+      d3.select(this).append('path')
+        .datum(d['kde_point'])
+        .attr("fill", "none")
+        .attr("opacity", ".8")
+        .attr("stroke", _this.bicluster_colorScale(d.cid))
+        .attr("stroke-width", 1)
+        .attr("stroke-linejoin", "round")
+        .attr("d",line)
+    });
+
+    unit_cells.append('rect').attr('x', _margin).attr('y', _margin)
+      .attr('width', _cell_width)
+      .attr('height', _cell_height)
+      .attr('fill', 'none').attr('fill-opacity', 0.2)
+      .attr('rx',3)
+      .attr('ry',3)
+      .attr('stroke',d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.8)
+      .attr('d', _=> _);
+
+  });
+
+  // Layout feature containers
+  this.single_feature_container.each(function(d, i){
+    let _feature_group_container = d3.select(this);
+    let _fids = d['f_ids'];
+
+    let feature_cells = _feature_group_container.selectAll('.feature_cell').data(_fids).enter()
+      .append('g')
+      .attr('class','feature_cell')
+      .attr('transform', (_, i) =>{
+        let _x = i % _this.f_col_max_n * (d.f_render.width / _this.f_col_max_n);
+        let _y = parseInt(i / _this.f_col_max_n ) * _this.f_cell_height
+        return 'translate(' + _x + ',' + _y +')'
+      });
+
+    let _margin = 2 ;
+    feature_cells.append('rect').attr('x', _margin).attr('y', _margin)
+      .attr('width', (d.f_render.width / _this.f_col_max_n) - 2 * _margin)
+      .attr('height', _this.f_cell_height - 2 * _margin)
+      .attr('rx', 2)
+      .attr('ry', 2)
+      .attr('fill', 'green').attr('fill-opacity', 0.2)
+      .attr('stroke','white')
+      .attr('d', _=> _)
+      .on('click', function(_id){
+        let cell_data = _this.id_map[_id];
+        if(cell_data['render'] == undefined){
+          cell_data['render'] = {'clicked': false};
+
+        }
+        if(cell_data['render']['clicked'] == false){
+          cell_data['render']['clicked'] = true;
+          d3.select(this).attr('stroke', 'black');
+          _this.selected_extend_units[_id] = cell_data;
+        }else{
+          cell_data['render']['clicked'] = false;
+          d3.select(this).attr('stroke', 'white');
+          delete _this.selected_extend_units[_id];
+          delete _this.selected_features[_id];
+        }
+
+        _this.update_selected_units();
+      })
+  })
+
+};
+
+DistributionMatrix.prototype.update_selected_units = function(){
+  // Container
+
+  let margin_x = 2;
+  let margin_y = 3;
+
+  let _this = this;
+  let selected_extend_units_list = [];
+  for(let _id in this.selected_extend_units){
+    selected_extend_units_list.push(this.selected_extend_units[_id]);
+  }
+
+  console.log('selected_extend_units', selected_extend_units_list);
+
+  let select_cell_width = (this.top_feature_width - margin_x * 5);
+  let select_cell_height = select_cell_width / 5 * 3;
+
+  selected_extend_units_list.forEach(function(d, i){
+    if(d['render'] == undefined){
+      d['render'] = {};
+    }
+    d['render']['selected_x'] = 0;
+    d['render']['selected_y'] = i * select_cell_height;
+    d['render']['height'] = select_cell_height;
+    d['render']['width'] = select_cell_width;
+  });
+
+  this.selected_feature_plot_conatiner = this.selected_feature_plot_conatiner.data(selected_extend_units_list, function(d){
+    return d.id;
+  });
+
+  this.selected_feature_plot_conatiner.exit().remove();
+
+  let new_container = this.selected_feature_plot_conatiner.enter()
+    .append("g")
+    .attr('class', 'selected_feature');
+
+  this.selected_feature_plot_conatiner = new_container.merge(this.selected_feature_plot_conatiner)
+    .attr('transform', d=>{return 'translate(' + margin_x * 2 + ',' + d.render.selected_y + ')'})
+
+  new_container.append("rect")
+    .attr('x', margin_x)
+    .attr('y', margin_y)
+    .attr('width', d=> d.render.width - 2 * margin_x)
+    .attr('height', d=>d.render.height - 2 * margin_y).attr('fill', 'none').attr('fill-opacity', 0.2)
+    .attr('stroke', 'grey').style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5)
+    .attr('stroke-width', 1.5);
+
+  //------------------------------------------
+
+
+  //---------------------------------------------------------------
+
+  let cell_x = d3.scaleLinear().range([margin_x, select_cell_width - margin_x])
+
+
+  let cell_y = d3.scaleLinear().range([select_cell_height - margin_y, margin_y])
+
+
+
+  new_container.each(function(d){
+    cell_x.domain([0, d['kde_point'].length]);
+    cell_y.domain([0,  d3.max(d['kde_point'])]);
+
+    let line = d3.line()
+      .x((d, i) => { return cell_x(i); })
+      .y((d, i) => { return cell_y(d); });
+    if(d == undefined || d == null || d['kde_point'] == undefined) return;
+
+    d3.select(this).append('path')
+      .datum(d['kde_point'])
+      .attr("fill", "none")
+      .attr("opacity", ".8")
+      .attr("stroke", _this.bicluster_colorScale(d.cid))
+      .attr("stroke-width", 1)
+      .attr("stroke-linejoin", "round")
+      .attr("d",line)
+
+  });
+
+  //  --------------------------------
+
+  var brush = d3.brushX()
+    .extent([[margin_x, margin_y], [select_cell_width - margin_x, select_cell_height - margin_y]])
+    .on("start brush", brushmoved)
+    .on("end", function(d){
+      let range = d3.event.selection;
+      if(range){
+        let domain = range.map(cell_x.invert);
+        // console.log('ddd',d, range, domain)
+        _this.register_selected_data(domain, d);
+      }else{
+        // console.log('else',d, range, domain)
+        _this.register_selected_data(0, d);
+      }
+    });
+  //
+  //
+  //
+  function brushmoved(x){
+
+    var s = d3.event.selection;
+    if (s == null) {
+      // handle.attr("display", "none");
+    } else {
+      // console.log('x',s, sx);
+      // _this.register_selected_data(x, sx);
+    }
+  }
+  let brush_containers = new_container.append('g')
+  // .attr('transform', 'translate(' + this.cell_render_config['offset_x'] +',' +this.cell_render_config['offset_y'] +')')
+    .attr('transform', 'translate(' + 0 +',' + 0 +')')
+    .attr('class', 'brush').call(brush);
+
+  brush_containers.append('title').text(d=>d.uid)
+
 };
 
 DistributionMatrix.prototype.get_selected_data = function(){
+
   return [this.selected_features, this.selected_units]
+};
+
+
+
+DistributionMatrix.prototype.update_units_distributionV2 = function(updated_units_stats){
+  console.log('updated_units_statsx', updated_units_stats);
+
+  let _this = this;
+  let new_arr = [];
+  updated_units_stats.forEach(function(d){
+    if(d == null){
+      return
+    }
+    new_arr.push(d);
+  });
+  updated_units_stats = new_arr;
+  updated_units_stats.sort(function(a,b) {
+    if(a == null || b == null){
+      return -1;
+    }
+    return parseFloat(b.dif) - parseFloat(a.dif)});
+
+  let new_units = updated_units_stats.slice(0, 10);
+  let merged_units = [];
+
+  new_units.forEach((unit, i)=>{
+    let template_unit = this.id_map[unit["id"]];
+    template_unit['new_unit'] = unit;
+    merged_units.push(template_unit);
+  });
+
+  // Container
+
+  let margin_x = 2;
+  let margin_y = 3;
+
+  console.log('selected_extend_units', merged_units);
+
+  let select_cell_width = (this.top_unit_width - margin_x * 5);
+  let select_cell_height = select_cell_width / 5 * 3;
+
+  merged_units.forEach(function(d, i){
+    if(d['render'] == undefined){
+      d['render'] = {};
+    }
+    d['render']['selected_x'] = 0;
+    d['render']['selected_y'] = i * select_cell_height;
+    d['render']['height'] = select_cell_height;
+    d['render']['width'] = select_cell_width;
+  });
+
+
+
+  this.top_unit_plot_conatiner = this.top_unit_plot_conatiner.data(merged_units, function(d){
+    return d.id;
+  });
+
+  this.top_unit_plot_conatiner.exit().remove();
+
+  let new_container = this.top_unit_plot_conatiner.enter()
+    .append("g")
+    .attr('class', 'top_units');
+
+  this.top_unit_plot_conatiner = new_container.merge(this.top_unit_plot_conatiner);
+
+
+  this.top_unit_plot_conatiner.attr('transform', d=>{return 'translate(' + margin_x * 2 + ',' + d.render.selected_y + ')'})
+    .transition()
+    .duration(2000);        // apply it over 4000 milliseconds
+
+  new_container.append("rect")
+    .attr('x', margin_x)
+    .attr('y', margin_y)
+    .attr('width', d=> d.render.width - 2 * margin_x)
+    .attr('height', d=>d.render.height - 2 * margin_y).attr('fill', 'none').attr('fill-opacity', 0.2)
+    .attr('stroke', 'grey').style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5)
+    .attr('stroke-width', 1.5);
+
+  //------------------------------------------
+
+  //---------------------------------------------------------------
+
+  let cell_x = d3.scaleLinear().range([margin_x, select_cell_width - margin_x])
+
+  let cell_y = d3.scaleLinear().range([select_cell_height - margin_y, margin_y])
+
+
+
+  new_container.each(function(d){
+    cell_x.domain([0, d['kde_point'].length]);
+    cell_y.domain([0,  d3.max(d['kde_point'].concat(d['new_unit']['kde_point']))]);
+
+    let line = d3.line()
+      .x((d, i) => { return cell_x(i); })
+      .y((d, i) => { return cell_y(d); });
+    if(d == undefined || d == null || d['kde_point'] == undefined) return;
+
+    d3.select(this).append('path')
+      .datum(d['kde_point'])
+      .attr("fill", "none")
+      .attr("opacity", ".8")
+      .attr("stroke", _this.bicluster_colorScale(d.cid))
+      .attr("stroke-width", 1)
+      .attr("stroke-linejoin", "round")
+      .attr("d",line);
+
+    d3.select(this).append('path')
+      .datum(d['new_unit']['kde_point'])
+      .attr("fill", "none")
+      .attr("opacity", ".8")
+      .attr("stroke", _this.bicluster_colorScale(d.cid))
+      .attr("stroke-width", 1).style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5)
+      .attr("stroke-linejoin", "round")
+      .attr("d",line);
+
+  });
+
+};
+////////Not now
+DistributionMatrix.prototype.color = function(d){
+  const scale = d3.scaleOrdinal(d3.schemeCategory20);
+  return scale(d.cid);
 };
 
 DistributionMatrix.prototype.render_untis = function(){
@@ -212,71 +655,27 @@ DistributionMatrix.prototype.render_untis = function(){
   })
 };
 
+DistributionMatrix.prototype.initialize_render = function(){
 
-DistributionMatrix.prototype.update_units_distribution_difference = function(updated_units_stats){
-  if(updated_units_stats == null || updated_units_stats.length == 0){
-    return
-  }
-  let _this = this;
+  // Initialize
+  this.featureContainer = this.svg.append('g').attr('class', 'feature_container')
+    .attr('transform', 'translate(' + this.feature_box['x']+ ',' + this.feature_box['y'] + ')');
+  this.unitContainer = this.svg.append('g').attr('class', 'unit_container')
+    .attr('transform', 'translate(' + this.unit_box['x']+ ',' + this.unit_box['y'] + ')');
 
-  // Reformat data
-  let unitid2stats = {};
-  for(let i = 0, ilen = updated_units_stats.length; i < ilen; i++){
-    if(updated_units_stats[i])
-      unitid2stats[updated_units_stats[i]['id']] = updated_units_stats[i];
-  }
+  // render the boundary, remove latter
+  this.featureContainer.append('rect')
+    .attr('width', this.feature_box['width'])
+    .attr('height', this.feature_box['height'])
+    .attr('stroke', 'red').attr('stroke-width', 0.2).attr('fill', 'none');
 
-  this.unit_statistics.forEach(function(d){
-    d['update_records'] = unitid2stats[d['id']]
-  });
-  console.log("unit_statistics.", this.unit_statistics);
+  this.unitContainer.append('rect')
+    .attr('width', this.unit_box['width']).attr('height', this.feature_box['height']).attr('fill', 'none')
+    .attr('stroke', 'blue').attr('stroke-width', 0.2).attr('stroke', 'blue');
 
-
-
-  this.cell_render_config = {
-    offset_x: this.cell_margin_x,
-    offset_y: this.cell_margin_y,
-    height: (this.unit_box.height / this.row_num) - 2 * this.cell_margin_y,
-    width: (this.unit_box.width / this.column_num) - 2 * this.cell_margin_x
-  };
-
-
-  let cell_x = d3.scaleLinear()
-
-    .range([this.cell_margin_x, this.cell_render_config['width']- this.cell_margin_x])
-
-  let cell_y = d3.scaleLinear()
-
-    .range([this.cell_render_config['height'], this.cell_margin_y + 2]);
-
-  let line = d3.line()
-    .x((d, i) => { return cell_x(i); })
-    .y((d, i) => { return cell_y(d); });
-
-  this.unit_cell_container.each(function(d){
-    if(!d['kde_point']){
-      return
-    }
-    let update_stats = d['update_records'];
-    cell_x.domain([0, update_stats['kde_point'].length]);
-
-    cell_y.domain([0,  d3.max(update_stats['kde_point'])]);
-
-    d3.select(this).select('.update_path').remove();
-    d3.select(this).append('path')
-      .datum(update_stats['kde_point'])
-      .attr("fill", "none")
-      .attr('class', 'update_path')
-      .attr("opacity", ".8")
-      .attr("stroke",  _this.bicluster_colorScale(d.cid))
-      .attr("stroke-width", 0.8)
-      .style("stroke-dasharray", "2,2")
-      // .attr("stroke-linejoin", "round")
-      .attr("d",line)
-  })
 };
 
-
+//Old version
 DistributionMatrix.prototype.update_units_render = function(data){
   this.unit_statistics = data;
   let n_cell= data.length;
@@ -493,6 +892,78 @@ DistributionMatrix.prototype.update_features_render = function(data){
     .attr('class', 'brush').call(brush);
 
   brush_containers.append('title').text(d=>d.uid)
+};
+
+DistributionMatrix.prototype.update_units_distribution_difference = function(updated_units_stats){
+  if(updated_units_stats == null || updated_units_stats.length == 0){
+    return
+  }
+  let _this = this;
+
+  // Reformat data
+  let unitid2stats = {};
+  for(let i = 0, ilen = updated_units_stats.length; i < ilen; i++){
+    if(updated_units_stats[i])
+      unitid2stats[updated_units_stats[i]['id']] = updated_units_stats[i];
+  }
+
+  this.unit_statistics.forEach(function(d){
+    d['update_records'] = unitid2stats[d['id']]
+  });
+  console.log("unit_statistics.", this.unit_statistics);
+
+
+
+  this.cell_render_config = {
+    offset_x: this.cell_margin_x,
+    offset_y: this.cell_margin_y,
+    height: (this.unit_box.height / this.row_num) - 2 * this.cell_margin_y,
+    width: (this.unit_box.width / this.column_num) - 2 * this.cell_margin_x
+  };
+
+
+  let cell_x = d3.scaleLinear()
+
+    .range([this.cell_margin_x, this.cell_render_config['width']- this.cell_margin_x])
+
+  let cell_y = d3.scaleLinear()
+
+    .range([this.cell_render_config['height'], this.cell_margin_y + 2]);
+
+  let line = d3.line()
+    .x((d, i) => { return cell_x(i); })
+    .y((d, i) => { return cell_y(d); });
+
+  this.unit_cell_container.each(function(d){
+    if(!d['kde_point']){
+      return
+    }
+    let update_stats = d['update_records'];
+    cell_x.domain([0, update_stats['kde_point'].length]);
+
+    cell_y.domain([0,  d3.max(update_stats['kde_point'])]);
+
+    d3.select(this).select('.update_path').remove();
+    d3.select(this).append('path')
+      .datum(update_stats['kde_point'])
+      .attr("fill", "none")
+      .attr('class', 'update_path')
+      .attr("opacity", ".8")
+      .attr("stroke",  _this.bicluster_colorScale(d.cid))
+      .attr("stroke-width", 0.8)
+      .style("stroke-dasharray", "2,2")
+      // .attr("stroke-linejoin", "round")
+      .attr("d",line)
+  })
+
+  // DistributionMatrix.prototype.add_feature_stats = function(data){
+  //   this.feature_stats_data = data;
+  //   this.feature_data_sign = true;
+  //   if(this.units_data_sign == true){
+  //     console.log('udpate add_feature_stats');
+  //     this.update_render();
+  //   }
+  // };
 };
 
 export default DistributionMatrix

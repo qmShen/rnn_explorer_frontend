@@ -84,11 +84,13 @@
           features[i]['cid'] = feature_cluster_map[features[i]['fid']];
           features[i]['id'] = features[i]['fid'];
         }
+        //
+        this.distributionMatrix.initialize_bicluster_render(new_val);
+        this.distributionMatrix.layout_cells();
 
-        this.distributionMatrix.set_feature_and_unit_states(new_val);
-
-        this.distributionMatrix.update_features_render(features);
-        this.distributionMatrix.update_units_render(units);
+        // this.distributionMatrix.initialize_render()
+        // this.distributionMatrix.update_features_render(features);
+        // this.distributionMatrix.update_units_render(units);
 
 
       }
@@ -122,7 +124,10 @@
             if(sub_group_data[i])
               sub_group_data[i]['id'] = sub_group_data[i]['uid']
           }
-          _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
+
+          _this.distributionMatrix.update_units_distributionV2(sub_group_data);
+          //Old version
+          // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
         });
       }
     },
