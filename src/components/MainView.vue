@@ -12,9 +12,9 @@
 
 
           ></DistributionView>
-          <!--<StatisticsView :input_scatter = 'input_scatter'-->
-                          <!--:trend_data = 'trend_data_json'-->
-                          <!--class = "left_top"></StatisticsView>-->
+          <StatisticsView :input_scatter = 'input_scatter'
+                          :trend_data = 'trend_data_json'
+                          class = "left_top"></StatisticsView>
         </div>
 
       </el-col>
@@ -90,9 +90,9 @@
       });
       dataService.getGradientsAndIO('GRU_1',
         [
-          // "1514736000",
-          // "1514757600",
-          // "1514804400",
+          "1514736000",
+          "1514757600",
+          "1514804400"
           // "1514808000",
           // "1514811600",
           // "1514815200",
@@ -160,7 +160,7 @@
     height: calc(30%);
   }
   .distribution_container{
-    height: calc(100%);
+    height: calc(70%);
   }
 
 

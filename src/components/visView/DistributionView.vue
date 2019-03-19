@@ -87,7 +87,7 @@
         //
         this.distributionMatrix.initialize_bicluster_render(new_val);
         this.distributionMatrix.layout_cells();
-
+        this.distributionMatrix.draw_linkage();
         // this.distributionMatrix.initialize_render()
         // this.distributionMatrix.update_features_render(features);
         // this.distributionMatrix.update_units_render(units);
@@ -118,7 +118,7 @@
         let x = this.distributionMatrix.get_selected_data();
         let selected_features = x[0];
         let selected_units = x[1];
-        dataService.getSubgroupStats("GRU_1", selected_features, selected_units, 50, 'ks', function(sub_group_data){
+        dataService.getSubgroupStats("GRU_1", selected_features, selected_units, 50, '75%', function(sub_group_data){
 
           for(let i = 0, ilen = sub_group_data.length; i < ilen; i++){
             if(sub_group_data[i])

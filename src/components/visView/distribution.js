@@ -205,7 +205,7 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups){
   });
 
 
-  this.single_unit_container = this.unit_container.selectAll('unit_group').data(cluster_groups).enter().append('g').attr('class', '.unit_group')
+  this.single_unit_container = this.unit_container.selectAll('unit_group').data(cluster_groups).enter().append('g').attr('class', 'unit_group')
     .attr('transform', (d, i) => 'translate(' + d.u_render.x + ',' + d.u_render.y +')');
 
   let _margin = 0;
@@ -300,14 +300,13 @@ DistributionMatrix.prototype.layout_cells = function(){
       });
 
     let _margin = 2 ;
-    feature_cells.append('rect').attr('x', _margin).attr('y', _margin)
+    let _rects = feature_cells.append('rect').attr('x', _margin).attr('y', _margin)
       .attr('width', (d.f_render.width / _this.f_col_max_n) - 2 * _margin)
       .attr('height', _this.f_cell_height - 2 * _margin)
       .attr('rx', 2)
       .attr('ry', 2)
       .attr('fill', 'green').attr('fill-opacity', 0.2)
       .attr('stroke','white')
-      .attr('d', _=> _)
       .on('click', function(_id){
         let cell_data = _this.id_map[_id];
         if(cell_data['render'] == undefined){
@@ -327,6 +326,9 @@ DistributionMatrix.prototype.layout_cells = function(){
 
         _this.update_selected_units();
       })
+
+    _rects.append('title').text(_id=>_this.id_map[_id].id)
+
   })
 
 };
@@ -473,8 +475,8 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
       return -1;
     }
     return parseFloat(b.dif) - parseFloat(a.dif)});
-
-  let new_units = updated_units_stats.slice(0, 10);
+  let max_top_units_n = 15;
+  let new_units = updated_units_stats.slice(0, max_top_units_n);
   let merged_units = [];
 
   new_units.forEach((unit, i)=>{
@@ -568,6 +570,36 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
       .attr("d",line);
 
   });
+
+};
+
+
+DistributionMatrix.prototype.draw_linkage = function(){
+// data this.cluster_groups
+  this.cluster_groups;
+  let _this = this;
+  console.log('draw_linkage', this.cluster_groups);
+  // .attr("d", d3.linkRadial()
+  //         .angle(d => d.x)
+  //         .radius(d => d.y));
+  let linkages = [];
+
+  this.cluster_groups.forEach(function(d){
+    let source = {x: d.u_render.x, y: d.u_render.y + d.u_render.height / 2};
+    let target = {x: d.f_render.x + _this.link_region_width, y: d.f_render.y + d.f_render.height / 2};
+    linkages.push({
+      'source':source,
+      'target': target
+    })
+  });
+  console.log('link', linkages);
+
+  this.link_region_container.selectAll('.link').data(linkages).enter().append('line').attr('class', 'link')
+    .style("stroke", "black")
+    .attr("x1", d=>d.source.x)     // x position of the first end of the line
+    .attr("y1", d=>d.source.y)      // y position of the first end of the line
+    .attr("x2", d=>d.target.x)     // x position of the second end of the line
+    .attr("y2", d=>d.target.y);    // y position of the second end of the line
 
 };
 ////////Not now
