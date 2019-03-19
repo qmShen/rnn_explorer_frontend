@@ -575,13 +575,8 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
 
 
 DistributionMatrix.prototype.draw_linkage = function(){
-// data this.cluster_groups
-  this.cluster_groups;
   let _this = this;
-  console.log('draw_linkage', this.cluster_groups);
-  // .attr("d", d3.linkRadial()
-  //         .angle(d => d.x)
-  //         .radius(d => d.y));
+
   let linkages = [];
 
   this.cluster_groups.forEach(function(d){
