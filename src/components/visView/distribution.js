@@ -66,6 +66,11 @@ DistributionMatrix.prototype.register_selected_data = function(domain, d){
 
 
 DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
+DistributionMatrix.prototype.bicluster_colorScale  = function(){
+  return 'grey'
+}
+DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory20"]);
+
 
 DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
   console.log('Get all distribution');
@@ -224,6 +229,30 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups){
 
 };
 
+DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
+
+DistributionMatrix.prototype.features = ["CO","NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "RH", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover"];
+
+DistributionMatrix.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 8, "NE": 7};
+
+DistributionMatrix.prototype.parse_feature_name = function(feature_name){
+
+  let name_arr = feature_name.split('_');
+  if(name_arr.length == 1){
+    return {
+      distance: 0,
+      direction: -1,
+      feature: feature_name
+    }
+  }else{
+    return {
+      distance: parseInt(name_arr[0]),
+      direction: name_arr[1],
+      feature: name_arr[2]
+    }
+  }
+};
+
 DistributionMatrix.prototype.layout_cells = function(){
   let _this = this;
 
@@ -287,6 +316,9 @@ DistributionMatrix.prototype.layout_cells = function(){
 
   // Layout feature containers
   this.single_feature_container.each(function(d, i){
+    let _margin = 2 ;
+    let feature_cell_width = (d.f_render.width / _this.f_col_max_n) - 2 * _margin;
+    let feature_cell_height = _this.f_cell_height - 2 * _margin;
     let _feature_group_container = d3.select(this);
     let _fids = d['f_ids'];
 
@@ -299,35 +331,119 @@ DistributionMatrix.prototype.layout_cells = function(){
         return 'translate(' + _x + ',' + _y +')'
       });
 
-    let _margin = 2 ;
-    let _rects = feature_cells.append('rect').attr('x', _margin).attr('y', _margin)
-      .attr('width', (d.f_render.width / _this.f_col_max_n) - 2 * _margin)
-      .attr('height', _this.f_cell_height - 2 * _margin)
-      .attr('rx', 2)
-      .attr('ry', 2)
-      .attr('fill', 'green').attr('fill-opacity', 0.2)
-      .attr('stroke','white')
-      .on('click', function(_id){
-        let cell_data = _this.id_map[_id];
-        if(cell_data['render'] == undefined){
-          cell_data['render'] = {'clicked': false};
 
-        }
-        if(cell_data['render']['clicked'] == false){
-          cell_data['render']['clicked'] = true;
-          d3.select(this).attr('stroke', 'black');
-          _this.selected_extend_units[_id] = cell_data;
-        }else{
-          cell_data['render']['clicked'] = false;
-          d3.select(this).attr('stroke', 'white');
-          delete _this.selected_extend_units[_id];
-          delete _this.selected_features[_id];
-        }
 
-        _this.update_selected_units();
-      })
 
-    _rects.append('title').text(_id=>_this.id_map[_id].id)
+    feature_cells.each(function(_fid){
+
+      let _container = d3.select(this);
+
+
+      let _rect = _container.append('rect').attr('x', _margin).attr('y', _margin)
+        .attr('width', (d.f_render.width / _this.f_col_max_n) - 2 * _margin)
+        .attr('height', _this.f_cell_height - 2 * _margin)
+        .attr('rx', 2)
+        .attr('ry', 2)
+        .attr('fill', 'white')
+        .attr('fill-opacity', 0.2)
+        .attr('stroke','white');
+
+      _rect.append('title').text(_id=>_this.id_map[_id].id);
+
+      // ------------------------------------------------------------------------------
+      let name_obj = _this.parse_feature_name(_this.id_map[_fid]['id']);
+      let direction = name_obj['direction'];
+      let distance = name_obj['distance'];
+      let feature = name_obj['feature'];
+      let distance_level = _this.distance_level[distance];
+
+
+
+      let unit_width = feature_cell_width / 10;
+      let unit_height = feature_cell_height / 10;
+      let _x = _margin + (5- (distance_level + 1)) * unit_width ;
+      let _y = _margin + (5- (distance_level + 1)) * unit_height ;
+      let _w =  ((distance_level + 1)) * unit_width * 2;
+      let _h = ((distance_level + 1)) * unit_height * 2;
+
+      let boundary_color = 'white';
+      let _rect_out = _container.append('rect')
+        .attr('x', _x).attr('y', _y).attr('rx', 2).attr('ry', 2)
+        .attr('fill', "rgb(228, 177, 146)").attr('width', _w).attr('height', _h)
+        .append('title').text(_id=>_this.id_map[_id].id)
+
+
+      // let _x2 = _margin + (4- (distance_level)) * unit_width ;
+      // let _y2 = _margin + (4- (distance_level)) * unit_height ;
+      let _x2 = _margin + (5- (distance_level)) * unit_width ;
+      let _y2 = _margin + (5- (distance_level)) * unit_height ;
+
+      let _w2 =  ((distance_level)) * unit_width * 2;
+      let _h2 = ((distance_level)) * unit_height * 2;
+      let _rect_in = _container.append('rect')
+        .attr('x', _x2).attr('y', _y2)
+        .attr('fill', boundary_color)
+        .attr('rx', 2).attr('ry', 2)
+        .attr('width', _w2).attr('height', _h2)
+        .append('title').text(_id=>_this.id_map[_id].id)
+
+      // outliner boundary
+      let _outline_rect = _container.append('rect')
+        .attr('x', _margin).attr('y', _margin)
+        .attr('width', feature_cell_width)
+        .attr('height', feature_cell_height)
+        .attr('rx', 2)
+        .attr('ry', 2)
+        // .attr('fill', 'none')
+        .attr('fill', _this.feature_color(feature))
+        .attr('fill-opacity',0.4)
+        .on('click', function(_id){
+          let cell_data = _this.id_map[_id];
+          if(cell_data['render'] == undefined){
+            cell_data['render'] = {'clicked': false};
+
+          }
+          if(cell_data['render']['clicked'] == false){
+            cell_data['render']['clicked'] = true;
+            d3.select(this).attr('stroke', 'black');
+            _this.selected_extend_units[_id] = cell_data;
+          }else{
+            cell_data['render']['clicked'] = false;
+            d3.select(this).attr('stroke', 'white');
+            delete _this.selected_extend_units[_id];
+            delete _this.selected_features[_id];
+          }
+
+          _this.update_selected_units();
+        });
+
+      _outline_rect.append('title').text(_id=>_this.id_map[_id].id);
+
+      if(direction == -1){
+        return
+      }
+      let direction_pi = Math.PI / 4 * _this.directions[direction];
+
+      let center_x =_margin + feature_cell_width / 2;
+      let center_y = _margin + feature_cell_height / 2;
+      let radius = Math.sqrt(feature_cell_height * feature_cell_height  + feature_cell_width * feature_cell_width) / 3;
+
+
+
+      _container.append("line")
+        .style("stroke", _this.feature_color(feature))
+        .attr('stroke-width', 1.5)
+        .attr("x1", center_x)
+        .attr("y1",center_y)
+        .attr("x2", _=>{
+          return center_x + radius * Math.cos(direction_pi)
+        })
+        .attr("y2", center_y + radius * Math.sin(direction_pi))
+
+
+    });
+
+
 
   })
 
@@ -396,7 +512,10 @@ DistributionMatrix.prototype.update_selected_units = function(){
   new_container.each(function(d){
     cell_x.domain([0, d['kde_point'].length]);
     cell_y.domain([0,  d3.max(d['kde_point'])]);
-
+    let name_obj = _this.parse_feature_name(d['id']);
+    let direction = name_obj['direction'];
+    let distance = name_obj['distance'];
+    let feature = name_obj['feature'];
     let line = d3.line()
       .x((d, i) => { return cell_x(i); })
       .y((d, i) => { return cell_y(d); });
@@ -406,7 +525,7 @@ DistributionMatrix.prototype.update_selected_units = function(){
       .datum(d['kde_point'])
       .attr("fill", "none")
       .attr("opacity", ".8")
-      .attr("stroke", _this.bicluster_colorScale(d.cid))
+      .attr("stroke", _this.feature_color(feature))
       .attr("stroke-width", 1)
       .attr("stroke-linejoin", "round")
       .attr("d",line)
@@ -584,17 +703,25 @@ DistributionMatrix.prototype.draw_linkage = function(){
     let target = {x: d.f_render.x + _this.link_region_width, y: d.f_render.y + d.f_render.height / 2};
     linkages.push({
       'source':source,
-      'target': target
+      'target':target,
+      'type': true
     })
   });
-  console.log('link', linkages);
+  for(let i = 0, ilen = 20; i < ilen; i++){
 
-  this.link_region_container.selectAll('.link').data(linkages).enter().append('line').attr('class', 'link')
-    .style("stroke", "black")
-    .attr("x1", d=>d.source.x)     // x position of the first end of the line
-    .attr("y1", d=>d.source.y)      // y position of the first end of the line
-    .attr("x2", d=>d.target.x)     // x position of the second end of the line
-    .attr("y2", d=>d.target.y);    // y position of the second end of the line
+  }
+  console.log('xx', linkages);
+  
+  let link = d3.linkHorizontal()
+    .x(function(d){return d.x})
+    .y(function(d){return d.y})
+  this.link_region_container.selectAll('.link').data(linkages).enter().append('path').attr('class', 'link')
+    .style("stroke", "grey")
+    .attr('d', link)
+    .attr('fill', 'none')
+    .attr('stroke-width', 10)
+    .attr('stroke-opacity', 0.4)
+
 
 };
 ////////Not now

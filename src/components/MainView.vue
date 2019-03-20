@@ -12,9 +12,9 @@
 
 
           ></DistributionView>
-          <StatisticsView :input_scatter = 'input_scatter'
-                          :trend_data = 'trend_data_json'
-                          class = "left_top"></StatisticsView>
+          <!--<StatisticsView :input_scatter = 'input_scatter'-->
+                          <!--:trend_data = 'trend_data_json'-->
+                          <!--class = "left_top"></StatisticsView>-->
         </div>
 
       </el-col>
@@ -160,7 +160,7 @@
     height: calc(30%);
   }
   .distribution_container{
-    height: calc(70%);
+    height: calc(100%);
   }
 
 
