@@ -711,7 +711,7 @@ DistributionMatrix.prototype.draw_linkage = function(){
 
   }
   console.log('xx', linkages);
-  
+
   let link = d3.linkHorizontal()
     .x(function(d){return d.x})
     .y(function(d){return d.y})
