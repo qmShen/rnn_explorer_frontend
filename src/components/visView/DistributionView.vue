@@ -8,10 +8,10 @@
     <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
     <el-dialog class = "popup_dialog"
 
-      title="Filter"
-      :visible.sync="dialogVisible"
-      width="90%"
-      :close="handleClose">
+               title="Filter"
+               :visible.sync="dialogVisible"
+               width="90%"
+               :close="handleClose">
       <FilterPCP :selected_feature_values="selected_feature_values" class="pcp"></FilterPCP>
 
       <span slot="footer" class="dialog-footer">
@@ -27,6 +27,7 @@
   import FilterPCP from "./FilterPCP.vue"
 
   import dataService from "../../service/dataService.js"
+  import pipeService from "../../service/pipeService.js"
 
   // dataService.getFeatureValues('GRU_1',
   //    ['10_NE_SO2', '10_NE_SeaLevelPressure','10_NE_Temp', '10_NE_Wind', '10_SW_NO2', '10_SW_O3', '10_SW_PM10',
@@ -52,6 +53,10 @@
       }
     },
     mounted:function(){
+
+      dataService.getScatterPlotBySelectedData("GRU_1", 'test', 'test', function(scatter){
+        pipeService.emitSelectedScatterPlot(scatter);
+      });
       this.distributionMatrix = new DistributionMatrix(this.$el);
       // this.distributionMatrix.register_function(this.handleSelectedData)
     },
@@ -130,12 +135,14 @@
           // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
         });
 
-        dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
 
-          console.log('scatter', scatter)
-          //Old version
-          // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
-        });
+        //Should be here
+        // dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
+        //   pipeService.emitSelectedScatterPlot(scatter);
+        //   console.log('scatter', scatter)
+        //   //Old version
+        //   // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
+        // });
       }
     },
 

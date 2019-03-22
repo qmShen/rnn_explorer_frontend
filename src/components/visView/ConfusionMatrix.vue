@@ -80,12 +80,7 @@
     },
 
     mounted: function(){
-      console.log('confusion matrix mounted')
-
-      // 基于准备好的dom，初始化echarts实例
       this.myChart = echarts.init(this.$el);
-
-
 
     }
   }

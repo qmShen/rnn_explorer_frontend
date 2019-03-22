@@ -68,14 +68,11 @@ DistributionMatrix.prototype.register_selected_data = function(domain, d){
 DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
 DistributionMatrix.prototype.bicluster_colorScale  = function(){
   return 'grey'
-}
+};
 DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory20"]);
 
 
 DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
-  console.log('Get all distribution');
-  console.log('data',feature_units_stats);
-
 
   this.id_map = {};
 
@@ -407,7 +404,7 @@ DistributionMatrix.prototype.layout_cells = function(){
             cell_data['render']['clicked'] = true;
             d3.select(this).attr('stroke', 'black');
             _this.selected_extend_units[_id] = cell_data;
-            console.log('hhh', _this.selected_extend_units)
+
           }else{
             cell_data['render']['clicked'] = false;
             d3.select(this).attr('stroke', 'white');
@@ -578,7 +575,7 @@ DistributionMatrix.prototype.get_selected_data = function(){
 
 
 DistributionMatrix.prototype.update_units_distributionV2 = function(updated_units_stats){
-  console.log('updated_units_statsx', updated_units_stats);
+
 
   let _this = this;
   let new_arr = [];
@@ -609,7 +606,7 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
   let margin_x = 2;
   let margin_y = 3;
 
-  console.log('selected_extend_units', merged_units);
+
 
   let select_cell_width = (this.top_unit_width - margin_x * 5);
   let select_cell_height = select_cell_width / 5 * 3;
@@ -710,7 +707,7 @@ DistributionMatrix.prototype.draw_linkage = function(){
   for(let i = 0, ilen = 20; i < ilen; i++){
 
   }
-  console.log('xx', linkages);
+
 
   let link = d3.linkHorizontal()
     .x(function(d){return d.x})
@@ -1064,7 +1061,7 @@ DistributionMatrix.prototype.update_units_distribution_difference = function(upd
   this.unit_statistics.forEach(function(d){
     d['update_records'] = unitid2stats[d['id']]
   });
-  console.log("unit_statistics.", this.unit_statistics);
+
 
 
 
