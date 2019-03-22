@@ -157,10 +157,10 @@
     width: 100%;
   }
   .left_top{
-    height: calc(20%);
+    height: calc(0%);
   }
   .distribution_container{
-    height: calc(80%);
+    height: calc(100%);
   }
 
 
