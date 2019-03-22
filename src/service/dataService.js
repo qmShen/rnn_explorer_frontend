@@ -108,6 +108,15 @@ function getSubgroupStats(mid, selectFeatures, selectUnits, r_len,  dif_type, ca
     console.log(errResponse)
   })
 }
+
+function getScatterPlotBySelectedData(mid, selectFeatures, selectUnits, callback ) {
+  const url = `${dataServerUrl}/scatter_plot_subgroup`
+  $http.post(url, {'mid': mid, 'feature_scales': selectFeatures, 'units':'selectUnits'}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 //get_subgroup_stats
 
 // function getAllRecordsForOneCity(cityId, callback) {
@@ -173,6 +182,7 @@ export default{
   getInitScatter,
   getUnitsStats,
   getFeatureStats,
-  getAllStats
+  getAllStats,
+  getScatterPlotBySelectedData
 
 }

@@ -60,7 +60,7 @@ DistributionMatrix.prototype.register_selected_data = function(domain, d){
     else
       this.selected_units[d['id']] = [int(domain[0]), Math.ceil(domain[1])];
   }
-  console.log('rrrrr', this.selected_units, this.selected_features);
+
   // this.select_call_back(this.selected_features, this.selected_units)
 };
 
@@ -407,6 +407,7 @@ DistributionMatrix.prototype.layout_cells = function(){
             cell_data['render']['clicked'] = true;
             d3.select(this).attr('stroke', 'black');
             _this.selected_extend_units[_id] = cell_data;
+            console.log('hhh', _this.selected_extend_units)
           }else{
             cell_data['render']['clicked'] = false;
             d3.select(this).attr('stroke', 'white');
@@ -461,7 +462,6 @@ DistributionMatrix.prototype.update_selected_units = function(){
     selected_extend_units_list.push(this.selected_extend_units[_id]);
   }
 
-  console.log('selected_extend_units', selected_extend_units_list);
 
   let select_cell_width = (this.top_feature_width - margin_x * 5);
   let select_cell_height = select_cell_width / 5 * 3;

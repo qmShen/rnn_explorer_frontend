@@ -129,6 +129,13 @@
           //Old version
           // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
         });
+
+        dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
+
+          console.log('scatter', scatter)
+          //Old version
+          // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
+        });
       }
     },
 
