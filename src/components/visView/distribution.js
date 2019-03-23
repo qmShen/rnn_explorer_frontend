@@ -117,9 +117,13 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.top_feature_width = this.remain_width * 0.15;
   this.unit_region_width = this.remain_width * 0.3;
   this.feature_region_width = this.remain_width * 0.4;
+  this.legend_container_height = this.canvas_height * 0.05;
+  this.legend_container_width = this.canvas_width;
+  this.remain_height = this.canvas_height - this.legend_container_height;
 
   this.root_container = this.svg.append('g').attr('class', 'root_container');
 
+  this.legend_container = this.root_container.append('g').attr('class', 'legend_container');
   this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container');
 
   // this.top_unit_container.append('rect')
@@ -127,22 +131,22 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
 
 
-  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ 0 + ')');
+  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ this.legend_container_height + ')');
   // this.unit_container.append('rect')
   //   .attr('width', this.unit_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ 0 + ')');
+  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ this.legend_container_height + ')');
   // this.link_region_container.append('rect')
   //   .attr('width', this.link_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
 
-  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ 0 + ')');
+  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ this.legend_container_height + ')');
   // this.feature_container.append('rect')
   //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ 0 + ')');
+  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ this.legend_container_height + ')');
   // this.selected_feature_container.append('rect')
   //   .attr('x', 3)
   //   .attr('y', 3)
@@ -178,8 +182,8 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups){
     f_total_row += Math.ceil(cluster['f_ids'].length / this.f_col_max_n);
   });
 
-  let u_cell_height = (this.canvas_height - this.u_total_gap) / u_total_row;
-  let f_cell_height = (this.canvas_height - this.f_total_gap) / f_total_row;
+  let u_cell_height = (this.remain_height - this.u_total_gap) / u_total_row;
+  let f_cell_height = (this.remain_height - this.f_total_gap) / f_total_row;
   this.u_cell_height = u_cell_height;
   this.f_cell_height = f_cell_height;
 
@@ -250,6 +254,42 @@ DistributionMatrix.prototype.parse_feature_name = function(feature_name){
   }
 };
 
+DistributionMatrix.prototype.plot_legend = function(){
+  let _this = this
+  let padding_x = this.legend_container_width * 0.05;
+  let padding_y = this.legend_container_height * 0.1;
+  let w = (this.legend_container_width - 2*padding_x)/this.features.length;
+  let h = this.legend_container_height - 2*padding_y;
+  let legends = this.legend_container.selectAll('.single_legend').data(this.features).enter().append('g')
+  .attr('class', 'single_legend')
+  .attr('transform', (d, i)=> 'translate(' + (padding_x+i*w) + ',' + padding_y + ')')
+
+
+
+
+  legends.each(function(f){
+    d3.select(this).append('rect')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('rx', 2)
+    .attr('ry', 2)
+    .attr('width', w/2)
+    .attr('height', h/2)
+    .attr('fill', _this.feature_color(f))
+    .attr('fill-opacity',0.4);
+
+    d3.select(this).append('text')
+    .text(f)
+    .attr('x', 0)
+    .attr('y', h/2)
+    .attr('dy', '1em')
+    .attr('fill', 'black')
+    .attr('font-size', '10px');
+
+
+  });
+}
+
 DistributionMatrix.prototype.layout_cells = function(){
   let _this = this;
 
@@ -310,6 +350,10 @@ DistributionMatrix.prototype.layout_cells = function(){
       .attr('d', _=> _);
 
   });
+  //Legend
+  this.plot_legend();
+
+
 
   // Layout feature containers
   this.single_feature_container.each(function(d, i){
