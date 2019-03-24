@@ -4,9 +4,10 @@
       <el-col :span="7" class="horizontal_stripe">
         <div class="bg-purple column">
           <!--<ControlView class = 'left_top boundary'></ControlView>-->
-          <StatisticsView :input_scatter = 'input_scatter'
-                          :trend_data = 'trend_data_json'
-                          class = "left_top"></StatisticsView>
+          <!--<StatisticsView :input_scatter = 'input_scatter'-->
+                          <!--:trend_data = 'trend_data_json'-->
+                          <!--class = "left_top"></StatisticsView>-->
+          <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
                             :all_units_stats="all_units_stats"
@@ -30,19 +31,19 @@
           </div>
 
           <div class = 'individual_container boundary'>
-            <el-col :span="8" class="horizontal_stripe boundary">
-              <div class="mini_head">
-                <div class = 'mini_title'>Scatter</div>
-              </div>
-              <!--<SequenceView class="sequence_container" :gradients_io="gradients_io" ></SequenceView>-->
-              <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
-            </el-col>
+            <!--<el-col :span="8" class="horizontal_stripe boundary">-->
+              <!--<div class="mini_head">-->
+                <!--<div class = 'mini_title'>Scatter</div>-->
+              <!--</div>-->
+        <!---->
+              <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
+            <!--</el-col>-->
 
-            <el-col :span="16" class="horizontal_stripe">
+            <el-col :span="24" class="horizontal_stripe">
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence</div>
               </div>
-              <SequenceView class="sequence_container" :gradients_io="gradients_io" ></SequenceView>
+              <SequenceView class="sequence_container" :gradients_io="gradients_io" :gradients_io_cluster="gradients_io_cluster"></SequenceView>
             </el-col>
 
           </div>
@@ -84,6 +85,7 @@
         all_feature_stats: null,
         all_units_stats: null,
         gradients_io: null,
+        gradients_io_cluster: null,
         biClusterMap: null,
         allStats: null,
         selected_sequence:[],
@@ -105,6 +107,7 @@
         dataService.getSequenceClusterData('GRU_1',
           selected_ids,function(records){
             console.log("recieved sequence cluster", records);
+            _this.gradients_io_cluster = records;
           });
       });
 
@@ -184,10 +187,10 @@
     height: calc(20%);
   }
   .distribution_container{
-    height: calc(80%);
+    height: calc(70%);
   }
   .scatter_container{
-    height: calc(60%);
+    height: calc(30%);
 
   }
 

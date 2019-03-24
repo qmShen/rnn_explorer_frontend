@@ -22,7 +22,8 @@
     },
     methods:{
       update_line_chart(data){
-        this.LineChart.update_render(data)
+        // CCC
+        // this.LineChart.update_render(data)
       }
     }
   }

@@ -89,10 +89,13 @@
           features[i]['cid'] = feature_cluster_map[features[i]['fid']];
           features[i]['id'] = features[i]['fid'];
         }
-        //
-        this.distributionMatrix.initialize_bicluster_render(new_val);
-        this.distributionMatrix.layout_cells();
-        this.distributionMatrix.draw_linkage();
+        //CCC
+        // this.distributionMatrix.initialize_bicluster_render(new_val);
+        // this.distributionMatrix.layout_cells();
+        // this.distributionMatrix.draw_linkage();
+
+
+        //Old version
         // this.distributionMatrix.initialize_render()
         // this.distributionMatrix.update_features_render(features);
         // this.distributionMatrix.update_units_render(units);
