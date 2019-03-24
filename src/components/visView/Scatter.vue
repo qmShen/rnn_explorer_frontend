@@ -112,7 +112,7 @@
         });
 
         // seq_ids
-        seq_ids  = [1514736000, 1514858400];
+        seq_ids  = [1514736000, 1514858400, 1514764800, 1514782800, 1514815200, 1514836800];
         pipeService.emitSequenceSelected(seq_ids);
 
       };
