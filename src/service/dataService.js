@@ -117,6 +117,16 @@ function getScatterPlotBySelectedData(mid, selectFeatures, selectUnits, callback
     console.log(errResponse)
   })
 }
+
+
+function getSequenceClusterData(mid, tid, callback) {
+  const url = `${dataServerUrl}/sequence_cluster`
+  $http.post(url, {'mid': mid, 'tid': tid}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 //get_subgroup_stats
 
 // function getAllRecordsForOneCity(cityId, callback) {
@@ -183,6 +193,7 @@ export default{
   getUnitsStats,
   getFeatureStats,
   getAllStats,
-  getScatterPlotBySelectedData
+  getScatterPlotBySelectedData,
+  getSequenceClusterData
 
 }

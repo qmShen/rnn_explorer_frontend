@@ -99,6 +99,16 @@
             _this.gradients_io = records;
           });
       });
+
+      pipeService.getSequenceClusterData(function(selected_ids){
+        console.log('sequence selected', selected_ids);
+        dataService.getGradientsAndIO('GRU_1',
+          selected_ids,function(records){
+            console.log("recieved sequence", records);
+          });
+      });
+
+
       dataService.getTemporal(function(records){
         _this.trend_data_json = records
       });
