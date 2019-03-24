@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import { mapGetters } from "vuex";
 
 let DistributionMatrix = function(el){
 
@@ -124,7 +125,7 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.root_container = this.svg.append('g').attr('class', 'root_container');
 
   this.legend_container = this.root_container.append('g').attr('class', 'legend_container');
-  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container');
+  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container').attr('transform', 'translate(' + 0 + ',' + this.legend_container_height + ')');
 
   // this.top_unit_container.append('rect')
   //   .attr('width', this.top_unit_width).attr('height', this.canvas_height).attr('fill', 'none')
@@ -146,7 +147,7 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ this.legend_container_height + ')');
+  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
   // this.selected_feature_container.append('rect')
   //   .attr('x', 3)
   //   .attr('y', 3)
@@ -232,9 +233,9 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups){
 
 DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
 
-DistributionMatrix.prototype.features = ["CO","NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "RH", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover"];
+DistributionMatrix.prototype.features = ["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"];
 
-DistributionMatrix.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 8, "NE": 7};
+DistributionMatrix.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 6, "NE": 7};
 
 DistributionMatrix.prototype.parse_feature_name = function(feature_name){
 
@@ -254,34 +255,265 @@ DistributionMatrix.prototype.parse_feature_name = function(feature_name){
   }
 };
 
+// sorting the features in each feature_group
+DistributionMatrix.prototype.sort_features = function(d){
+  let _this = this
+  if(d == 'type'){
+    var order = this.features;
+    var parse = 'feature';
+  }else if(d == 'direction'){
+    var order = [-1, 'E', 'ES', 'S', 'SW', 'W', 'WN', 'N', 'NE'];
+    var parse = 'direction' 
+  }else if(d == 'distance'){
+    var order = [0, '10', '30', '100', '200', '300'];
+    var parse = 'distance'
+  }
+
+  
+  this.single_feature_container.each(function(d, i){
+    let new_order = []
+    order.forEach(function(item){
+      d['f_ids'].forEach(function(feature){
+        var name_obj = _this.parse_feature_name(feature);
+        var tmp = name_obj[parse];
+        if(tmp == item){
+          new_order.push(feature);
+        }
+      })
+    })
+    d3.select(this).selectAll('.feature_cell').data(new_order);
+  })
+
+  this.update_feature_sorting_render(); 
+
+  d3.selectAll('.feature_cell').each(function(_id){
+    if(_this.selected_extend_units[_id] != undefined){
+      if(_this.selected_extend_units[_id]['render']['clicked'] == true){
+        d3.select(this).select('.feature_cell_outline').attr('stroke', 'black');
+      }
+    }
+  });
+
+};
+
+DistributionMatrix.prototype.update_feature_sorting_render = function(){
+  let _this = this;
+  d3.selectAll('.feature_cell').each(function(d){
+    d3.select(this).selectAll('*').remove()
+  })
+  
+  this.single_feature_container.each(function(d, i){
+    let _margin = 2 ;
+    let feature_cell_width = (d.f_render.width / _this.f_col_max_n) - 2 * _margin;
+    let feature_cell_height = _this.f_cell_height - 2 * _margin;
+  
+    d3.select(this).selectAll('.feature_cell').each(function(_fid){
+
+      let _container = d3.select(this);
+
+
+      let _rect = _container.append('rect').attr('x', _margin).attr('y', _margin)
+        .attr('width', (d.f_render.width / _this.f_col_max_n) - 2 * _margin)
+        .attr('height', _this.f_cell_height - 2 * _margin)
+        .attr('rx', 2)
+        .attr('ry', 2)
+        .attr('fill', 'white')
+        .attr('fill-opacity', 0.2)
+        .attr('stroke','white');
+
+      _rect.append('title').text(_id=>_this.id_map[_id].id);
+
+      // ------------------------------------------------------------------------------
+      let name_obj = _this.parse_feature_name(_this.id_map[_fid]['id']);
+      let direction = name_obj['direction'];
+      let distance = name_obj['distance'];
+      let feature = name_obj['feature'];
+      let distance_level = _this.distance_level[distance];
+
+
+
+      let unit_width = feature_cell_width / 10;
+      let unit_height = feature_cell_height / 10;
+      let _x = _margin + (5- (distance_level + 1)) * unit_width ;
+      let _y = _margin + (5- (distance_level + 1)) * unit_height ;
+      let _w =  ((distance_level + 1)) * unit_width * 2;
+      let _h = ((distance_level + 1)) * unit_height * 2;
+
+      let boundary_color = 'white';
+      let _rect_out = _container.append('rect')
+        .attr('x', _x).attr('y', _y).attr('rx', 2).attr('ry', 2)
+        .attr('fill', "rgb(228, 177, 146)").attr('width', _w).attr('height', _h)
+        .append('title').text(_id=>_this.id_map[_id].id)
+
+
+      // let _x2 = _margin + (4- (distance_level)) * unit_width ;
+      // let _y2 = _margin + (4- (distance_level)) * unit_height ;
+      let _x2 = _margin + (5- (distance_level)) * unit_width ;
+      let _y2 = _margin + (5- (distance_level)) * unit_height ;
+
+      let _w2 =  ((distance_level)) * unit_width * 2;
+      let _h2 = ((distance_level)) * unit_height * 2;
+      let _rect_in = _container.append('rect')
+        .attr('x', _x2).attr('y', _y2)
+        .attr('fill', boundary_color)
+        .attr('rx', 2).attr('ry', 2)
+        .attr('width', _w2).attr('height', _h2)
+        .append('title').text(_id=>_this.id_map[_id].id)
+
+      // outliner boundary
+      let _outline_rect = _container.append('rect')
+        .attr('class', 'feature_cell_outline')
+        .attr('x', _margin).attr('y', _margin)
+        .attr('width', feature_cell_width)
+        .attr('height', feature_cell_height)
+        .attr('rx', 2)
+        .attr('ry', 2)
+        .attr('fill', _this.feature_color(feature))
+        .attr('fill-opacity',0.4)
+        .on('click', function(_id){
+          let cell_data = _this.id_map[_id];
+          if(cell_data['render'] == undefined){
+            cell_data['render'] = {'clicked': false};
+
+          }
+          if(cell_data['render']['clicked'] == false){
+            cell_data['render']['clicked'] = true;
+            d3.select(this).attr('stroke', 'black');
+            _this.selected_extend_units[_id] = cell_data;
+
+          }else{
+            cell_data['render']['clicked'] = false;
+            d3.select(this).attr('stroke', 'white');
+            delete _this.selected_extend_units[_id];
+            delete _this.selected_features[_id];
+          }
+
+          _this.update_selected_units();
+        });
+
+      _outline_rect.append('title').text(_id=>_this.id_map[_id].id);
+
+      if(direction == -1){
+        return
+      }
+      let direction_pi = Math.PI / 4 * _this.directions[direction];
+
+      let center_x =_margin + feature_cell_width / 2;
+      let center_y = _margin + feature_cell_height / 2;
+      let radius = Math.sqrt(feature_cell_height * feature_cell_height  + feature_cell_width * feature_cell_width) / 3;
+
+
+
+      _container.append("line")
+        .style("stroke", _this.feature_color(feature))
+        .attr('stroke-width', 1.5)
+        .attr("x1", center_x)
+        .attr("y1",center_y)
+        .attr("x2", _=>{
+          return center_x + radius * Math.cos(direction_pi)
+        })
+        .attr("y2", center_y + radius * Math.sin(direction_pi))
+
+
+    });
+  })
+
+  this.update_selected_units();
+
+};
+
+// plot legend
 DistributionMatrix.prototype.plot_legend = function(){
   let _this = this
   let padding_x = this.legend_container_width * 0.05;
   let padding_y = this.legend_container_height * 0.1;
-  let w = (this.legend_container_width - 2*padding_x)/this.features.length;
+  let w = (this.legend_container_width - 2*padding_x)/(this.features.length+1);
   let h = this.legend_container_height - 2*padding_y;
   let legends = this.legend_container.selectAll('.single_legend').data(this.features).enter().append('g')
   .attr('class', 'single_legend')
   .attr('transform', (d, i)=> 'translate(' + (padding_x+i*w) + ',' + padding_y + ')')
 
+  // sort button
+  let sort_button = this.legend_container.append('g')
+  .attr('class', 'sort_button')
+  .attr('transform', 'translate(' + (padding_x+this.features.length*w) + ',' + 0 +')');
 
+  sort_button.append('text')
+  .attr('x', 4)
+  .attr('y', 0)
+  .attr('dy', '1em')
+  .attr('fill', 'black')
+  .attr('font-size', '10px')
+  .text('Sort By');
+  
+  let sorts = ['type', 'direction', 'distance']
+  let buttons = sort_button.selectAll('.button_cell').data(sorts).enter().append('g')
+  .attr('class', 'button_cell')
+  .attr('transform', (d, i)=> 'translate(' + 0 + ',' + (15*(i+1)) + ')')
 
+  buttons.each(function(d){
+    let __this = this
+    d3.select(this).append('rect')
+    .attr('class', 'button_rect')
+    .attr('x', 2)
+    .attr('rx', 4)
+    .attr('ry', 4)
+    .attr('y', 2)
+    .attr('width', w+padding_x-4)
+    .attr('height', '13')
+    .attr('fill', 'none')
+    .attr('stroke', 'grey')
+    .attr('stroke-width', '1');
+    
+    d3.select(this).append('text')
+    .attr('x', 6)
+    .attr('y', 2)
+    .attr('dy', '1em')
+    .attr('fill', 'black')
+    .attr('font-size', '10px')
+    .text(d)
+    .on('click',function(d){
+      _this.sort_features(d);
 
+      d3.selectAll('.button_rect').attr('stroke', 'grey').attr('stroke-width', '1')
+      d3.select(__this).select('.button_rect').attr('stroke', 'black').attr('stroke-width', '2')
+    });
+  })
+    
+  // legend
+  let w_legend = w/2;
+  let h_legend = h/2;
   legends.each(function(f){
     d3.select(this).append('rect')
     .attr('x', 0)
     .attr('y', 0)
     .attr('rx', 2)
     .attr('ry', 2)
-    .attr('width', w/2)
-    .attr('height', h/2)
+    .attr('width', w_legend)
+    .attr('height', h_legend)
     .attr('fill', _this.feature_color(f))
     .attr('fill-opacity',0.4);
 
     d3.select(this).append('text')
-    .text(f)
+    .text(function(f){
+      if(f == 'WindDirection'){
+        return 'WD'
+      }else if(f == 'SeaLevelPressure'){
+        return 'SLP'
+      }else if(f == 'CloudCover'){
+        return 'CC'
+      }else if(f == 'StationPresure'){
+        return 'SP'
+      }else if(f == 'AQHIER'){
+        return 'AR'
+      }else if(f == 'DewPt'){
+        return 'DP'
+      }else{
+        return f
+      }
+    })
     .attr('x', 0)
-    .attr('y', h/2)
+    .attr('y', h_legend)
     .attr('dy', '1em')
     .attr('fill', 'black')
     .attr('font-size', '10px');
@@ -348,9 +580,10 @@ DistributionMatrix.prototype.layout_cells = function(){
       .attr('ry',3)
       .attr('stroke',d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.8)
       .attr('d', _=> _);
-
+  
   });
-  //Legend
+ 
+  // Legend
   this.plot_legend();
 
 
@@ -515,7 +748,9 @@ DistributionMatrix.prototype.update_selected_units = function(){
     d['render']['selected_y'] = i * select_cell_height;
     d['render']['height'] = select_cell_height;
     d['render']['width'] = select_cell_width;
+    d['render']['order'] = i+1;
   });
+
 
   this.selected_feature_plot_conatiner = this.selected_feature_plot_conatiner.data(selected_extend_units_list, function(d){
     return d.id;
@@ -538,7 +773,39 @@ DistributionMatrix.prototype.update_selected_units = function(){
     .attr('stroke', 'grey').style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5)
     .attr('stroke-width', 1.5);
 
-  //------------------------------------------
+  // order on selected feature linechart
+  d3.selectAll('.selected_feature_order').remove();
+  d3.selectAll('.selected_feature').append('text')
+    .attr('class', 'selected_feature_order')
+    .text(function(d){
+      return d.render.order + ' ' + d.id;
+    })
+    .attr('x', margin_x)
+    .attr('y', margin_y)
+    .attr('dy', '1em')
+    .attr('fill', 'black')
+    .attr('font-size', '8px')
+    .attr('opacity', '0.8')
+
+  // order on feature glyph
+  d3.selectAll('.glyph_order').remove()
+  d3.selectAll('.selected_feature').each(function(d){
+    d3.selectAll('.feature_cell').each(function(i){
+      if(i == d.id){
+        d3.select(this).append('text')
+        .attr('class', 'glyph_order')
+        .text(d.render.order)
+        .attr('x', 4)
+        .attr('y', 2)
+        .attr('dy', '1em')
+        .attr('fill', 'black')
+        .attr('font-size', '8px')
+        .attr('opacity', '0.8');
+      }
+    })
+
+  })
+    //------------------------------------------
 
 
   //---------------------------------------------------------------
@@ -731,6 +998,38 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
 
   });
 
+  // unit_id on top unit plots
+  d3.selectAll('.id_top_units').remove()
+  d3.selectAll('.top_units').append('text')
+  .attr('class', 'id_top_units')
+  .text(function(d){
+    return d.id
+  })
+  .attr('x', 2)
+  .attr('y', 2)
+  .attr('dy', '1em')
+  .attr('fill', 'black')
+  .attr('opacity', '0.8')
+  .attr('font-size', '10px');
+
+
+  d3.selectAll('.id_units').remove()
+  merged_units.forEach(function(d){
+    d3.selectAll('.unit_cell').each(function(i){
+      if(d.id == i){
+        d3.select(this).append('text')
+          .attr('class', 'id_units')
+          .text(function(i){
+            return i
+          })
+          .attr('x', 2)
+          .attr('y', 2)
+          .attr('dy', '1em')
+          .attr('font-size', '8px')
+          .attr('opacity', '0.8')
+      }
+    })
+  });
 };
 
 
