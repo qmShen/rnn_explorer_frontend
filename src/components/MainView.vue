@@ -100,11 +100,11 @@
           });
       });
 
-      pipeService.getSequenceClusterData(function(selected_ids){
-        console.log('sequence selected', selected_ids);
-        dataService.getGradientsAndIO('GRU_1',
+      pipeService.onSequenceSelected(function(selected_ids){
+        console.log('sequence selected cluster', selected_ids);
+        dataService.getSequenceClusterData('GRU_1',
           selected_ids,function(records){
-            console.log("recieved sequence", records);
+            console.log("recieved sequence cluster", records);
           });
       });
 

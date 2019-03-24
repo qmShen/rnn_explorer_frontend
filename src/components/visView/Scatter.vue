@@ -100,7 +100,8 @@
       this.myChart.on('click', function(params){
         console.log('click', params);
       });
-      this.myChart.on('brushselected', function(params){
+
+      let handleSelected = function(params){
         let dataIndex = params.batch[0].selected[0]['dataIndex'];
         console.log('brushed', dataIndex);
         let objs = [];
@@ -109,8 +110,18 @@
           objs.push(_this.scatter_data[index]);
           seq_ids.push(_this.scatter_data[index][4]);
         });
-        // _this.selected_sequence = seq_ids;
+
+        // seq_ids
+        seq_ids  = [1514736000, 1514858400, 1514880000, 1514883600, 1514887200, 1514890800];
         pipeService.emitSequenceSelected(seq_ids);
+
+      };
+      _this.myChart.on('brushselected', function(params){
+        if (_this.x) clearTimeout(_this.x);
+        _this.x = setTimeout(function(){
+          handleSelected(params)
+        }, 500);
+
       });
     },
   }
