@@ -124,14 +124,16 @@ Sequence.prototype.update_sequence_render = function(data){
 
     // ----------------------------------------------------------------------------------------------------------------------------------------- end
 
-
-
-
     let gradient_cell_width = (_this.timetsamp_width) * gradient_io_ratio
     let gradientContainer = timestamp_containers.append('g');
 
     gradientContainer.each(function(t_id){
-      let gradient = gradient_seq[t_id]
+      if(t_id == 0){
+        return
+      }
+      let gradient = gradient_seq[t_id];
+      let state_io = mean_io_seq[t_id];
+
       let _container = d3.select(this);
 
       // ------------------------------- rect
@@ -149,16 +151,22 @@ Sequence.prototype.update_sequence_render = function(data){
             'o': o_i,
             'i': i_i,
             'v': gradient[o_i][i_i],
-            'source':{x: 0, y: o_i * unit_height + 0.5 * unit_height},
-            'target':{x: gradient_cell_width, y: i_i * unit_height + 0.5 * unit_height}
+            'source':{x: 0, y: i_i * unit_height + 0.5 * unit_height},
+            'target':{x: gradient_cell_width, y: o_i * unit_height + 0.5 * unit_height}
           })
         }
       }
 
       linkages.sort((a, b) => (a.v > b.v) ? -1 : 1);
       let top_linkages = linkages.slice(0, 30);
-      console.log('linkages', linkages);
-      console.log('slice linkages', top_linkages);
+      top_linkages = [];
+
+      linkages.forEach(d=>{
+        if(d['v'] > 0.07){
+          top_linkages.push(d)
+        }
+      });
+      console.log('len', linkages.length);
 
       let link = d3.linkHorizontal()
         .x(function(d){return d.x})
