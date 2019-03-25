@@ -5,8 +5,8 @@
         <div class="bg-purple column">
           <!--<ControlView class = 'left_top boundary'></ControlView>-->
           <!--<StatisticsView :input_scatter = 'input_scatter'-->
-                          <!--:trend_data = 'trend_data_json'-->
-                          <!--class = "left_top"></StatisticsView>-->
+          <!--:trend_data = 'trend_data_json'-->
+          <!--class = "left_top"></StatisticsView>-->
           <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
@@ -32,11 +32,11 @@
 
           <div class = 'individual_container boundary'>
             <!--<el-col :span="8" class="horizontal_stripe boundary">-->
-              <!--<div class="mini_head">-->
-                <!--<div class = 'mini_title'>Scatter</div>-->
-              <!--</div>-->
-        <!---->
-              <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
+            <!--<div class="mini_head">-->
+            <!--<div class = 'mini_title'>Scatter</div>-->
+            <!--</div>-->
+            <!---->
+            <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
             <!--</el-col>-->
 
             <el-col :span="24" class="horizontal_stripe">
@@ -98,6 +98,7 @@
         console.log('sequence selected', selected_ids);
         dataService.getGradientsAndIO('GRU_1',
           selected_ids,function(records){
+
             _this.gradients_io = records;
           });
       });
@@ -107,6 +108,7 @@
         dataService.getSequenceClusterData('GRU_1',
           selected_ids,function(records){
             console.log("recieved sequence cluster", records);
+            records['sequence_time'] = selected_ids;
             _this.gradients_io_cluster = records;
           });
       });

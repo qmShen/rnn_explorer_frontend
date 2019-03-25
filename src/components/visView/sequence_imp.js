@@ -19,8 +19,16 @@ Sequence.prototype.update_sequence_render = function(data){
   let _this = this;
   console.log('update sequence cluster', data);
   this.seq_n = data.cluster_io_list.length;
-  this.seq_n = 7;
+  this.seq_n = 10;
   this.seq_gap = 10;
+  if(data['cluster_io_list'].length == 0){
+    return
+  }
+  let time_list = data['sequence_time'];
+  let sort_time_obj_list = [];
+  time_list.forEach(function(t, i){sort_time_obj_list.push({'t':parseInt(t), 'i': i})});
+  sort_time_obj_list.sort((a, b) => (a.t > b.t) ? 1 : -1);
+  console.log('xxx', sort_time_obj_list);
   this.timestamp_n = data['cluster_io_list'][0][0].length;
   // this.timestamp_n = 10;
   this.seq_height = this.canvas_height / this.seq_n - this.seq_gap;
@@ -36,18 +44,31 @@ Sequence.prototype.update_sequence_render = function(data){
   let sequence_renders = [];
 
   this.seq_height = this.canvas_height / this.seq_n;
-  for(let i = 0, ilen = data.cluster_gradient_list.length; i< ilen; i++){
+
+  for(let i = 0, ilen = sort_time_obj_list.length; i < ilen; i++){
+    let _index = sort_time_obj_list[i]['i'];
     let render = {
       'x':0, 'y': this.seq_height * i,
       'height': this.seq_height - this.seq_gap, 'width': this.canvas_width,
-      'io': data.cluster_io_list[i],
-      'gradient': data.cluster_gradient_list[i]
+      'io': data.cluster_io_list[_index],
+      'gradient': data.cluster_gradient_list[_index]
     };
     sequence_renders.push(render);
   }
+  // for(let i = 0, ilen = data.cluster_gradient_list.length; i< ilen; i++){
+  //   let render = {
+  //     'x':0, 'y': this.seq_height * i,
+  //     'height': this.seq_height - this.seq_gap, 'width': this.canvas_width,
+  //     'io': data.cluster_io_list[i],
+  //     'gradient': data.cluster_gradient_list[i]
+  //   };
+  //   sequence_renders.push(render);
+  // }
 
 
   // Svg => container => sequence(element)
+
+  d3.select(this.$el).selectAll('.container').remove();
   let container = d3.select(this.$el).append('g')
     .attr('class', 'container');
 
@@ -59,7 +80,7 @@ Sequence.prototype.update_sequence_render = function(data){
     .attr('transform', (d,i)=>'translate(' + d.x + ',' + (d.y) + ')');
 
 
-  sequence_containers.each(function(d, i){
+  sequence_containers.each(function(d, time_index){
 
     let mean_io_seq = [];
     for(let i = 0; i < _this.timestamp_n; i++){
@@ -90,6 +111,7 @@ Sequence.prototype.update_sequence_render = function(data){
     console.log('ttt', gradient_seq);
 
     let _container = d3.select(this);
+
     _container.append('rect')
       .attr('width', d.width).attr('height', d.height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
 
@@ -112,7 +134,7 @@ Sequence.prototype.update_sequence_render = function(data){
       let state_io = mean_io_seq[t_id];
       // console.log('state_io', state_io); len 15的activation
       let unit_height = d.height / state_io.length;
-      let max_mean = 0.5;
+      let max_mean = 0.7;
       let _bar_container = d3.select(this);
       _bar_container.selectAll('.unit_cluster_bar')
         .data(state_io).enter().append('rect').attr('class', 'unit_cluster_bar')
@@ -162,7 +184,7 @@ Sequence.prototype.update_sequence_render = function(data){
       top_linkages = [];
 
       linkages.forEach(d=>{
-        if(d['v'] > 0.07){
+        if(d['v'] > 0.075){
           top_linkages.push(d)
         }
       });
@@ -182,7 +204,16 @@ Sequence.prototype.update_sequence_render = function(data){
     });
 
 
+    let text = _container.append('text').text(sort_time_obj_list[time_index]['t']).attr('font-size', 10).attr('y', 10)
 
+    var bbox = text.node().getBBox();
+    var padding = 2;
+    var rect = _container.insert("rect", "text")
+      .attr("x", bbox.x - padding)
+      .attr("y", bbox.y - padding)
+      .attr("width", bbox.width + (padding*2))
+      .attr("height", bbox.height + (padding*2))
+      .style("fill", "white");
   })
 };
 

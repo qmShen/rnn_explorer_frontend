@@ -18,7 +18,7 @@
     watch:{
 
       scatter_data:function(new_val, old_val) {
-        let colors = ['red', 'blue'];
+        let colors = ['red', 'blue', 'green'];
 
         let  option = {
           xAxis: {},
@@ -106,14 +106,21 @@
         console.log('brushed', dataIndex);
         let objs = [];
         let seq_ids = [];
+        let time_map = {};
         dataIndex.forEach(function(index){
           objs.push(_this.scatter_data[index]);
-          seq_ids.push(_this.scatter_data[index][4]);
+          let _tid = _this.scatter_data[index][4];
+          if(time_map[_tid] == undefined){
+            seq_ids.push(_tid);
+            time_map[_tid] = 1;
+          }
+
         });
 
         // seq_ids
         // seq_ids  = [1514736000, 1514858400, 1514764800, 1514782800, 1514815200, 1514836800];
-        seq_ids  = [1514736000, 1514858400];
+        // seq_ids  = [1514736000, 1514858400];
+
         pipeService.emitSequenceSelected(seq_ids);
 
       };
@@ -121,7 +128,7 @@
         if (_this.x) clearTimeout(_this.x);
         _this.x = setTimeout(function(){
           handleSelected(params)
-        }, 500);
+        }, 800);
 
       });
     },

@@ -90,9 +90,9 @@
           features[i]['id'] = features[i]['fid'];
         }
         //CCC
-        // this.distributionMatrix.initialize_bicluster_render(new_val);
-        // this.distributionMatrix.layout_cells();
-        // this.distributionMatrix.draw_linkage();
+        this.distributionMatrix.initialize_bicluster_render(new_val);
+        this.distributionMatrix.layout_cells();
+        this.distributionMatrix.draw_linkage();
 
 
         //Old version
