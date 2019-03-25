@@ -7,7 +7,7 @@
           <!--<StatisticsView :input_scatter = 'input_scatter'-->
           <!--:trend_data = 'trend_data_json'-->
           <!--class = "left_top"></StatisticsView>-->
-          <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
+
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
                             :all_units_stats="all_units_stats"
@@ -24,11 +24,38 @@
         <div class="grid-content bg-purple">
 
           <div class = 'temporal_container boundary'>
-            <div class="mini_head">
+            <el-row :gutter="3" class="horizontal_stripe">
+              <el-col :span="3" class="horizontal_stripe boundary">
+                <div class="mini_head">
+                  <div class = 'mini_title'>Subgroup</div>
+                </div>
+                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+
+              </el-col>
+              <el-col :span="9" class="horizontal_stripe">
+                <div class="mini_head">
+                  <div class = 'mini_title'>Projection</div>
+                </div>
+                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+                <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
+              </el-col>
+              <el-col :span="12" class="horizontal_stripe">
+                <div class="mini_head">
               <div class = 'mini_title'>Temporal</div>
             </div>
-            <LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>
+                <LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>
+              </el-col>
+            </el-row>
           </div>
+
+
+          <!--<div class = 'temporal_container boundary'>-->
+            <!--<div class="mini_head">-->
+              <!--<div class = 'mini_title'>Temporal</div>-->
+            <!--</div>-->
+            <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
+            <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
+          <!--</div>-->
 
           <div class = 'individual_container boundary'>
             <!--<el-col :span="8" class="horizontal_stripe boundary">-->
@@ -168,7 +195,7 @@
   /*height: 75%*/
   /*}*/
   .individual_container{
-    height: calc(80%);
+    height: calc(60%);
   }
 
   .sequence_container{
@@ -176,7 +203,7 @@
     width: 100%;
   }
   .temporal_container{
-    height: calc(20%);
+    height: calc(40%);
   }
   .statistics_container{
     height: calc(100%);
@@ -189,10 +216,11 @@
     height: calc(20%);
   }
   .distribution_container{
-    height: calc(80%);
+    height: calc(90%);
   }
   .scatter_container{
-    height: calc(30%);
+    height: calc(100%);
+
 
   }
 

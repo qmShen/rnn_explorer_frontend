@@ -57,6 +57,7 @@
 
   .scatter_container{
     height: calc(100%);
+
   }
   .input_scatter{
     height: calc(100% - 38px - 20px - 10px);

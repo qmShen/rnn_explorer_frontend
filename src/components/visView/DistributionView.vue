@@ -54,9 +54,9 @@
     },
     mounted:function(){
 
-      dataService.getScatterPlotBySelectedData("GRU_1", 'test', 'test', function(scatter){
-        pipeService.emitSelectedScatterPlot(scatter);
-      });
+      // dataService.getScatterPlotBySelectedData("GRU_1", 'test', 'test', function(scatter){
+      //   pipeService.emitSelectedScatterPlot(scatter);
+      // });
       this.distributionMatrix = new DistributionMatrix(this.$el);
       // this.distributionMatrix.register_function(this.handleSelectedData)
     },
@@ -140,12 +140,12 @@
 
 
         //Should be here
-        // dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
-        //   pipeService.emitSelectedScatterPlot(scatter);
-        //   console.log('scatter', scatter)
-        //   //Old version
-        //   // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
-        // });
+        dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
+          pipeService.emitSelectedScatterPlot(scatter);
+          console.log('scatterxzz', scatter)
+          //Old version
+          // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
+        });
       }
     },
 

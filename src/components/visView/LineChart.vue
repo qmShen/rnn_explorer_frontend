@@ -23,7 +23,7 @@
     methods:{
       update_line_chart(data){
         // CCC
-        // this.LineChart.update_render(data)
+        this.LineChart.update_render(data)
       }
     }
   }

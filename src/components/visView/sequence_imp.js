@@ -19,7 +19,7 @@ Sequence.prototype.update_sequence_render = function(data){
   let _this = this;
   console.log('update sequence cluster', data);
   this.seq_n = data.cluster_io_list.length;
-  this.seq_n = 10;
+  this.seq_n = 7;
   this.seq_gap = 10;
   if(data['cluster_io_list'].length == 0){
     return
@@ -28,7 +28,7 @@ Sequence.prototype.update_sequence_render = function(data){
   let sort_time_obj_list = [];
   time_list.forEach(function(t, i){sort_time_obj_list.push({'t':parseInt(t), 'i': i})});
   sort_time_obj_list.sort((a, b) => (a.t > b.t) ? 1 : -1);
-  console.log('xxx', sort_time_obj_list);
+
   this.timestamp_n = data['cluster_io_list'][0][0].length;
   // this.timestamp_n = 10;
   this.seq_height = this.canvas_height / this.seq_n - this.seq_gap;
@@ -91,8 +91,6 @@ Sequence.prototype.update_sequence_render = function(data){
       mean_io_seq.push(timestamp_seq)
     }
 
-    console.log('rr', d);
-    console.log('rrr', mean_io_seq);
 
     let gradient_seq = [];
     for(let i = 0; i < _this.timestamp_n;i ++){
@@ -108,7 +106,6 @@ Sequence.prototype.update_sequence_render = function(data){
       gradient_seq.push(timestamp_seq);
     }
 
-    console.log('ttt', gradient_seq);
 
     let _container = d3.select(this);
 
@@ -188,7 +185,7 @@ Sequence.prototype.update_sequence_render = function(data){
           top_linkages.push(d)
         }
       });
-      console.log('len', linkages.length);
+
 
       let link = d3.linkHorizontal()
         .x(function(d){return d.x})
