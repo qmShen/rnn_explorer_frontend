@@ -99,6 +99,7 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
 
 
   let cluster_groups = [];
+  let cluster_map = {};
   for(let cid in bicluster){
     let _obj = {
       'cid': cid,
@@ -106,12 +107,15 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
       'f_ids': bicluster[cid]['f_ids'],
       'u_ids': bicluster[cid]['u_ids']
     };
-
+    cluster_map[cid] = _obj;
     cluster_groups.push(_obj);
   }
 
   this.cluster_groups = cluster_groups;
+  this.cluster_map = cluster_map;
+  this.cluster_weights = feature_units_stats['bicluster']['weights'];
 
+  console.log('wiehgtsss', this.cluster_weights);
   this.link_region_width = this.canvas_width * 0.15;
   this.remain_width=  this.canvas_width - this.link_region_width;
   this.top_unit_width = this.remain_width * 0.15;
@@ -263,13 +267,13 @@ DistributionMatrix.prototype.sort_features = function(d){
     var parse = 'feature';
   }else if(d == 'direction'){
     var order = [-1, 'E', 'ES', 'S', 'SW', 'W', 'WN', 'N', 'NE'];
-    var parse = 'direction' 
+    var parse = 'direction'
   }else if(d == 'distance'){
     var order = [0, '10', '30', '100', '200', '300'];
     var parse = 'distance'
   }
 
-  
+
   this.single_feature_container.each(function(d, i){
     let new_order = []
     order.forEach(function(item){
@@ -284,7 +288,7 @@ DistributionMatrix.prototype.sort_features = function(d){
     d3.select(this).selectAll('.feature_cell').data(new_order);
   })
 
-  this.update_feature_sorting_render(); 
+  this.update_feature_sorting_render();
 
   d3.selectAll('.feature_cell').each(function(_id){
     if(_this.selected_extend_units[_id] != undefined){
@@ -301,12 +305,12 @@ DistributionMatrix.prototype.update_feature_sorting_render = function(){
   d3.selectAll('.feature_cell').each(function(d){
     d3.select(this).selectAll('*').remove()
   })
-  
+
   this.single_feature_container.each(function(d, i){
     let _margin = 2 ;
     let feature_cell_width = (d.f_render.width / _this.f_col_max_n) - 2 * _margin;
     let feature_cell_height = _this.f_cell_height - 2 * _margin;
-  
+
     d3.select(this).selectAll('.feature_cell').each(function(_fid){
 
       let _container = d3.select(this);
@@ -424,99 +428,99 @@ DistributionMatrix.prototype.update_feature_sorting_render = function(){
 
 // plot legend
 DistributionMatrix.prototype.plot_legend = function(){
-  let _this = this
+  let _this = this;
   let padding_x = this.legend_container_width * 0.05;
   let padding_y = this.legend_container_height * 0.1;
   let w = (this.legend_container_width - 2*padding_x)/(this.features.length+1);
   let h = this.legend_container_height - 2*padding_y;
   let legends = this.legend_container.selectAll('.single_legend').data(this.features).enter().append('g')
-  .attr('class', 'single_legend')
-  .attr('transform', (d, i)=> 'translate(' + (padding_x+i*w) + ',' + padding_y + ')')
+    .attr('class', 'single_legend')
+    .attr('transform', (d, i)=> 'translate(' + (padding_x+i*w) + ',' + padding_y + ')')
 
   // sort button
   let sort_button = this.legend_container.append('g')
-  .attr('class', 'sort_button')
-  .attr('transform', 'translate(' + (padding_x+this.features.length*w) + ',' + 0 +')');
+    .attr('class', 'sort_button')
+    .attr('transform', 'translate(' + (padding_x+this.features.length*w) + ',' + 0 +')');
 
   sort_button.append('text')
-  .attr('x', 4)
-  .attr('y', 0)
-  .attr('dy', '1em')
-  .attr('fill', 'black')
-  .attr('font-size', '10px')
-  .text('Sort By');
-  
-  let sorts = ['type', 'direction', 'distance']
+    .attr('x', 4)
+    .attr('y', 0)
+    .attr('dy', '1em')
+    .attr('fill', 'black')
+    .attr('font-size', '10px')
+    .text('Sort By');
+
+  let sorts = ['type', 'direction', 'distance'];
   let buttons = sort_button.selectAll('.button_cell').data(sorts).enter().append('g')
-  .attr('class', 'button_cell')
-  .attr('transform', (d, i)=> 'translate(' + 0 + ',' + (15*(i+1)) + ')')
+    .attr('class', 'button_cell')
+    .attr('transform', (d, i)=> 'translate(' + 0 + ',' + (15*(i+1)) + ')')
 
   buttons.each(function(d){
     let __this = this
     d3.select(this).append('rect')
-    .attr('class', 'button_rect')
-    .attr('x', 2)
-    .attr('rx', 4)
-    .attr('ry', 4)
-    .attr('y', 2)
-    .attr('width', w+padding_x-4)
-    .attr('height', '13')
-    .attr('fill', 'none')
-    .attr('stroke', 'grey')
-    .attr('stroke-width', '1');
-    
-    d3.select(this).append('text')
-    .attr('x', 6)
-    .attr('y', 2)
-    .attr('dy', '1em')
-    .attr('fill', 'black')
-    .attr('font-size', '10px')
-    .text(d)
-    .on('click',function(d){
-      _this.sort_features(d);
+      .attr('class', 'button_rect')
+      .attr('x', 2)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('y', 2)
+      .attr('width', w+padding_x-4)
+      .attr('height', '13')
+      .attr('fill', 'none')
+      .attr('stroke', 'grey')
+      .attr('stroke-width', '1');
 
-      d3.selectAll('.button_rect').attr('stroke', 'grey').attr('stroke-width', '1')
-      d3.select(__this).select('.button_rect').attr('stroke', 'black').attr('stroke-width', '2')
-    });
+    d3.select(this).append('text')
+      .attr('x', 6)
+      .attr('y', 2)
+      .attr('dy', '1em')
+      .attr('fill', 'black')
+      .attr('font-size', '10px')
+      .text(d)
+      .on('click',function(d){
+        _this.sort_features(d);
+
+        d3.selectAll('.button_rect').attr('stroke', 'grey').attr('stroke-width', '1')
+        d3.select(__this).select('.button_rect').attr('stroke', 'black').attr('stroke-width', '2')
+      });
   })
-    
+
   // legend
   let w_legend = w/2;
   let h_legend = h/2;
   legends.each(function(f){
     d3.select(this).append('rect')
-    .attr('x', 0)
-    .attr('y', 0)
-    .attr('rx', 2)
-    .attr('ry', 2)
-    .attr('width', w_legend)
-    .attr('height', h_legend)
-    .attr('fill', _this.feature_color(f))
-    .attr('fill-opacity',0.4);
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('rx', 2)
+      .attr('ry', 2)
+      .attr('width', w_legend)
+      .attr('height', h_legend)
+      .attr('fill', _this.feature_color(f))
+      .attr('fill-opacity',0.4);
 
     d3.select(this).append('text')
-    .text(function(f){
-      if(f == 'WindDirection'){
-        return 'WD'
-      }else if(f == 'SeaLevelPressure'){
-        return 'SLP'
-      }else if(f == 'CloudCover'){
-        return 'CC'
-      }else if(f == 'StationPresure'){
-        return 'SP'
-      }else if(f == 'AQHIER'){
-        return 'AR'
-      }else if(f == 'DewPt'){
-        return 'DP'
-      }else{
-        return f
-      }
-    })
-    .attr('x', 0)
-    .attr('y', h_legend)
-    .attr('dy', '1em')
-    .attr('fill', 'black')
-    .attr('font-size', '10px');
+      .text(function(f){
+        if(f == 'WindDirection'){
+          return 'WD'
+        }else if(f == 'SeaLevelPressure'){
+          return 'SLP'
+        }else if(f == 'CloudCover'){
+          return 'CC'
+        }else if(f == 'StationPresure'){
+          return 'SP'
+        }else if(f == 'AQHIER'){
+          return 'AR'
+        }else if(f == 'DewPt'){
+          return 'DP'
+        }else{
+          return f
+        }
+      })
+      .attr('x', 0)
+      .attr('y', h_legend)
+      .attr('dy', '1em')
+      .attr('fill', 'black')
+      .attr('font-size', '10px');
 
 
   });
@@ -580,9 +584,9 @@ DistributionMatrix.prototype.layout_cells = function(){
       .attr('ry',3)
       .attr('stroke',d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.8)
       .attr('d', _=> _);
-  
+
   });
- 
+
   // Legend
   this.plot_legend();
 
@@ -793,19 +797,19 @@ DistributionMatrix.prototype.update_selected_units = function(){
     d3.selectAll('.feature_cell').each(function(i){
       if(i == d.id){
         d3.select(this).append('text')
-        .attr('class', 'glyph_order')
-        .text(d.render.order)
-        .attr('x', 4)
-        .attr('y', 2)
-        .attr('dy', '1em')
-        .attr('fill', 'black')
-        .attr('font-size', '8px')
-        .attr('opacity', '0.8');
+          .attr('class', 'glyph_order')
+          .text(d.render.order)
+          .attr('x', 4)
+          .attr('y', 2)
+          .attr('dy', '1em')
+          .attr('fill', 'black')
+          .attr('font-size', '8px')
+          .attr('opacity', '0.8');
       }
     })
 
   })
-    //------------------------------------------
+  //------------------------------------------
 
 
   //---------------------------------------------------------------
@@ -1001,16 +1005,16 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
   // unit_id on top unit plots
   d3.selectAll('.id_top_units').remove()
   d3.selectAll('.top_units').append('text')
-  .attr('class', 'id_top_units')
-  .text(function(d){
-    return d.id
-  })
-  .attr('x', 2)
-  .attr('y', 2)
-  .attr('dy', '1em')
-  .attr('fill', 'black')
-  .attr('opacity', '0.8')
-  .attr('font-size', '10px');
+    .attr('class', 'id_top_units')
+    .text(function(d){
+      return d.id
+    })
+    .attr('x', 2)
+    .attr('y', 2)
+    .attr('dy', '1em')
+    .attr('fill', 'black')
+    .attr('opacity', '0.8')
+    .attr('font-size', '10px');
 
 
   d3.selectAll('.id_units').remove()
@@ -1047,23 +1051,50 @@ DistributionMatrix.prototype.draw_linkage = function(){
       'type': true
     })
   });
-  for(let i = 0, ilen = 20; i < ilen; i++){
-
-  }
 
 
+  linkages = [];
+
+  this.cluster_weights.forEach((weight)=>{
+    let uc_id = weight['uc_id'];
+    let fc_id = weight['fc_id'];
+    let s_cluster  = this.cluster_groups[uc_id];
+    let t_cluster = this.cluster_groups[fc_id];
+
+    let source = {"uc_id": uc_id, x: s_cluster.u_render.x, y: s_cluster.u_render.y + s_cluster.u_render.height / 2};
+    let target = {"fc_id": fc_id, x: t_cluster.f_render.x + _this.link_region_width, y: t_cluster.f_render.y + t_cluster.f_render.height / 2};
+
+    linkages.push({
+      'source':source,
+      'target':target,
+      'weight':weight['mean_ks'],
+      'type': true
+    })
+  });
+
+  linkages.sort((a, b) => (a.source.uc_id > b.source.uc_id) ? 1 : -1);
+
+  let sub_linkages = [];
+  linkages.forEach(function(link_obj){
+    if(link_obj['weight'] > 0.12 || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
+      sub_linkages.push(link_obj);
+    }
+  });
+  console.log('links, links, ', linkages);
   let link = d3.linkHorizontal()
     .x(function(d){return d.x})
-    .y(function(d){return d.y})
-  this.link_region_container.selectAll('.link').data(linkages).enter().append('path').attr('class', 'link')
+    .y(function(d){return d.y});
+
+
+  this.link_region_container.selectAll('.link').data(sub_linkages).enter().append('path').attr('class', 'link')
     .style("stroke", "grey")
     .attr('d', link)
     .attr('fill', 'none')
-    .attr('stroke-width', 10)
-    .attr('stroke-opacity', 0.4)
-
+    .attr('stroke-width', 2)
+    .attr('stroke-opacity', 0.2)
 
 };
+
 ////////Not now
 DistributionMatrix.prototype.color = function(d){
   const scale = d3.scaleOrdinal(d3.schemeCategory20);

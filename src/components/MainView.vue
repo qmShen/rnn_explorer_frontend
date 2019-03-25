@@ -1,7 +1,7 @@
 <template>
   <div class = 'main'>
     <el-row :gutter="3" class="horizontal_stripe">
-      <el-col :span="7" class="horizontal_stripe">
+      <el-col :span="8" class="horizontal_stripe">
         <div class="bg-purple column">
           <!--<ControlView class = 'left_top boundary'></ControlView>-->
           <!--<StatisticsView :input_scatter = 'input_scatter'-->
@@ -20,7 +20,7 @@
       </el-col>
 
 
-      <el-col :span="17" class="horizontal_stripe">
+      <el-col :span="16" class="horizontal_stripe">
         <div class="grid-content bg-purple">
 
           <div class = 'temporal_container boundary'>
@@ -189,7 +189,7 @@
     height: calc(20%);
   }
   .distribution_container{
-    height: calc(70%);
+    height: calc(80%);
   }
   .scatter_container{
     height: calc(30%);
