@@ -6,11 +6,11 @@ let Sequence = function(el){
 
   this.canvas_width = this.$el.clientWidth;
   this.canvas_height = this.$el.clientHeight;
-
+  this.canvas_height = 550;
   this.sequence_margin = 2;
   this.cell_margin = 10;
   this.cell_margin_y = 25;
-
+  console.log('height', this.canvas_height);
 };
 
 
@@ -44,6 +44,9 @@ Sequence.prototype.update_sequence_render = function(data){
   let sequence_renders = [];
 
   this.seq_height = this.canvas_height / this.seq_n;
+  if(data.cluster_io_list.length > this.seq_n){
+    d3.select(this.$el).attr('height', data.cluster_io_list.length / 7 *  this.canvas_height);
+  }
 
   for(let i = 0, ilen = sort_time_obj_list.length; i < ilen; i++){
     let _index = sort_time_obj_list[i]['i'];

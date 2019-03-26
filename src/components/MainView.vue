@@ -25,10 +25,11 @@
 
           <div class = 'temporal_container boundary'>
             <el-row :gutter="3" class="horizontal_stripe">
-              <el-col :span="3" class="horizontal_stripe boundary">
+              <el-col :span="4" class="table_horizontal_stripe boundary">
                 <div class="mini_head">
                   <div class = 'mini_title'>Subgroup</div>
                 </div>
+                <SubGroupTable></SubGroupTable>
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
 
               </el-col>
@@ -39,10 +40,10 @@
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
                 <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
               </el-col>
-              <el-col :span="12" class="horizontal_stripe">
+              <el-col :span="11" class="horizontal_stripe">
                 <div class="mini_head">
-              <div class = 'mini_title'>Temporal</div>
-            </div>
+                  <div class = 'mini_title'>Temporal</div>
+                </div>
                 <LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>
               </el-col>
             </el-row>
@@ -50,11 +51,11 @@
 
 
           <!--<div class = 'temporal_container boundary'>-->
-            <!--<div class="mini_head">-->
-              <!--<div class = 'mini_title'>Temporal</div>-->
-            <!--</div>-->
-            <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
-            <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
+          <!--<div class="mini_head">-->
+          <!--<div class = 'mini_title'>Temporal</div>-->
+          <!--</div>-->
+          <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
+          <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
           <!--</div>-->
 
           <div class = 'individual_container boundary'>
@@ -66,7 +67,7 @@
             <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
             <!--</el-col>-->
 
-            <el-col :span="24" class="horizontal_stripe">
+            <el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto'>
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence</div>
               </div>
@@ -101,7 +102,7 @@
   import SequenceView from './visView/SequenceView.vue'
   import dataService from '../service/dataService.js'
   import pipeService from '../service/pipeService.js'
-
+  import SubGroupTable from './visView/SubGroupTable.vue'
 
   export default {
     name: "MainView",
@@ -159,7 +160,8 @@
       LineChart,
       DistributionView,
       SequenceView,
-      Scatter
+      Scatter,
+      SubGroupTable
     },
     watch:{
       selected_sequence:function(new_data, old_data){
@@ -178,7 +180,11 @@
   .horizontal_stripe{
     height: 100%;
   }
-
+  .table_horizontal_stripe{
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
   .bg-purple {
 
   }
@@ -199,8 +205,9 @@
   }
 
   .sequence_container{
-    height: calc(100% - 20px);
+    /*height: calc(100% - 20px);*/
     width: 100%;
+
   }
   .temporal_container{
     height: calc(40%);

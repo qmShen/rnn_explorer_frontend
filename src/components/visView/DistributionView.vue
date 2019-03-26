@@ -121,11 +121,11 @@
 
       },
       handleSelectedData(){
-        console.log('selected_features',selected_features);
         let _this = this;
         let x = this.distributionMatrix.get_selected_data();
-        let selected_features = x[0];
-        let selected_units = x[1];
+        let selected_features = JSON.parse(JSON.stringify(x[0]));
+        let selected_units =  JSON.parse(JSON.stringify(x[1]));
+        pipeService.emitSubgroupSelected(selected_features);
         dataService.getSubgroupStats("GRU_1", selected_features, selected_units, 50, 'ks', function(sub_group_data){
 
           for(let i = 0, ilen = sub_group_data.length; i < ilen; i++){
@@ -139,13 +139,10 @@
         });
 
 
+
         //Should be here
-        dataService.getScatterPlotBySelectedData("GRU_1", selected_features, selected_units, function(scatter){
-          pipeService.emitSelectedScatterPlot(scatter);
-          console.log('scatterxzz', scatter)
-          //Old version
-          // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
-        });
+        // Maybe used latter
+
       }
     },
 

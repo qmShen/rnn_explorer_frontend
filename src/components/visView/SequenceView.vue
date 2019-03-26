@@ -28,5 +28,7 @@
 </script>
 
 <style scoped>
-
+  svg{
+    height: 1000px
+  }
 </style>

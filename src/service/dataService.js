@@ -109,9 +109,9 @@ function getSubgroupStats(mid, selectFeatures, selectUnits, r_len,  dif_type, ca
   })
 }
 
-function getScatterPlotBySelectedData(mid, selectFeatures, selectUnits, callback ) {
+function getScatterPlotBySelectedData(mid, subGroup, callback ) {
   const url = `${dataServerUrl}/scatter_plot_subgroup`
-  $http.post(url, {'mid': mid, 'feature_scales': selectFeatures, 'units':'selectUnits'}).then(response => {
+  $http.post(url, {'mid': mid, 'sub_groups': subGroup}).then(response => {
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)

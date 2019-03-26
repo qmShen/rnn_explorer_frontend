@@ -6,7 +6,8 @@ import Vue from 'vue'
 var pipeService = new Vue({
   data:{
     SELECTEDSCATTER: 'select_scatter_plot',
-    SEQUENCESELECTED: 'sequence_selected'
+    SEQUENCESELECTED: 'sequence_selected',
+    SUBGROUPSELECTED: 'subgroup_selected'
 
   },
 
@@ -26,6 +27,17 @@ var pipeService = new Vue({
     },
     onSequenceSelected: function(callback){
       this.$on(this.SEQUENCESELECTED,function(msg){
+        callback(msg);
+      })
+    },
+
+    //------------------------------------------------------------
+    //When a subgroup is selected in distribution view, emit this message
+    emitSubgroupSelected: function(msg){
+      this.$emit(this.SUBGROUPSELECTED, msg);
+    },
+    onSubgroupSelected: function(callback){
+      this.$on(this.SUBGROUPSELECTED,function(msg){
         callback(msg);
       })
     },
