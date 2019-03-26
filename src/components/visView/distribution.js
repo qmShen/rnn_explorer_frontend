@@ -259,7 +259,7 @@ DistributionMatrix.prototype.parse_feature_name = function(feature_name){
   }
 };
 
-// sorting the features in each feature_group
+// sort the features in each feature_group
 DistributionMatrix.prototype.sort_features = function(d){
   let _this = this
   if(d == 'type'){
@@ -298,8 +298,12 @@ DistributionMatrix.prototype.sort_features = function(d){
     }
   });
 
+
+
+
 };
 
+// sort the features render
 DistributionMatrix.prototype.update_feature_sorting_render = function(){
   let _this = this;
   d3.selectAll('.feature_cell').each(function(d){
@@ -426,6 +430,76 @@ DistributionMatrix.prototype.update_feature_sorting_render = function(){
 
 };
 
+
+// mouseover 
+DistributionMatrix.prototype.mouseover_unit = function(_id){
+  let unit_id = Number(_id);
+  d3.selectAll('.unit_cell').each(function(uid){
+    if(uid == unit_id){
+      d3.select(this).select('.unit_cell_outline').attr('stroke', 'black').attr('stroke-opacity', 1)
+    }
+  })
+  d3.selectAll('.top_units').each(function(d){
+    if(Number(d.id) == unit_id){
+      d3.select(this).select('.top_unit_outline').attr('stroke','black').attr('stroke-opacity', 1)
+    }
+  })
+}
+
+DistributionMatrix.prototype.mouseover_feature = function(_id){
+  let _this = this;
+  d3.selectAll('.feature_cell').each(function(d){
+    if(d == _id){
+      d3.select(this).select('.feature_cell_outline').attr('stroke', 'black')
+    }
+  })
+  d3.selectAll('.selected_feature').each(function(selected_f){
+    if(selected_f.id == _id){
+      d3.select(this).select('.selected_feature_outline').attr('stroke', 'black')
+      .style("stroke-dasharray", "10,4").attr('stroke-opacity', 1);
+    }
+  })
+}
+
+// mouseout
+DistributionMatrix.prototype.mouseout_unit = function(_id){
+  let _this = this;
+  let unit_id = Number(_id);
+  d3.selectAll('.unit_cell').each(function(d){
+    if(d == unit_id){
+      d3.select(this).select('.unit_cell_outline').attr('stroke', d=>_this.bicluster_colorScale(d.cid)).attr('stroke-opacity', 0.8)
+    }
+  })
+  d3.selectAll('.top_units').each(function(d){
+    if(Number(d.id) == unit_id){
+      d3.select(this).select('.top_unit_outline').attr('stroke','grey').attr('stroke-opacity', 0.5)
+    }
+  })
+}
+
+DistributionMatrix.prototype.mouseout_feature = function(_id){
+  let _this = this;
+  d3.selectAll('.feature_cell').each(function(d){
+    if(d == _id){
+      let cell_data = _this.id_map[_id];
+      if(cell_data['render'] == undefined){
+        cell_data['render'] = {'clicked': false};
+      }
+      if(cell_data['render']['clicked'] == false){
+        d3.select(this).select('.feature_cell_outline').attr('stroke', 'white')
+      }
+    }
+  })
+
+  d3.selectAll('.selected_feature').each(function(selected_f){
+    if(selected_f.id == _id){
+      d3.select(this).select('.selected_feature_outline').attr('stroke', 'grey')
+      .style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5);
+    }
+  })
+}
+
+
 // plot legend
 DistributionMatrix.prototype.plot_legend = function(){
   let _this = this;
@@ -489,6 +563,7 @@ DistributionMatrix.prototype.plot_legend = function(){
   let h_legend = h/2;
   legends.each(function(f){
     d3.select(this).append('rect')
+      .attr('class', 'legend_rect')
       .attr('x', 0)
       .attr('y', 0)
       .attr('rx', 2)
@@ -496,7 +571,8 @@ DistributionMatrix.prototype.plot_legend = function(){
       .attr('width', w_legend)
       .attr('height', h_legend)
       .attr('fill', _this.feature_color(f))
-      .attr('fill-opacity',0.4);
+      .attr('fill-opacity',0.4)
+      .append('title').text(f);
 
     d3.select(this).append('text')
       .text(function(f){
@@ -521,9 +597,34 @@ DistributionMatrix.prototype.plot_legend = function(){
       .attr('dy', '1em')
       .attr('fill', 'black')
       .attr('font-size', '10px');
-
-
   });
+
+  d3.selectAll('.legend_rect').each(function(d){
+    d3.select(this)
+    .on('click',function(type){
+      d3.selectAll('.feature_cell').each(function(_id){
+        var name_obj = _this.parse_feature_name(_id);
+        var name = name_obj['feature'];
+        if(type == name){
+          let cell_data = _this.id_map[_id];
+          if(cell_data['render'] == undefined){
+            cell_data['render'] = {'clicked': false};
+          }
+          if(cell_data['render']['clicked'] == false){
+            cell_data['render']['clicked'] = true;
+            _this.selected_extend_units[_id] = cell_data;
+            d3.select(this).select('.feature_cell_outline').attr('stroke', 'black')
+          }else{
+            cell_data['render']['clicked'] = false;
+            delete _this.selected_extend_units[_id];
+            d3.select(this).select('.feature_cell_outline').attr('stroke', 'white')
+          }
+        }
+      })
+      _this.update_selected_units();
+    })
+  })
+
 }
 
 DistributionMatrix.prototype.layout_cells = function(){
@@ -577,6 +678,7 @@ DistributionMatrix.prototype.layout_cells = function(){
     });
 
     unit_cells.append('rect').attr('x', _margin).attr('y', _margin)
+      .attr('class', 'unit_cell_outline')
       .attr('width', _cell_width)
       .attr('height', _cell_height)
       .attr('fill', 'none').attr('fill-opacity', 0.2)
@@ -667,6 +769,7 @@ DistributionMatrix.prototype.layout_cells = function(){
 
       // outliner boundary
       let _outline_rect = _container.append('rect')
+        .attr('class', 'feature_cell_outline')
         .attr('x', _margin).attr('y', _margin)
         .attr('width', feature_cell_width)
         .attr('height', feature_cell_height)
@@ -770,6 +873,7 @@ DistributionMatrix.prototype.update_selected_units = function(){
     .attr('transform', d=>{return 'translate(' + margin_x * 2 + ',' + d.render.selected_y + ')'})
 
   new_container.append("rect")
+    .attr('class', 'selected_feature_outline')
     .attr('x', margin_x)
     .attr('y', margin_y)
     .attr('width', d=> d.render.width - 2 * margin_x)
@@ -956,6 +1060,7 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
     .duration(2000);        // apply it over 4000 milliseconds
 
   new_container.append("rect")
+    .attr('class', 'top_unit_outline')
     .attr('x', margin_x)
     .attr('y', margin_y)
     .attr('width', d=> d.render.width - 2 * margin_x)
