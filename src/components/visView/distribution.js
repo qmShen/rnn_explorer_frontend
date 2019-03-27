@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import { mapGetters } from "vuex";
+// import { ElStep } from "element-ui/types/step";
 
 let DistributionMatrix = function(el){
 
@@ -71,7 +72,7 @@ DistributionMatrix.prototype.bicluster_colorScale  = function(){
   return 'grey'
 };
 DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory20"]);
-
+DistributionMatrix.prototype.feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 
 DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
 
@@ -220,20 +221,155 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups){
     .attr('transform', (d, i) => 'translate(' + d.u_render.x + ',' + d.u_render.y +')');
 
   let _margin = 0;
+  let highlight_outline = 1.8;
   this.single_unit_container.append('rect').attr('x', _margin).attr('y', _margin).attr('rx', 1).attr('ry', 1)
+    .attr('class', 'unit_group_outline')
     .attr('width', d=>d.u_render.width - 2* _margin)
     .attr('height', d=>d.u_render.height -  2* _margin)
-    .attr('fill', 'none')
-    .attr('stroke', d=>this.bicluster_colorScale(d.cid)).attr('stroke-width', 1.5);
+    .attr('fill', 'white')
+    .attr('stroke', d=>this.bicluster_colorScale(d.cid))
+    .attr('stroke-width', 1.5)
+    .on('mouseover', function(d){
+      // let uc_id = d.cid;
+      // d3.select(this).attr('stroke-width', highlight_outline).attr('stroke', 'black');
+      // d3.selectAll('.link').each(function(d){
+      //   if(d['source']['uc_id'] != uc_id){
+      //     d3.select(this).attr('stroke-opacity', 0)
+      //   }
+      //   else{
+      //     let fc_id = d['target']['fc_id'];
+      //     d3.selectAll('.feature_group').each(function(_d){
+      //       if(fc_id == _d.cid){
+      //         d3.select(this).select('.feature_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+      //       }
+      //     })
+      //   }
+      // });
+      _this.highlight_unit_group(d.cid);
+    })
+    .on('mouseout', function(d){
+      // let uc_id = d.cid;
+      // d3.select(this).attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid));
+      // d3.selectAll('.link').each(function(d){
+      //   if(d['source']['uc_id'] != uc_id){
+      //     d3.select(this).attr('stroke-opacity', 0.2)
+      //   }
+      // });
+      // d3.selectAll('.feature_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+      _this.unhighlight_unit_group(d.cid);
+    })
+
+
 
   this.single_feature_container = this.feature_container.selectAll('.feature_group').data(cluster_groups).enter().append('g').attr('class','feature_group')
     .attr('transform', (d, i) => 'translate(' + d.f_render.x + ',' + d.f_render.y +')');
 
   this.single_feature_container.append('rect').attr('x', _margin).attr('y', _margin).attr('rx', 1).attr('ry', 1)
-    .attr('width', d=>d.f_render.width - 2 * _margin).attr('height', d=>d.f_render.height -  2* _margin).attr('fill', 'none')
-    .attr('stroke', d=>this.bicluster_colorScale(d.cid)).attr('stroke-width', 1.5);
+    .attr('class', 'feature_group_outline')
+    .attr('width', d=>d.f_render.width - 2 * _margin).attr('height', d=>d.f_render.height -  2* _margin)
+    .attr('fill', 'white')
+    .attr('stroke', d=>this.bicluster_colorScale(d.cid))
+    .attr('stroke-width', 1.5)
+    .on('mouseover', function(d){
+      // let fc_id = d.cid;
+      // d3.select(this).attr('stroke-width', highlight_outline).attr('stroke', 'black');
+      // d3.selectAll('.link').each(function(d){
+      //   if(d['target']['fc_id'] != fc_id){
+      //     d3.select(this).attr('stroke-opacity', 0)
+      //   }
+      //   else{
+      //     let uc_id = d['source']['uc_id'];
+      //     d3.selectAll('.unit_group').each(function(_d){
+      //       if(uc_id == _d.cid){
+      //         d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+      //       }
+      //     })
+      //   }
+      // });
+      _this.highlight_feature_group(d.cid);
+    })
+    .on('mouseout', function(d){
+      // let fc_id = d.cid;
+      // d3.select(this).attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid));
+      // d3.selectAll('.link').each(function(d){
+      //   if(d['target']['fc_id'] != fc_id){
+      //     d3.select(this).attr('stroke-opacity', 0.2)
+      //   }
+        
+      // });
+      // d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+      _this.unhighlight_feature_group(d.cid);
+    })
 
 };
+
+// highlight unit_group
+DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
+  let highlight_outline = 1.8
+  d3.selectAll('.unit_group').each(function(_d){
+    if(uc_id == _d.cid){
+      d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+    }
+  });
+  d3.selectAll('.link').each(function(d){
+    if(d['source']['uc_id'] != uc_id){
+      d3.select(this).attr('stroke-opacity', 0)
+    }
+    else{
+      let fc_id = d['target']['fc_id'];
+      d3.selectAll('.feature_group').each(function(_d){
+        if(fc_id == _d.cid){
+          d3.select(this).select('.feature_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+        }
+      })
+    }
+  });
+}
+// unhighlight unit_group
+DistributionMatrix.prototype.unhighlight_unit_group = function(uc_id){
+  let _this = this;
+  d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+  d3.selectAll('.link').each(function(d){
+    if(d['source']['uc_id'] != uc_id){
+      d3.select(this).attr('stroke-opacity', 0.2)
+    }
+  });
+  d3.selectAll('.feature_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+}
+// highlight feature_group
+DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
+  let highlight_outline = 1.8
+  d3.selectAll('.feature_group').each(function(_d){
+    if(fc_id == _d.cid){
+      d3.select(this).select('.feature_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+    }
+  });
+  d3.selectAll('.link').each(function(d){
+    if(d['target']['fc_id'] != fc_id){
+      d3.select(this).attr('stroke-opacity', 0);
+    }
+    else{
+      let uc_id = d['source']['uc_id'];
+      d3.selectAll('.unit_group').each(function(_d){
+        if(uc_id == _d.cid){
+          d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
+        }
+      })
+      console.log(d['weight']);
+    }
+  });
+}
+// unhighlight feature_group
+DistributionMatrix.prototype.unhighlight_feature_group = function(fc_id){
+  let _this = this;
+  d3.selectAll('.feature_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+  d3.selectAll('.link').each(function(d){
+    if(d['target']['fc_id'] != fc_id){
+      d3.select(this).attr('stroke-opacity', 0.2)
+    }
+  });
+  d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
+}
 
 DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
 
@@ -297,9 +433,6 @@ DistributionMatrix.prototype.sort_features = function(d){
       }
     }
   });
-
-
-
 
 };
 
@@ -1195,8 +1328,9 @@ DistributionMatrix.prototype.draw_linkage = function(){
     .style("stroke", "grey")
     .attr('d', link)
     .attr('fill', 'none')
-    .attr('stroke-width', 2)
+    .attr('stroke-width', d => d['weight']*20)
     .attr('stroke-opacity', 0.2)
+  
 
 };
 
