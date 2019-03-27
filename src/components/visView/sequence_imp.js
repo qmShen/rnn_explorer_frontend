@@ -140,7 +140,24 @@ Sequence.prototype.update_sequence_render = function(data){
       }
       mean_io_seq.push(timestamp_seq)
     }
+    let difference_io_seq = [];
 
+    for(let i = 0; i < mean_io_seq.length; i++){
+
+      let current_stamp = mean_io_seq[i];
+      let current_dif = [];
+      if(i ==0){
+        for(let j = 0, jlen = mean_io_seq[i].length; j < jlen; j++){
+          current_dif.push(mean_io_seq[i][j])
+        }
+      }else{
+        for(let j = 0, jlen = mean_io_seq[i].length; j < jlen; j++){
+          current_dif.push(mean_io_seq[i][j] - mean_io_seq[i-1][j])
+        }
+      }
+      difference_io_seq.push(current_dif);
+    }
+    console.log('current ', difference_io_seq);
 
     let gradient_seq = [];
     for(let i = 0; i < _this.timestamp_n;i ++){
@@ -174,6 +191,8 @@ Sequence.prototype.update_sequence_render = function(data){
 
     let ioContainer = timestamp_containers.append('g').attr('transform', (d,i)=>'translate(' + (_this.timetsamp_width * gradient_io_ratio) + ',' + (0) + ')');
 
+
+    console.log('mean_io_seq', mean_io_seq);
 
 
     ioContainer.each(function(t_id){
