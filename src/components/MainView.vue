@@ -122,21 +122,26 @@
     },
     mounted: function(){
       let _this = this;
-      pipeService.onSequenceSelected(function(selected_ids){
-        console.log('sequence selected', selected_ids);
-        dataService.getGradientsAndIO('GRU_1',
-          selected_ids,function(records){
+      //
+      // pipeService.onSequenceSelected(function(selected_ids){
+      //   console.log('sequence selected', selected_ids);
+      //   dataService.getGradientsAndIO('GRU_1',
+      //     selected_ids,function(records){
+      //
+      //       _this.gradients_io = records;
+      //     });
+      // });
 
-            _this.gradients_io = records;
-          });
-      });
-
-      pipeService.onSequenceSelected(function(selected_ids){
-        console.log('sequence selected cluster', selected_ids);
+      pipeService.onSequenceSelected(function(selected_data){
+        let selected_ids = selected_data['seq_ids'];
+        let selected_timestamps = selected_data['selected_timestamps'];
+        let colors = selected_data['colors'];
         dataService.getSequenceClusterData('GRU_1',
           selected_ids,function(records){
             console.log("recieved sequence cluster", records);
             records['sequence_time'] = selected_ids;
+            records['selected_timestamp'] = selected_timestamps;
+            records['colors'] = colors;
             _this.gradients_io_cluster = records;
           });
       });

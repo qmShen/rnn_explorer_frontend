@@ -70,8 +70,11 @@
     mounted(){
       // Used for test
       let _this = this;
-      let c1 = {'10_WN_RH': [42, 51], '10_NE_RH': [43, 51], '30_N_RH': [46, 51]};
-      let c2 = {'300_NE_Temp': [36, 51], '300_N_Temp': [37, 51]};
+      // let c1 = {'10_WN_RH': [42, 51], '10_NE_RH': [43, 51], '30_N_RH': [46, 51]};
+      // let c2 = {'300_NE_Temp': [36, 51], '300_N_Temp': [37, 51]};
+      let c1 = {'10_WN_RH': [42, 51], '10_NE_RH': [48, 51], '30_N_RH': [46, 51]};
+      let c2 = {'300_NE_Temp': [45, 51], '300_N_Temp': [45, 51]};
+
       this.id2group[0] = c1;
       this.id2group[1] = c2;
       this.tableData = [{'group_id':0, context: 3}, {'group_id':1, context : 2}]

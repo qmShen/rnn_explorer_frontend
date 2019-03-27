@@ -20,7 +20,7 @@ Sequence.prototype.update_sequence_render = function(data){
   console.log('update sequence cluster', data);
   this.seq_n = data.cluster_io_list.length;
   this.seq_n = 7;
-  this.seq_gap = 10;
+  this.seq_gap = 20;
   if(data['cluster_io_list'].length == 0){
     return
   }
@@ -34,6 +34,47 @@ Sequence.prototype.update_sequence_render = function(data){
   this.seq_height = this.canvas_height / this.seq_n - this.seq_gap;
   this.timetsamp_width = this.canvas_width / this.timestamp_n;
   let gradient_io_ratio = 0.4;
+
+  //red colors
+
+  this.colors = data['colors'];
+  // Generate sequence map
+  let selected_time_stamps = data['selected_timestamp'];
+  _this.sequence_time_map = {};
+
+  let all_selected_records = [];
+  selected_time_stamps.forEach((selected_records, class_id)=> {
+    selected_records.forEach((record)=>{
+      record.push(class_id);
+      all_selected_records.push(record);
+    })
+  });
+
+  let start_time = new Date();
+  for(let i =0 ,ilen = all_selected_records.length; i < ilen; i++){
+    let seq_record = all_selected_records[i];
+    let sequence_time = seq_record[1];
+    if(_this.sequence_time_map[sequence_time] == undefined) _this.sequence_time_map[sequence_time] = {};
+    for(let j = 0, jlen = all_selected_records.length; j < jlen; j++){
+      let unit_record = all_selected_records[j];
+      let unit_time = unit_record[0];
+      let class_id = unit_record[3];
+      if(Math.abs(sequence_time - unit_time) < 22 * 3600){
+        if(_this.sequence_time_map[sequence_time][unit_time] == undefined){
+          _this.sequence_time_map[sequence_time][unit_time] = {'unit_time': unit_time, 'sequence_time':sequence_time, 'class_ids':[class_id]}
+        }else{
+          _this.sequence_time_map[sequence_time][unit_time]['class_ids'].push(class_id);
+        }
+      }
+    }
+  }
+  console.log('date', new Date() - start_time);
+
+  // for(let sequence_time in _this.sequence_time_map){
+  //   _this.sequence_time_map[sequence_time] = Object.values(_this.sequence_time_map[sequence_time]);
+  // }
+
+  // Generate sequence map ------ Finished!
   this.timestamp_ids = [];
   for(let i = 0, ilen = this.timestamp_n; i < ilen; i++){
     this.timestamp_ids.push(i);
@@ -54,19 +95,11 @@ Sequence.prototype.update_sequence_render = function(data){
       'x':0, 'y': this.seq_height * i,
       'height': this.seq_height - this.seq_gap, 'width': this.canvas_width,
       'io': data.cluster_io_list[_index],
-      'gradient': data.cluster_gradient_list[_index]
+      'gradient': data.cluster_gradient_list[_index],
+      'sequence_time': time_list[_index]
     };
     sequence_renders.push(render);
   }
-  // for(let i = 0, ilen = data.cluster_gradient_list.length; i< ilen; i++){
-  //   let render = {
-  //     'x':0, 'y': this.seq_height * i,
-  //     'height': this.seq_height - this.seq_gap, 'width': this.canvas_width,
-  //     'io': data.cluster_io_list[i],
-  //     'gradient': data.cluster_gradient_list[i]
-  //   };
-  //   sequence_renders.push(render);
-  // }
 
 
   // Svg => container => sequence(element)
@@ -84,6 +117,19 @@ Sequence.prototype.update_sequence_render = function(data){
 
 
   sequence_containers.each(function(d, time_index){
+    let sequence_time = d['sequence_time'];
+    let unit_times = [];
+    let selected_timestamp_obj = _this.sequence_time_map[sequence_time];
+    if(selected_timestamp_obj == undefined){
+      console.log('error')
+    }
+
+
+
+    for(let i = 0, ilen = 23; i<ilen; i++){
+      unit_times.push(sequence_time - (23 - 1 -  i) * 3600 );
+    }
+
 
     let mean_io_seq = [];
     for(let i = 0; i < _this.timestamp_n; i++){
@@ -112,8 +158,8 @@ Sequence.prototype.update_sequence_render = function(data){
 
     let _container = d3.select(this);
 
-    _container.append('rect')
-      .attr('width', d.width).attr('height', d.height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
+    // _container.append('rect')
+    //   .attr('width', d.width).attr('height', d.height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
 
     let timestamp_containers = _container.selectAll('.timestamp_containers')
       .data(_this.timestamp_ids).enter()
@@ -126,13 +172,12 @@ Sequence.prototype.update_sequence_render = function(data){
     let io_cell_width = (_this.timetsamp_width) * (1 - gradient_io_ratio);
 
     let ioContainer = timestamp_containers.append('g').attr('transform', (d,i)=>'translate(' + (_this.timetsamp_width * gradient_io_ratio) + ',' + (0) + ')');
-    ioContainer.append('rect')
-      .attr('width', io_cell_width)
-      .attr('height', d.height)
-      .attr('fill', 'none').attr('stroke', 'blue').attr('stroke-width', 0.5);
+
+
+
     ioContainer.each(function(t_id){
       let state_io = mean_io_seq[t_id];
-      // console.log('state_io', state_io); len 15的activation
+
       let unit_height = d.height / state_io.length;
       let max_mean = 0.7;
       let _bar_container = d3.select(this);
@@ -141,7 +186,7 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('y', (m_val,j)=> j * unit_height)
         .attr('height', unit_height)
         .attr('width',(m_val)=>m_val / max_mean * io_cell_width )
-        .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 1);
+        .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 0.2);
     });
 
     // ----------------------------------------------------------------------------------------------------------------------------------------- end
@@ -159,10 +204,10 @@ Sequence.prototype.update_sequence_render = function(data){
       let _container = d3.select(this);
 
       // ------------------------------- rect
-      _container.append('rect')
-        .attr('width', gradient_cell_width)
-        .attr('height', d.height)
-        .attr('fill', 'none').attr('stroke', 'orange').attr('stroke-width', 0.5);
+      // _container.append('rect')
+      //   .attr('width', gradient_cell_width)
+      //   .attr('height', d.height)
+      //   .attr('fill', 'none').attr('stroke', 'orange').attr('stroke-width', 0.5);
 
       // ------------------------------- end
       let linkages = [];
@@ -198,10 +243,45 @@ Sequence.prototype.update_sequence_render = function(data){
         .style("stroke", "grey")
         .attr('d', link)
         .attr('fill', 'none')
-        .attr('stroke-width', 2)
-        .attr('stroke-opacity', 0.3)
+        .attr('stroke-width', 1.5)
+        .attr('stroke-opacity', 0.5)
 
     });
+
+    // _container.append('rect')
+    //   .attr('width', d.width).attr('height', d.height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
+
+    timestamp_containers.append('rect')
+      .attr('width', _this.timetsamp_width)
+      .attr('height', d.height)
+      .attr('fill-opacity', 0.05)
+      .attr('fill', (io, i)=>{
+        let _u_t = unit_times[i];
+        if(selected_timestamp_obj[_u_t] == undefined){
+          return 'white'
+        }else{
+          let class_id = selected_timestamp_obj[_u_t]['class_ids'][0];
+          return _this.colors[parseInt(class_id)]
+        }
+      })
+      .attr('stroke', (io, i)=>{
+        let _u_t = unit_times[i];
+        if(selected_timestamp_obj[_u_t] == undefined){
+          return 'grey'
+        }else{
+          let class_id = selected_timestamp_obj[_u_t]['class_ids'][0];
+          return _this.colors[parseInt(class_id)]
+        }
+      })
+      .attr('stroke-width', (io, i)=>{
+
+        let _u_t = unit_times[i];
+        if(selected_timestamp_obj[_u_t] == undefined){
+          return 0.5
+        }else{
+          return 1.5
+        }
+      })
 
 
     let text = _container.append('text').text(sort_time_obj_list[time_index]['t']).attr('font-size', 10).attr('y', 10)

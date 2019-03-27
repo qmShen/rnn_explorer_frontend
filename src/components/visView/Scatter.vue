@@ -12,7 +12,9 @@
     data() {
       return {
         scatter_data: null,
+        selected_timestamps: null,
         option: null,
+        colors: ['#4BA453', '#CE373E', '#239FFC', '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
       }
     },
     methods:{
@@ -37,13 +39,19 @@
         // seq_ids  = [1514736000, 1514858400, 1514764800, 1514782800, 1514815200, 1514836800];
         // seq_ids  = [1514736000, 1514858400];
 
-        pipeService.emitSequenceSelected(seq_ids);
+        pipeService.emitSequenceSelected({
+          'seq_ids': seq_ids,
+          'selected_timestamps': _this.selected_timestamps,
+          'colors': _this.colors
+        });
       }
     },
     watch:{
       scatter_data:function(new_val, old_val) {
         let _this = this;
-        if(this.myChart) this.myChart.dispose()
+        if(!new_val) return;
+
+        if(this.myChart) this.myChart.dispose();
 
         this.myChart = echarts.init(this.$el);
         this.option.series[0]['data'] = new_val;
@@ -57,19 +65,18 @@
           _this.x = setTimeout(function(){
             _this.handleSelected(params)
           }, 800);
-
         });
       }
     },
+
     mounted: function(){
       let _this = this;
       pipeService.onSelectedScatterPlot(function(d){
-
-        _this.scatter_data = d;
+        _this.scatter_data = d['data'];
+        _this.selected_timestamps = d['selected_timestamps'];
       });
 
-
-      let colors = ['red', 'blue', 'green'];
+      let colors = this.colors;
 
       let  option = {
         xAxis: {},
@@ -89,6 +96,7 @@
           geoIndex: 0
         },
         dataZoom: [
+
           // {
           //   type: 'slider',
           //   show: true,
@@ -104,21 +112,21 @@
           //   start: 29,
           //   end: 36
           // },
-          // {
-          //   type: 'inside',
-          //   // xAxisIndex: [0],
-          //   start: 100,
-          //   dataZoomIndex: 100,
-          //   end: 35
-          //
-          // },
-          // {
-          //   type: 'inside',
-          //   // yAxisIndex: [0],
-          //   dataZoomIndex: 100,
-          //   start: 100,
-          //   end: 35
-          // }
+          {
+            type: 'inside',
+            xAxisIndex: [0],
+            start: 100,
+            // dataZoomIndex: 100,
+            end: 0
+
+          },
+          {
+            type: 'inside',
+            yAxisIndex: [0],
+            // dataZoomIndex: 100,
+            start: 100,
+            end: 0
+          }
         ],
 
         series: [{
@@ -136,7 +144,6 @@
 
       };
       this.option = option;
-
 
     },
   }
