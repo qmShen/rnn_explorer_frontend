@@ -40,11 +40,35 @@
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
                 <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
               </el-col>
+
+
+
               <el-col :span="11" class="horizontal_stripe">
                 <div class="mini_head">
-                  <div class = 'mini_title'>Temporal</div>
+                  <div class = 'mini_title'>Time</div>
                 </div>
-                <LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>
+                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+
+                <ConfusionMatrix class="linechart_container matrix_container"
+                                 :trend_data = "trend_data_json">
+                </ConfusionMatrix>
+
+                <!--<el-tabs class="horizontal_stripe"  v-model="activeName">-->
+                <!--<el-tab-pane class="horizontal_stripe" label="Temporal" name="first">-->
+
+                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+                <!--</el-tab-pane>-->
+
+                <!--<el-tab-pane class="horizontal_stripe" label="Confusion Matrix" name="second">-->
+                <!--<ConfusionMatrix :trend_data = "trend_data_json"-->
+                <!--class='matrix_container'>-->
+                <!--</ConfusionMatrix>-->
+                <!--&lt;!&ndash;<StatisticsView :input_scatter = 'input_scatter'&ndash;&gt;-->
+                <!--&lt;!&ndash;:trend_data = 'trend_data_json'&ndash;&gt;-->
+                <!--&lt;!&ndash;class = "statistics_container"></StatisticsView>&ndash;&gt;-->
+                <!--</el-tab-pane>-->
+                <!--</el-tabs>-->
+
               </el-col>
             </el-row>
           </div>
@@ -103,6 +127,7 @@
   import dataService from '../service/dataService.js'
   import pipeService from '../service/pipeService.js'
   import SubGroupTable from './visView/SubGroupTable.vue'
+  import ConfusionMatrix from './visView/ConfusionMatrix.vue'
 
   export default {
     name: "MainView",
@@ -117,6 +142,7 @@
         biClusterMap: null,
         allStats: null,
         selected_sequence:[],
+        activeName:'second'
 
       }
     },
@@ -166,7 +192,8 @@
       DistributionView,
       SequenceView,
       Scatter,
-      SubGroupTable
+      SubGroupTable,
+      ConfusionMatrix
     },
     watch:{
       selected_sequence:function(new_data, old_data){
@@ -176,7 +203,7 @@
   }
 </script>
 
-<style scoped>
+<style>
   .main{
     /*background: #efedf2;*/
     height: 100%;
@@ -236,5 +263,24 @@
 
   }
 
+  .el-tabs__content{
+    height: calc(100% - 50px);
+    font-family: 'monospace';
+    font-size: 13px;
 
+  }
+  .el-tabs__nav-wrap is-top{
+    max-height: 10px;
+    font-family: 'monospace';
+
+  }
+  .el-tabs__item{
+    height: 13px;
+    line-height: 13px;
+    font-family: 'monospace';
+    font-size: 13px;
+  }
+  .el-tabs__nav-scroll{
+    background: rgb(243,243,243);
+  }
 </style>

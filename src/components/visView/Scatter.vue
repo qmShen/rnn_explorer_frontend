@@ -1,5 +1,5 @@
 <template>
-  <div>123123</div>
+  <div></div>
 </template>
 
 <script>
@@ -94,6 +94,11 @@
           throttleType: 'debounce',
           throttleDelay: 300,
           geoIndex: 0
+        },
+        grid:{
+          top: 30,
+          bottom: 50,
+          right: 30
         },
         dataZoom: [
 

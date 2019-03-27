@@ -13,10 +13,9 @@
       <!--<div class="mini_head">-->
         <!--<div class = 'mini_title'>Confusion matrix</div>-->
       <!--</div>-->
-      <!--<ConfusionMatrix :trend_data = "trend_data"-->
-                       <!--class='matrix_container'>-->
-
-      <!--</ConfusionMatrix>-->
+      <ConfusionMatrix :trend_data = "trend_data"
+                       class='matrix_container'>
+      </ConfusionMatrix>
     <!--</div>-->
   </div>
 </template>

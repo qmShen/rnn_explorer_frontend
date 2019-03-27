@@ -19,7 +19,7 @@ Sequence.prototype.update_sequence_render = function(data){
   let _this = this;
   console.log('update sequence cluster', data);
   this.seq_n = data.cluster_io_list.length;
-  this.seq_n = 7;
+  this.seq_n = 8;
   this.seq_gap = 20;
   if(data['cluster_io_list'].length == 0){
     return
@@ -86,6 +86,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   this.seq_height = this.canvas_height / this.seq_n;
   if(data.cluster_io_list.length > this.seq_n){
+    console.log('123', data.cluster_io_list.length);
     d3.select(this.$el).attr('height', data.cluster_io_list.length / 7 *  this.canvas_height);
   }
 
@@ -257,6 +258,7 @@ Sequence.prototype.update_sequence_render = function(data){
       .attr('fill-opacity', 0.05)
       .attr('fill', (io, i)=>{
         let _u_t = unit_times[i];
+        if(!selected_timestamp_obj) return 'white'
         if(selected_timestamp_obj[_u_t] == undefined){
           return 'white'
         }else{
@@ -266,6 +268,7 @@ Sequence.prototype.update_sequence_render = function(data){
       })
       .attr('stroke', (io, i)=>{
         let _u_t = unit_times[i];
+        if(!selected_timestamp_obj) return 'grey'
         if(selected_timestamp_obj[_u_t] == undefined){
           return 'grey'
         }else{
@@ -276,6 +279,7 @@ Sequence.prototype.update_sequence_render = function(data){
       .attr('stroke-width', (io, i)=>{
 
         let _u_t = unit_times[i];
+        if(!selected_timestamp_obj) return 0.5
         if(selected_timestamp_obj[_u_t] == undefined){
           return 0.5
         }else{
