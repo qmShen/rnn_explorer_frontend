@@ -311,7 +311,7 @@ DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
       d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
     }
   });
-  d3.selectAll('.link').each(function(d){
+  d3.select(this.$el).selectAll('.link').each(function(d){
     if(d['source']['uc_id'] != uc_id){
       d3.select(this).attr('stroke-opacity', 0)
     }
@@ -329,7 +329,7 @@ DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
 DistributionMatrix.prototype.unhighlight_unit_group = function(uc_id){
   let _this = this;
   d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
-  d3.selectAll('.link').each(function(d){
+  d3.select(this.$el).selectAll('.link').each(function(d){
     if(d['source']['uc_id'] != uc_id){
       d3.select(this).attr('stroke-opacity', 0.2)
     }
@@ -344,7 +344,7 @@ DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
       d3.select(this).select('.feature_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
     }
   });
-  d3.selectAll('.link').each(function(d){
+  d3.select(this.$el).selectAll('.link').each(function(d){
     if(d['target']['fc_id'] != fc_id){
       d3.select(this).attr('stroke-opacity', 0);
     }
@@ -363,7 +363,7 @@ DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
 DistributionMatrix.prototype.unhighlight_feature_group = function(fc_id){
   let _this = this;
   d3.selectAll('.feature_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
-  d3.selectAll('.link').each(function(d){
+  d3.select(this.$el).selectAll('.link').each(function(d){
     if(d['target']['fc_id'] != fc_id){
       d3.select(this).attr('stroke-opacity', 0.2)
     }
