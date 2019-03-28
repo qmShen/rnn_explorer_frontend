@@ -220,13 +220,19 @@ Sequence.prototype.update_sequence_render = function(data){
           if(dif_io[_i]>0){
             return (m_val - dif_io[_i] )  / max_mean * io_cell_width
           }else{
-            return
+            return m_val / max_mean * io_cell_width
           }
         })
         .attr('y', (m_val,j)=> j * unit_height)
         .attr('height', unit_height)
-        .attr('width',(m_val, i)=>m_val / max_mean * io_cell_width )
-        .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 0.2);
+        .attr('width',(m_val, _i)=>Math.abs(dif_io[_i]) / max_mean * io_cell_width )
+        .attr('fill', (d, _i)=>{
+          if(dif_io[_i] > 0){
+            return 'blue'
+          }else{
+            return 'red'
+          }
+        }).attr('stroke', 'white').attr('stroke-width', 0.2);
     });
 
     // ----------------------------------------------------------------------------------------------------------------------------------------- end
