@@ -75,7 +75,7 @@ DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory2
 DistributionMatrix.prototype.feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 
 DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
-
+  let _this = this;
   this.id_map = {};
 
   let features = feature_units_stats['features'];
@@ -164,6 +164,13 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
   // this.selected_feature_plot_conatiner.selectAll('.selected_feature')
   this.calc_position(cluster_groups)
+
+  var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom)
+  this.selected_feature_container.call(zoomer);
+  function zoom(){
+    let y =  d3.event.transform['y'];
+    _this.selected_feature_container.attr("transform", 'translate('+0 + ',' + y+')');
+  }
 };
 
 DistributionMatrix.prototype.calc_position = function(cluster_groups){
