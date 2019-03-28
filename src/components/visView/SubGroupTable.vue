@@ -24,10 +24,12 @@
         show-overflow-tooltip>
       </el-table-column>
       <el-table-column
-        prop="context"
-        label="Col"
-        width="50"
+        prop = "context"
+        label="C"
         show-overflow-tooltip>
+        <template slot-scope="scope">
+          <div class="rectangle" v-bind:style="{backgroundColor: scope.row.context}"></div>
+        </template>
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -57,6 +59,7 @@
 
   export default {
     name: "SubGroupTable",
+    props:['colors'],
     data() {
       return {
         index:2,
@@ -77,8 +80,8 @@
 
       this.id2group[0] = c1;
       this.id2group[1] = c2;
-      this.tableData = [{'group_id':0, context: 3}, {'group_id':1, context : 2}]
-      this.multipleSelection = [{'group_id':0, 'context':3},{'group_id':1, 'context':2}];
+      this.tableData = [{'group_id':0, context: 2, color: 'white'}, {'group_id':1, context : 2, color: 'white'}];
+      this.multipleSelection = [{'group_id':0, 'context':"red"},{'group_id':1, 'context':'blue'}];
 
       pipeService.onSubgroupSelected(function(selected_features){
         console.log('selected_features, sub_group_data', selected_features);
@@ -91,7 +94,7 @@
           'group_id': _this.index,
           'context': feature_list.length
         })
-        _this.index  = _this.index + 1
+        _this.index  = _this.index + 1;
         console.log('thisthisthis', _this.index, _this.id2group)
       })
     },
@@ -103,7 +106,7 @@
           let _index = group['group_id'];
           sub_groups.push(this.id2group[_index])
         });
-        console.log('sub_groups', sub_groups)
+        console.log('sub_groups', sub_groups);
         dataService.getScatterPlotBySelectedData("GRU_1", sub_groups, function(scatter){
           pipeService.emitSelectedScatterPlot(scatter);
 
@@ -123,5 +126,9 @@
 </script>
 
 <style scoped>
+  .rectangle{
+    width: 20px;
+    height: 20px;
 
+  }
 </style>

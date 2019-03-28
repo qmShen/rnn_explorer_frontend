@@ -29,7 +29,7 @@
                 <div class="mini_head">
                   <div class = 'mini_title'>Subgroup</div>
                 </div>
-                <SubGroupTable></SubGroupTable>
+                <SubGroupTable :colors="groupColors"></SubGroupTable>
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
 
               </el-col>
@@ -142,7 +142,8 @@
         biClusterMap: null,
         allStats: null,
         selected_sequence:[],
-        activeName:'second'
+        activeName:'second',
+        groupColors: ['#4BA453', '#CE373E', '#239FFC', '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
 
       }
     },
