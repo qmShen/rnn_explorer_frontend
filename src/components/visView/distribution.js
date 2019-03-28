@@ -355,7 +355,7 @@ DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
           d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
         }
       })
-      console.log(d['weight']);
+      // console.log(d['weight']);
     }
   });
 }
