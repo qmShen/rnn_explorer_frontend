@@ -21,7 +21,7 @@ Sequence.prototype.update_sequence_render = function(data){
   this.seq_n = data.cluster_io_list.length;
   this.seq_n = 5;
   this.seq_gap = 20;
-  this.gradient_filter_weight = 0.08;
+  this.gradient_filter_weight = 0.075;
   if(data['cluster_io_list'].length == 0){
     return
   }
@@ -32,6 +32,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   this.timestamp_n = data['cluster_io_list'][0][0].length;
   // this.timestamp_n = 10;
+  console.log(' this.$el.clientHeight', this.$el.clientHeight)
   this.seq_height = this.canvas_height / this.seq_n - this.seq_gap;
   this.timetsamp_width = this.canvas_width / this.timestamp_n;
   let gradient_io_ratio = 0.4;
@@ -87,6 +88,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   this.seq_height = this.canvas_height / this.seq_n;
   if(data.cluster_io_list.length > this.seq_n){
+    console.log('height',  data.cluster_io_list.length / this.seq_n *  this.canvas_height);
     d3.select(this.$el).attr('height', data.cluster_io_list.length / this.seq_n *  this.canvas_height);
   }
 
@@ -148,16 +150,20 @@ Sequence.prototype.update_sequence_render = function(data){
       let current_dif = [];
       if(i ==0){
         for(let j = 0, jlen = mean_io_seq[i].length; j < jlen; j++){
-          current_dif.push(mean_io_seq[i][j])
+          current_dif.push(0)
         }
       }else{
+        console.log('mean_io_seq[i]',mean_io_seq[i]);
+        console.log('mean_io_seq[i]',mean_io_seq[i-1]);
         for(let j = 0, jlen = mean_io_seq[i].length; j < jlen; j++){
           current_dif.push(mean_io_seq[i][j] - mean_io_seq[i-1][j])
         }
+        // console.log('dif',current_dif);
       }
       difference_io_seq.push(current_dif);
     }
-    console.log('current ', difference_io_seq);
+    // console.log('1 mean_io_seq', mean_io_seq);
+    // console.log('2 difference_io_seq', difference_io_seq);
 
     let gradient_seq = [];
     for(let i = 0; i < _this.timestamp_n;i ++){
@@ -192,12 +198,12 @@ Sequence.prototype.update_sequence_render = function(data){
     let ioContainer = timestamp_containers.append('g').attr('transform', (d,i)=>'translate(' + (_this.timetsamp_width * gradient_io_ratio) + ',' + (0) + ')');
 
 
-    console.log('mean_io_seq', mean_io_seq);
+
 
 
     ioContainer.each(function(t_id){
       let state_io = mean_io_seq[t_id];
-
+      let dif_io = difference_io_seq[t_id];
       let unit_height = d.height / state_io.length;
       let max_mean = 0.7;
       let _bar_container = d3.select(this);
@@ -206,6 +212,20 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('y', (m_val,j)=> j * unit_height)
         .attr('height', unit_height)
         .attr('width',(m_val)=>m_val / max_mean * io_cell_width )
+        .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 0.2);
+
+      _bar_container.selectAll('.dif_bar')
+        .data(state_io).enter().append('rect').attr('class', 'dif_bar')
+        .attr('x', (m_val, _i)=>{
+          if(dif_io[_i]>0){
+            return (m_val - dif_io[_i] )  / max_mean * io_cell_width
+          }else{
+            return
+          }
+        })
+        .attr('y', (m_val,j)=> j * unit_height)
+        .attr('height', unit_height)
+        .attr('width',(m_val, i)=>m_val / max_mean * io_cell_width )
         .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 0.2);
     });
 
@@ -264,7 +284,7 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('d', link)
         .attr('fill', 'none')
         .attr('stroke-width', function(link){
-          console.log('link', link);
+
           let weight = link['v'];
           let weight_dif = weight - _this.gradient_filter_weight;
           return 1 + (weight_dif / (0.2 - _this.gradient_filter_weight)) * 3;

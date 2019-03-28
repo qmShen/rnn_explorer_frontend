@@ -93,7 +93,8 @@
             }
           ],
           series: [{
-            symbolSize: 2,
+            symbolSize: 3,
+            opacity: 0.5,
             data: values,
             type: 'scatter'
           }]

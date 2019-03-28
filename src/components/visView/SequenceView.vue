@@ -29,6 +29,6 @@
 
 <style scoped>
   svg{
-    /*height: 1000px*/
+    height: 1500px
   }
 </style>

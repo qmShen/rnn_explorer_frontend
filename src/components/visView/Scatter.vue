@@ -135,14 +135,15 @@
         ],
 
         series: [{
-          symbolSize: 2,
+          symbolSize: 4,
           data: [],
           type: 'scatter',
           itemStyle: {
             normal: {
               color: function (param) {
                 return colors[param['data'][2]];
-              }
+              },
+              opacity: 0.5,
             }
           },
         }],
