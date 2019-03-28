@@ -21,6 +21,7 @@ Sequence.prototype.update_sequence_render = function(data){
   this.seq_n = data.cluster_io_list.length;
   this.seq_n = 5;
   this.seq_gap = 20;
+  this.gradient_filter_weight = 0.08;
   if(data['cluster_io_list'].length == 0){
     return
   }
@@ -86,8 +87,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   this.seq_height = this.canvas_height / this.seq_n;
   if(data.cluster_io_list.length > this.seq_n){
-    console.log('123', data.cluster_io_list.length);
-    d3.select(this.$el).attr('height', data.cluster_io_list.length / 7 *  this.canvas_height);
+    d3.select(this.$el).attr('height', data.cluster_io_list.length / this.seq_n *  this.canvas_height);
   }
 
   for(let i = 0, ilen = sort_time_obj_list.length; i < ilen; i++){
@@ -249,7 +249,7 @@ Sequence.prototype.update_sequence_render = function(data){
       top_linkages = [];
 
       linkages.forEach(d=>{
-        if(d['v'] > 0.075){
+        if(d['v'] > _this.gradient_filter_weight){
           top_linkages.push(d)
         }
       });
@@ -263,7 +263,12 @@ Sequence.prototype.update_sequence_render = function(data){
         .style("stroke", "grey")
         .attr('d', link)
         .attr('fill', 'none')
-        .attr('stroke-width', 1.5)
+        .attr('stroke-width', function(link){
+          console.log('link', link);
+          let weight = link['v'];
+          let weight_dif = weight - _this.gradient_filter_weight;
+          return 1 + (weight_dif / (0.2 - _this.gradient_filter_weight)) * 3;
+        })
         .attr('stroke-opacity', 0.5)
 
     });
@@ -304,7 +309,7 @@ Sequence.prototype.update_sequence_render = function(data){
         }else{
           return 1.5
         }
-      })
+      });
 
 
     let text = _container.append('text').text(sort_time_obj_list[time_index]['t']).attr('font-size', 10).attr('y', 10)
