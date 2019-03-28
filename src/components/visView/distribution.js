@@ -75,7 +75,7 @@ DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory2
 DistributionMatrix.prototype.feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 
 DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
-
+  let _this = this;
   this.id_map = {};
 
   let features = feature_units_stats['features'];
@@ -152,7 +152,12 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
+  this.selected_feature_container_outer = this.root_container.append('g').attr('class', 'top_feature_width')
+    .attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
+
+  this.selected_feature_container = this.selected_feature_container_outer.append('g');
+  this.selected_feature_container.append('rect').attr('fill', 'white').attr('height', 2000).attr('width', 2000);
+
   // this.selected_feature_container.append('rect')
   //   .attr('x', 3)
   //   .attr('y', 3)
@@ -164,6 +169,14 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
   // this.selected_feature_plot_conatiner.selectAll('.selected_feature')
   this.calc_position(cluster_groups)
+
+  var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom)
+  this.selected_feature_container.call(zoomer);
+  function zoom(){
+    let y =  d3.event.transform['y'];
+
+    _this.selected_feature_container.attr("transform", 'translate('+0 + ',' + y+')');
+  }
 };
 
 DistributionMatrix.prototype.calc_position = function(cluster_groups){
