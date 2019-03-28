@@ -1328,7 +1328,19 @@ DistributionMatrix.prototype.draw_linkage = function(){
     .style("stroke", "grey")
     .attr('d', link)
     .attr('fill', 'none')
-    .attr('stroke-width', d => d['weight']*20)
+    .attr('stroke-width', function(d){
+      let weight = d['weight'];
+      if( weight >= 0 && weight < 0.1){
+        // 1-3
+        return weight * 20 + 1;
+      }else if(weight >= 0.1 && weight < 0.2){
+        // 3-5
+        return weight * 20 + 1;
+      }else if(weight >= 0.2 && weight <= 0.3){
+        // 5-10
+        return weight * 50 - 5;
+      }
+    })
     .attr('stroke-opacity', 0.2)
   
 
