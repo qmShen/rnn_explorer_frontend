@@ -116,6 +116,10 @@
       },
 
       handleSelectionChange(val) {
+        console.log('handle selection', val);
+        for(let i  = 0, ilen = val.length; i < ilen; i++){
+          val[i]['color'] = this.colors[i];
+        }
         this.multipleSelection = val;
       },
       deleteRow(index, rows) {
