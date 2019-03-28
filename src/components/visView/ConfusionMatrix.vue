@@ -126,7 +126,7 @@
         let time_map = {};
         dataIndex.forEach(function(index){
           let _tid = _this.trend_data[index]['timestamp'];
-          seq_ids.push(_tid);
+          seq_ids.push(_tid - 3600 * 3);
         });
 
         // seq_ids

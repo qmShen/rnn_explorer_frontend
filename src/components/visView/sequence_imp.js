@@ -198,9 +198,6 @@ Sequence.prototype.update_sequence_render = function(data){
     let ioContainer = timestamp_containers.append('g').attr('transform', (d,i)=>'translate(' + (_this.timetsamp_width * gradient_io_ratio) + ',' + (0) + ')');
 
 
-
-
-
     ioContainer.each(function(t_id){
       let state_io = mean_io_seq[t_id];
       let dif_io = difference_io_seq[t_id];
@@ -212,7 +209,7 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('y', (m_val,j)=> j * unit_height)
         .attr('height', unit_height)
         .attr('width',(m_val)=>m_val / max_mean * io_cell_width )
-        .attr('fill', 'grey').attr('stroke', 'white').attr('stroke-width', 0.2);
+        .attr('fill', 'grey').attr('fill-opacity', 0.7).attr('stroke', 'white').attr('stroke-width', 0.2);
 
       _bar_container.selectAll('.dif_bar')
         .data(state_io).enter().append('rect').attr('class', 'dif_bar')
@@ -229,11 +226,17 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('opacity', 0.5)
         .attr('fill', (d, _i)=>{
           if(dif_io[_i] > 0){
-            return '#3182bd'
+            return '#08b5fa'
           }else{
             return '#f03b20'
           }
-        }).attr('stroke', 'white').attr('stroke-width', 0.2);
+        }).attr('stroke',(d,_i)=>{
+           if(dif_io[_i] > 0){
+            return '#08b5fa'
+          }else{
+            return '#f03b20'
+          }
+      }).attr('stroke-width', 0.2);
     });
 
     // ----------------------------------------------------------------------------------------------------------------------------------------- end
