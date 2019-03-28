@@ -19,7 +19,7 @@ Sequence.prototype.update_sequence_render = function(data){
   let _this = this;
   console.log('update sequence cluster', data);
   this.seq_n = data.cluster_io_list.length;
-  this.seq_n = 8;
+  this.seq_n = 5;
   this.seq_gap = 20;
   if(data['cluster_io_list'].length == 0){
     return

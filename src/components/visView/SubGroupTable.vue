@@ -28,7 +28,7 @@
         label="C"
         show-overflow-tooltip>
         <template slot-scope="scope">
-          <div class="rectangle" v-bind:style="{backgroundColor: scope.row.context}"></div>
+          <div class="rectangle" v-bind:style="{backgroundColor: scope.row.color}"></div>
         </template>
       </el-table-column>
       <el-table-column
@@ -93,9 +93,8 @@
         _this.tableData.push({
           'group_id': _this.index,
           'context': feature_list.length
-        })
+        });
         _this.index  = _this.index + 1;
-        console.log('thisthisthis', _this.index, _this.id2group)
       })
     },
     methods:{
@@ -116,11 +115,17 @@
       },
 
       handleSelectionChange(val) {
+        this.tableData.forEach(function(d){
+          d['color'] = 'white';
+        });
         console.log('handle selection', val);
         for(let i  = 0, ilen = val.length; i < ilen; i++){
           val[i]['color'] = this.colors[i];
         }
         this.multipleSelection = val;
+
+        console.log('val', val);
+
       },
       deleteRow(index, rows) {
         rows.splice(index, 1);
@@ -131,8 +136,9 @@
 
 <style scoped>
   .rectangle{
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
+    opacity: 0.5;
 
   }
 </style>
