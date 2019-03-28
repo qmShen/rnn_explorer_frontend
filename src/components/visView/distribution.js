@@ -152,7 +152,12 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.selected_feature_container = this.root_container.append('g').attr('class', 'top_feature_width').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
+  this.selected_feature_container_outer = this.root_container.append('g').attr('class', 'top_feature_width')
+    .attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
+
+  this.selected_feature_container = this.selected_feature_container_outer.append('g');
+  this.selected_feature_container.append('rect').attr('fill', 'white').attr('height', 2000).attr('width', 2000);
+
   // this.selected_feature_container.append('rect')
   //   .attr('x', 3)
   //   .attr('y', 3)
@@ -169,6 +174,7 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.selected_feature_container.call(zoomer);
   function zoom(){
     let y =  d3.event.transform['y'];
+
     _this.selected_feature_container.attr("transform", 'translate('+0 + ',' + y+')');
   }
 };
