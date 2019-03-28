@@ -226,11 +226,12 @@ Sequence.prototype.update_sequence_render = function(data){
         .attr('y', (m_val,j)=> j * unit_height)
         .attr('height', unit_height)
         .attr('width',(m_val, _i)=>Math.abs(dif_io[_i]) / max_mean * io_cell_width )
+        .attr('opacity', 0.5)
         .attr('fill', (d, _i)=>{
           if(dif_io[_i] > 0){
-            return 'blue'
+            return '#3182bd'
           }else{
-            return 'red'
+            return '#f03b20'
           }
         }).attr('stroke', 'white').attr('stroke-width', 0.2);
     });
