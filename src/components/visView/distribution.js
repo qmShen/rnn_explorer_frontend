@@ -168,9 +168,9 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
 
   this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
   // this.selected_feature_plot_conatiner.selectAll('.selected_feature')
-  this.calc_position(cluster_groups)
+  this.calc_position(cluster_groups);
 
-  var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom)
+  var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom);
   this.selected_feature_container.call(zoomer);
   function zoom(){
     let y =  d3.event.transform['y'];
