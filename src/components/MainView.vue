@@ -38,7 +38,7 @@
                   <div class = 'mini_title'>Projection</div>
                 </div>
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-                <Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>
+                <Scatter :selected_sequence="selected_sequence" :colors="groupColors" class="scatter_container" ></Scatter>
               </el-col>
 
 
@@ -143,7 +143,7 @@
         allStats: null,
         selected_sequence:[],
         activeName:'second',
-        groupColors: ['#4BA453', '#CE373E', '#239FFC', '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
+        groupColors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
 
       }
     },

@@ -8,13 +8,13 @@
 
   export default {
     name: "Scatter",
-    props: ['scatter',"selected_sequence"],
+    props: ['scatter',"selected_sequence", 'colors'],
     data() {
       return {
         scatter_data: null,
         selected_timestamps: null,
         option: null,
-        colors: ['#4BA453', '#CE373E', '#239FFC', '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
+        // colors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
       }
     },
     methods:{
@@ -82,9 +82,9 @@
         xAxis: {},
         yAxis: {},
         brush: {
-          outOfBrush: {
-            color: '#abc'
-          },
+          // outOfBrush: {
+          //   color: '#fdf8ff'
+          // },
           brushStyle: {
             borderWidth: 2,
             color: 'rgba(0,0,0,0.2)',
