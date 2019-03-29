@@ -177,4 +177,38 @@
 
   /*opacity: 0.4;*/
   /*}*/
+.ticks {
+  font: 10px sans-serif;
+}
+
+.track,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
+
+.track {
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 10px;
+}
+
+.track-inset {
+  stroke: rgb(255, 255, 255);
+  stroke-width: 8px;
+}
+
+.track-overlay {
+  pointer-events: stroke;
+  stroke-width: 50px;
+  stroke: transparent;
+  cursor: crosshair;
+}
+
+.handle {
+  fill: #fff;
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25px;
+}
 </style>

@@ -124,30 +124,32 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.unit_region_width = this.remain_width * 0.3;
   this.feature_region_width = this.remain_width * 0.4;
   this.legend_container_height = this.canvas_height * 0.05;
+  this.slider_height = this.canvas_height * 0.025;
   this.legend_container_width = this.canvas_width;
-  this.remain_height = this.canvas_height - this.legend_container_height;
+  this.remain_height = this.canvas_height - this.legend_container_height- this.slider_height;
 
   this.root_container = this.svg.append('g').attr('class', 'root_container');
 
   this.legend_container = this.root_container.append('g').attr('class', 'legend_container');
-  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container').attr('transform', 'translate(' + 0 + ',' + this.legend_container_height + ')');
+  this.slider_container = this.root_container.append('g').attr('class', 'slider_container').attr('transform', 'translate(' + (this.canvas_width * 1/3) + ',' + (this.legend_container_height * 1.1) + ')');
+  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container').attr('transform', 'translate(' + 0 + ',' + (this.legend_container_height+this.slider_height) + ')');
 
   // this.top_unit_container.append('rect')
   //   .attr('width', this.top_unit_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
 
 
-  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ this.legend_container_height + ')');
+  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
   // this.unit_container.append('rect')
   //   .attr('width', this.unit_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
 
-  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ this.legend_container_height + ')');
+  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
   // this.link_region_container.append('rect')
   //   .attr('width', this.link_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
 
-  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ this.legend_container_height + ')');
+  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
   // this.feature_container.append('rect')
   //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
   //   .attr('stroke', 'red').attr('stroke-width', 0.2);
@@ -837,7 +839,7 @@ DistributionMatrix.prototype.layout_cells = function(){
 
   // Legend
   this.plot_legend();
-
+  this.draw_slider();
 
 
   // Layout feature containers
@@ -1130,6 +1132,11 @@ DistributionMatrix.prototype.update_selected_units = function(){
 
   brush_containers.append('title').text(d=>d.uid)
 
+  d3.select('.legend_container').each(function(d){
+    this.parentNode.appendChild(this);
+  })
+  
+
 };
 
 DistributionMatrix.prototype.get_selected_data = function(){
@@ -1288,7 +1295,7 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
 };
 
 
-DistributionMatrix.prototype.draw_linkage = function(){
+DistributionMatrix.prototype.draw_linkage = function(h){
   let _this = this;
 
   let linkages = [];
@@ -1327,7 +1334,7 @@ DistributionMatrix.prototype.draw_linkage = function(){
 
   let sub_linkages = [];
   linkages.forEach(function(link_obj){
-    if(link_obj['weight'] > 0.12 || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
+    if(link_obj['weight'] > h || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
       sub_linkages.push(link_obj);
     }
   });
@@ -1356,9 +1363,54 @@ DistributionMatrix.prototype.draw_linkage = function(){
     })
     .attr('stroke-opacity', 0.2)
   
-
 };
 
+// slider
+DistributionMatrix.prototype.draw_slider = function(){
+  let _this = this;
+  var x = d3.scaleLinear()
+  .domain([0, 0.3])
+  .range([0, this.canvas_width * 1/3])
+  .clamp(true);
+
+  this.slider_container.append("line")
+    .attr("class", "track")
+    .attr("x1", x.range()[0])
+    .attr("x2", x.range()[1])
+    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-inset")
+    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+    .attr("class", "track-overlay")
+    .call(d3.drag()
+        .on("start.interrupt", function() { _this.slider_container.interrupt(); })
+        .on("start drag", function() { hue(x.invert(d3.event.x)); }));
+
+  this.slider_container.insert("g", ".track-overlay")
+    .attr("class", "ticks")
+    .attr("transform", "translate(0," + 18 + ")")
+    .selectAll("text")
+    .data(x.ticks(3))
+    .enter().append("text")
+    .attr("x", x)
+    .attr("text-anchor", "middle")
+    .text(function(d){return d});
+
+  var handle = this.slider_container.insert("circle", ".track-overlay")
+    .attr("class", "handle")
+    .attr("r", 7);
+  this.slider_container.transition() // Gratuitous intro!
+  .duration(10)
+  .tween("hue", function() {
+    var i = d3.interpolate(0, 0.12);
+    return function(t) { hue(i(t)); };
+  });
+  function hue(h) {
+    handle.attr("cx", x(h));
+    let threshold = h;
+    d3.select(_this.$el).selectAll('.link').remove();
+    _this.draw_linkage(threshold);
+  }
+}
 ////////Not now
 DistributionMatrix.prototype.color = function(d){
   const scale = d3.scaleOrdinal(d3.schemeCategory20);
