@@ -205,10 +205,4 @@
   cursor: crosshair;
 }
 
-.handle {
-  fill: #fff;
-  stroke: #000;
-  stroke-opacity: 0.5;
-  stroke-width: 1.25px;
-}
 </style>

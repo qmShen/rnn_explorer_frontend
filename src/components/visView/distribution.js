@@ -1336,7 +1336,7 @@ DistributionMatrix.prototype.draw_linkage = function(h){
   linkages.forEach(function(link_obj){
     if(link_obj['weight'] > h || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
       sub_linkages.push(link_obj);
-    }
+    } 
   });
   console.log('links, links, ', linkages);
   let link = d3.linkHorizontal()
@@ -1396,7 +1396,10 @@ DistributionMatrix.prototype.draw_slider = function(){
     .text(function(d){return d});
 
   var handle = this.slider_container.insert("circle", ".track-overlay")
-    .attr("class", "handle")
+    .attr('fill', 'white')
+    .attr('stroke', 'black')
+    .attr('stroke-opacity', '0.5')
+    .attr('stroke-width', '1.25px')
     .attr("r", 7);
   this.slider_container.transition() // Gratuitous intro!
   .duration(10)
