@@ -153,12 +153,9 @@ Sequence.prototype.update_sequence_render = function(data){
           current_dif.push(0)
         }
       }else{
-        console.log('mean_io_seq[i]',mean_io_seq[i]);
-        console.log('mean_io_seq[i]',mean_io_seq[i-1]);
         for(let j = 0, jlen = mean_io_seq[i].length; j < jlen; j++){
           current_dif.push(mean_io_seq[i][j] - mean_io_seq[i-1][j])
         }
-        // console.log('dif',current_dif);
       }
       difference_io_seq.push(current_dif);
     }
