@@ -19,7 +19,6 @@
     watch:{
       trend_data:function(new_val, old_val){
         let _this = this;
-        console.log('raw', new_val);
         if(!new_val){
           return
         }

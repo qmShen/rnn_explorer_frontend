@@ -44,9 +44,7 @@ let DistributionMatrix = function(el){
 };
 
 
-DistributionMatrix.prototype.register_function = function(select_call_back){
-  this.select_call_back = select_call_back
-};
+
 DistributionMatrix.prototype.register_selected_data = function(domain, d){
 
   this.selected_features[d['id']] = null;
@@ -116,7 +114,7 @@ DistributionMatrix.prototype.initialize_bicluster_render = function(feature_unit
   this.cluster_map = cluster_map;
   this.cluster_weights = feature_units_stats['bicluster']['weights'];
 
-  console.log('wiehgtsss', this.cluster_weights);
+
   this.link_region_width = this.canvas_width * 0.15;
   this.remain_width=  this.canvas_width - this.link_region_width;
   this.top_unit_width = this.remain_width * 0.15;
@@ -1338,7 +1336,7 @@ DistributionMatrix.prototype.draw_linkage = function(h){
       sub_linkages.push(link_obj);
     } 
   });
-  console.log('links, links, ', linkages);
+
   let link = d3.linkHorizontal()
     .x(function(d){return d.x})
     .y(function(d){return d.y});
