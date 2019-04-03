@@ -69,16 +69,16 @@
 
       },
       all_feature_stats: function(new_val, old_val){
-        this.distributionMatrix.add_feature_stats(new_val);
-        this.distributionMatrix.update_features_render(new_val);
+        // this.distributionMatrix.add_feature_stats(new_val);
+        // this.distributionMatrix.update_features_render(new_val);
       },
       selected_feature_values:function(new_val, old_val){
         console.log('erer')
       },
       allStats:function(new_val){
 
-        let unit_cluster_map = new_val['bicluster']['unit2cluster'];
-        let feature_cluster_map = new_val['bicluster']['featrue2cluster'];
+        let unit_cluster_map = new_val['cluster']['unit2cluster'];
+        let feature_cluster_map = new_val['cluster']['featrue2cluster'];
         let units = new_val['units'];
         let features = new_val['features'];
         for(let i = 0, ilen = units.length; i < ilen; i++){
@@ -90,15 +90,14 @@
           features[i]['id'] = features[i]['fid'];
         }
         //CCC
-        this.distributionMatrix.initialize_bicluster_render(new_val);
-        this.distributionMatrix.layout_cells();
-        this.distributionMatrix.draw_linkage();
+
+        this.distributionMatrix.initialize_cluster_render(new_val);
+        // this.distributionMatrix.initialize_bicluster_render(new_val);
+
+        // this.distributionMatrix.layout_cells();
+        // this.distributionMatrix.draw_linkage();
 
 
-        //Old version
-        // this.distributionMatrix.initialize_render()
-        // this.distributionMatrix.update_features_render(features);
-        // this.distributionMatrix.update_units_render(units);
 
 
       }

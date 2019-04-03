@@ -175,8 +175,8 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
 
   this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
 
-  // ---important---
-  this.calc_position(cluster_groups, unit_cluster_group, feature_cluster_group);
+  // ---important
+  this.calc_position(cluster_groups);
 
   var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom);
   this.selected_feature_container.call(zoomer);
@@ -187,9 +187,115 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
   }
 };
 
+DistributionMatrix.prototype.initialize_bicluster_render = function(feature_units_stats){
+  console.log('cluster', feature_units_stats);
+  let _this = this;
+  this.id_map = {};
 
-DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_cluster_group, feature_cluster_group){
-  console.log('Uneven,', cluster_groups, unit_cluster_group, feature_cluster_group);
+  let features = feature_units_stats['features'];
+  let units = feature_units_stats['units'];
+
+  features.forEach(d=>{
+    if(this.id_map[d['id']] != undefined){
+      console.log('id', d['id'], 'existed!')
+    }
+    this.id_map[d['id']] = d;
+  });
+
+  units.forEach(d=>{
+    if(this.id_map[d['id']] != undefined){
+      console.log('id', d['id'], 'existed!')
+    }
+    this.id_map[d['id']] = d;
+  });
+
+
+  let bicluster = feature_units_stats['bicluster']['bi_clusters'];
+
+
+  let cluster_groups = [];
+  let cluster_map = {};
+  for(let cid in bicluster){
+    let _obj = {
+      'cid': cid,
+      'size': bicluster[cid]['f_ids'].length + bicluster[cid]['u_ids'].length,
+      'f_ids': bicluster[cid]['f_ids'],
+      'u_ids': bicluster[cid]['u_ids']
+    };
+    cluster_map[cid] = _obj;
+    cluster_groups.push(_obj);
+  }
+
+  this.cluster_groups = cluster_groups;
+  this.cluster_map = cluster_map;
+  this.cluster_weights = feature_units_stats['bicluster']['weights'];
+
+
+  this.link_region_width = this.canvas_width * 0.15;
+  this.remain_width=  this.canvas_width - this.link_region_width;
+  this.top_unit_width = this.remain_width * 0.15;
+  this.top_feature_width = this.remain_width * 0.15;
+  this.unit_region_width = this.remain_width * 0.3;
+  this.feature_region_width = this.remain_width * 0.4;
+  this.legend_container_height = this.canvas_height * 0.05;
+  this.slider_height = this.canvas_height * 0.025;
+  this.legend_container_width = this.canvas_width;
+  this.remain_height = this.canvas_height - this.legend_container_height- this.slider_height;
+
+  this.root_container = this.svg.append('g').attr('class', 'root_container');
+
+  this.legend_container = this.root_container.append('g').attr('class', 'legend_container');
+  this.slider_container = this.root_container.append('g').attr('class', 'slider_container').attr('transform', 'translate(' + (this.canvas_width * 1/3) + ',' + (this.legend_container_height * 1.1) + ')');
+  this.top_unit_container = this.root_container.append('g').attr('class', 'top_unit_container').attr('transform', 'translate(' + 0 + ',' + (this.legend_container_height+this.slider_height) + ')');
+
+  // this.top_unit_container.append('rect')
+  //   .attr('width', this.top_unit_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+
+  this.unit_container = this.root_container.append('g').attr('class', 'unit_container').attr('transform', 'translate(' + (this.top_unit_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
+  // this.unit_container.append('rect')
+  //   .attr('width', this.unit_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'red').attr('stroke-width', 0.2);
+
+  this.link_region_container = this.root_container.append('g').attr('class', 'link_region_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
+  // this.link_region_container.append('rect')
+  //   .attr('width', this.link_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+  this.feature_container = this.root_container.append('g').attr('class', 'feature_container').attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width) + ','+ (this.legend_container_height+this.slider_height) + ')');
+  // this.feature_container.append('rect')
+  //   .attr('width', this.feature_region_width).attr('height', this.canvas_height).attr('fill', 'none')
+  //   .attr('stroke', 'red').attr('stroke-width', 0.2);
+
+  this.selected_feature_container_outer = this.root_container.append('g').attr('class', 'top_feature_width')
+    .attr('transform', 'translate(' + (this.top_unit_width + this.unit_region_width + this.link_region_width + this.feature_region_width) + ','+ (this.legend_container_height*2) + ')');
+
+  this.selected_feature_container = this.selected_feature_container_outer.append('g');
+  this.selected_feature_container.append('rect').attr('fill', 'white').attr('height', 2000).attr('width', 2000);
+
+  // this.selected_feature_container.append('rect')
+  //   .attr('x', 3)
+  //   .attr('y', 3)
+  //   .attr('width', this.top_feature_width - 2 * 3).attr('height', this.canvas_height - 2 * 3).attr('fill', 'none').attr('stroke-dasharray', '10,5')
+  //   .attr('stroke', 'blue').attr('stroke-width', 0.2);
+
+  this.selected_feature_plot_conatiner = this.selected_feature_container.append('g').attr('class', 'selected_feature_container').selectAll('.selected_feature');
+
+  this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
+  // this.selected_feature_plot_conatiner.selectAll('.selected_feature')
+  this.calc_position(cluster_groups);
+
+  var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom);
+  this.selected_feature_container.call(zoomer);
+  function zoom(){
+    let y =  d3.event.transform['y'];
+
+    _this.selected_feature_container.attr("transform", 'translate('+0 + ',' + y+')');
+  }
+};
+
+DistributionMatrix.prototype.calc_position = function(cluster_groups){
   let _this = this;
   this.f_col_max_n = 10;
   this.u_col_max_n = 5;
@@ -200,83 +306,47 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
   this.u_cell_gap = 10;
   this.f_cell_gap = 10;
 
-  // this.u_total_gap = this.u_cell_gap * (cluster_groups.length + 1);
-  // this.f_total_gap = this.f_cell_gap * (cluster_groups.length + 1);
+  this.u_total_gap = this.u_cell_gap * (cluster_groups.length + 1);
+  this.f_total_gap = this.f_cell_gap * (cluster_groups.length + 1);
 
-  this.u_total_gap = this.u_cell_gap * (unit_cluster_group.length + 1);
-  this.f_total_gap = this.f_cell_gap * (feature_cluster_group.length + 1);
 
   let u_total_row = 0;
   let f_total_row = 0;
-
-  unit_cluster_group.forEach(cluster=>{
+  cluster_groups.forEach(cluster=>{
     u_total_row += Math.ceil(cluster['u_ids'].length / this.u_col_max_n);
-  });
-
-  feature_cluster_group.forEach(cluster=>{
     f_total_row += Math.ceil(cluster['f_ids'].length / this.f_col_max_n);
   });
-
-
-  // cluster_groups.forEach(cluster=>{
-  //   u_total_row += Math.ceil(cluster['u_ids'].length / this.u_col_max_n);
-  //   f_total_row += Math.ceil(cluster['f_ids'].length / this.f_col_max_n);
-  // });
 
   let u_cell_height = (this.remain_height - this.u_total_gap) / u_total_row;
   let f_cell_height = (this.remain_height - this.f_total_gap) / f_total_row;
   this.u_cell_height = u_cell_height;
   this.f_cell_height = f_cell_height;
 
+
   let u_c_y = this.u_cell_gap;
   let f_c_y = this.f_cell_gap;
 
-  unit_cluster_group.forEach(cluster=>{
+  cluster_groups.forEach((cluster, i)=>{
     let _u_height = Math.ceil(cluster['u_ids'].length / this.u_col_max_n) * u_cell_height;
+    let _f_height = Math.ceil(cluster['f_ids'].length / this.f_col_max_n) * f_cell_height;
     cluster.u_render = {
       x: 0,
       y: u_c_y,
       height: _u_height,
       width: this.unit_region_width
     };
-    u_c_y += (_u_height + this.u_cell_gap);
-  });
-  feature_cluster_group.forEach((cluster, i)=>{
-
-    let _f_height = Math.ceil(cluster['f_ids'].length / this.f_col_max_n) * f_cell_height;
-
     cluster.f_render = {
       x: 0,
       y: f_c_y,
       height: _f_height,
       width: this.feature_region_width
     };
+    u_c_y += (_u_height + this.u_cell_gap);
     f_c_y += (_f_height + this.f_cell_gap);
   });
 
 
-
-  // cluster_groups.forEach((cluster, i)=>{
-  //   let _u_height = Math.ceil(cluster['u_ids'].length / this.u_col_max_n) * u_cell_height;
-  //   let _f_height = Math.ceil(cluster['f_ids'].length / this.f_col_max_n) * f_cell_height;
-  //   cluster.u_render = {
-  //     x: 0,
-  //     y: u_c_y,
-  //     height: _u_height,
-  //     width: this.unit_region_width
-  //   };
-  //   cluster.f_render = {
-  //     x: 0,
-  //     y: f_c_y,
-  //     height: _f_height,
-  //     width: this.feature_region_width
-  //   };
-  //   u_c_y += (_u_height + this.u_cell_gap);
-  //   f_c_y += (_f_height + this.f_cell_gap);
-  // });
-
-
-  this.single_unit_container = this.unit_container.selectAll('unit_group').data(unit_cluster_group).enter().append('g').attr('class', 'unit_group')
+  this.single_unit_container = this.unit_container.selectAll('unit_group').data(cluster_groups).enter().append('g').attr('class', 'unit_group')
     .attr('transform', (d, i) => 'translate(' + d.u_render.x + ',' + d.u_render.y +')');
 
   let _margin = 0;
@@ -297,7 +367,7 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
 
 
 
-  this.single_feature_container = this.feature_container.selectAll('.feature_group').data(feature_cluster_group).enter().append('g').attr('class','feature_group')
+  this.single_feature_container = this.feature_container.selectAll('.feature_group').data(cluster_groups).enter().append('g').attr('class','feature_group')
     .attr('transform', (d, i) => 'translate(' + d.f_render.x + ',' + d.f_render.y +')');
 
   this.single_feature_container.append('rect').attr('x', _margin).attr('y', _margin).attr('rx', 1).attr('ry', 1)
@@ -601,7 +671,7 @@ DistributionMatrix.prototype.mouseover_feature = function(_id){
   d3.selectAll('.selected_feature').each(function(selected_f){
     if(selected_f.id == _id){
       d3.select(this).select('.selected_feature_outline').attr('stroke', 'black')
-        .style("stroke-dasharray", "10,4").attr('stroke-opacity', 1);
+      .style("stroke-dasharray", "10,4").attr('stroke-opacity', 1);
     }
   })
 }
@@ -639,7 +709,7 @@ DistributionMatrix.prototype.mouseout_feature = function(_id){
   d3.selectAll('.selected_feature').each(function(selected_f){
     if(selected_f.id == _id){
       d3.select(this).select('.selected_feature_outline').attr('stroke', 'grey')
-        .style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5);
+      .style("stroke-dasharray", "10,4").attr('stroke-opacity', 0.5);
     }
   })
 }
@@ -746,28 +816,28 @@ DistributionMatrix.prototype.plot_legend = function(){
 
   d3.selectAll('.legend_rect').each(function(d){
     d3.select(this)
-      .on('click',function(type){
-        d3.selectAll('.feature_cell').each(function(_id){
-          var name_obj = _this.parse_feature_name(_id);
-          var name = name_obj['feature'];
-          if(type == name){
-            let cell_data = _this.id_map[_id];
-            if(cell_data['render'] == undefined){
-              cell_data['render'] = {'clicked': false};
-            }
-            if(cell_data['render']['clicked'] == false){
-              cell_data['render']['clicked'] = true;
-              _this.selected_extend_units[_id] = cell_data;
-              d3.select(this).select('.feature_cell_outline').attr('stroke', 'black')
-            }else{
-              cell_data['render']['clicked'] = false;
-              delete _this.selected_extend_units[_id];
-              d3.select(this).select('.feature_cell_outline').attr('stroke', 'white')
-            }
+    .on('click',function(type){
+      d3.selectAll('.feature_cell').each(function(_id){
+        var name_obj = _this.parse_feature_name(_id);
+        var name = name_obj['feature'];
+        if(type == name){
+          let cell_data = _this.id_map[_id];
+          if(cell_data['render'] == undefined){
+            cell_data['render'] = {'clicked': false};
           }
-        })
-        _this.update_selected_units();
+          if(cell_data['render']['clicked'] == false){
+            cell_data['render']['clicked'] = true;
+            _this.selected_extend_units[_id] = cell_data;
+            d3.select(this).select('.feature_cell_outline').attr('stroke', 'black')
+          }else{
+            cell_data['render']['clicked'] = false;
+            delete _this.selected_extend_units[_id];
+            d3.select(this).select('.feature_cell_outline').attr('stroke', 'white')
+          }
+        }
       })
+      _this.update_selected_units();
+    })
   })
 
 }
@@ -1132,7 +1202,7 @@ DistributionMatrix.prototype.update_selected_units = function(){
   d3.select('.legend_container').each(function(d){
     this.parentNode.appendChild(this);
   })
-
+  
 
 };
 
@@ -1333,7 +1403,7 @@ DistributionMatrix.prototype.draw_linkage = function(h){
   linkages.forEach(function(link_obj){
     if(link_obj['weight'] > h || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
       sub_linkages.push(link_obj);
-    }
+    } 
   });
 
   let link = d3.linkHorizontal()
@@ -1359,16 +1429,16 @@ DistributionMatrix.prototype.draw_linkage = function(h){
       }
     })
     .attr('stroke-opacity', 0.2)
-
+  
 };
 
 // slider
 DistributionMatrix.prototype.draw_slider = function(){
   let _this = this;
   var x = d3.scaleLinear()
-    .domain([0, 0.3])
-    .range([0, this.canvas_width * 1/3])
-    .clamp(true);
+  .domain([0, 0.3])
+  .range([0, this.canvas_width * 1/3])
+  .clamp(true);
 
   this.slider_container.append("line")
     .attr("class", "track")
@@ -1379,8 +1449,8 @@ DistributionMatrix.prototype.draw_slider = function(){
     .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
     .attr("class", "track-overlay")
     .call(d3.drag()
-      .on("start.interrupt", function() { _this.slider_container.interrupt(); })
-      .on("start drag", function() { hue(x.invert(d3.event.x)); }));
+        .on("start.interrupt", function() { _this.slider_container.interrupt(); })
+        .on("start drag", function() { hue(x.invert(d3.event.x)); }));
 
   this.slider_container.insert("g", ".track-overlay")
     .attr("class", "ticks")
@@ -1399,11 +1469,11 @@ DistributionMatrix.prototype.draw_slider = function(){
     .attr('stroke-width', '1.25px')
     .attr("r", 7);
   this.slider_container.transition() // Gratuitous intro!
-    .duration(10)
-    .tween("hue", function() {
-      var i = d3.interpolate(0, 0.12);
-      return function(t) { hue(i(t)); };
-    });
+  .duration(10)
+  .tween("hue", function() {
+    var i = d3.interpolate(0, 0.12);
+    return function(t) { hue(i(t)); };
+  });
   function hue(h) {
     handle.attr("cx", x(h));
     let threshold = h;
