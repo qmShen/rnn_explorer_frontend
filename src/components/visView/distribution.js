@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import { mapGetters } from "vuex";
 // import { ElStep } from "element-ui/types/step";
 
 let DistributionMatrix = function(el){
@@ -95,10 +94,25 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
   });
 
   // -----------------------------------  New  ----------------------------------------
-  let unit_cluster_group = feature_units_stats['cluster']['feature_clusters'];
-  let feature_cluster_group = feature_units_stats['cluster']['unit_clusters'];
+  let unit_cluster_group = feature_units_stats['cluster']['unit_clusters'];
+  let feature_cluster_group = feature_units_stats['cluster']['feature_clusters'];
+  let cluster_weights = feature_units_stats['cluster']['weights'];
   this.unit_cluster_group = unit_cluster_group;
   this.feature_cluster_group = feature_cluster_group;
+  this.cluster_weights = cluster_weights;
+  this.feature_cluster_map = {};
+  this.unit_cluster_map = {};
+  feature_cluster_group.forEach((group, index)=>{
+    this.feature_cluster_map[group['fc_id']] = group;
+  });
+
+  unit_cluster_group.forEach((group, index)=>{
+    this.unit_cluster_map[group['uc_id']] = group;
+  });
+  cluster_weights.forEach(weight=>{
+    weight['fc'] = this.feature_cluster_map[weight['fc_id']];
+    weight['uc'] = this.unit_cluster_map[weight['uc_id']];
+  });
   // ----------------------------------- New End --------------------------------------
 
 
@@ -117,7 +131,7 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
   }
 
   this.cluster_groups = cluster_groups;
-  this.cluster_weights = feature_units_stats['bicluster']['weights'];
+  // this.cluster_weights = feature_units_stats['bicluster']['weights'];
 
   // ----------------------------------- Old End --------------------------------------
 
@@ -182,7 +196,6 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
   this.selected_feature_container.call(zoomer);
   function zoom(){
     let y =  d3.event.transform['y'];
-
     _this.selected_feature_container.attr("transform", 'translate('+0 + ',' + y+')');
   }
 };
@@ -194,8 +207,6 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
   this.f_col_max_n = 10;
   this.u_col_max_n = 5;
 
-  console.log('f_col_max_n', this.f_col_max_n);
-  console.log('u_col_max_n', this.u_col_max_n);
 
   this.u_cell_gap = 10;
   this.f_cell_gap = 10;
@@ -289,10 +300,10 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
     .attr('stroke', d=>this.bicluster_colorScale(d.cid))
     .attr('stroke-width', 1.5)
     .on('mouseover', function(d){
-      _this.highlight_unit_group(d.cid);
+      _this.highlight_unit_group(d.uc_id);
     })
     .on('mouseout', function(d){
-      _this.unhighlight_unit_group(d.cid);
+      _this.unhighlight_unit_group(d.uc_id);
     });
 
 
@@ -307,10 +318,10 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
     .attr('stroke', d=>this.bicluster_colorScale(d.cid))
     .attr('stroke-width', 1.5)
     .on('mouseover', function(d){
-      _this.highlight_feature_group(d.cid);
+      _this.highlight_feature_group(d.fc_id);
     })
     .on('mouseout', function(d){
-      _this.unhighlight_feature_group(d.cid);
+      _this.unhighlight_feature_group(d.fc_id);
     })
 
 };
@@ -319,7 +330,7 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
 DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
   let highlight_outline = 1.8
   d3.selectAll('.unit_group').each(function(_d){
-    if(uc_id == _d.cid){
+    if(uc_id == _d.uc_id){
       d3.select(this).select('.unit_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
     }
   });
@@ -330,7 +341,7 @@ DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
     else{
       let fc_id = d['target']['fc_id'];
       d3.selectAll('.feature_group').each(function(_d){
-        if(fc_id == _d.cid){
+        if(fc_id == _d.fc_id){
           d3.select(this).select('.feature_group_outline').attr('stroke-width', highlight_outline).attr('stroke', 'black')
         }
       })
@@ -1295,26 +1306,15 @@ DistributionMatrix.prototype.update_units_distributionV2 = function(updated_unit
 DistributionMatrix.prototype.draw_linkage = function(h){
   let _this = this;
 
+
+
   let linkages = [];
-
-  this.cluster_groups.forEach(function(d){
-    let source = {x: d.u_render.x, y: d.u_render.y + d.u_render.height / 2};
-    let target = {x: d.f_render.x + _this.link_region_width, y: d.f_render.y + d.f_render.height / 2};
-    linkages.push({
-      'source':source,
-      'target':target,
-      'type': true
-    })
-  });
-
-
-  linkages = [];
 
   this.cluster_weights.forEach((weight)=>{
     let uc_id = weight['uc_id'];
     let fc_id = weight['fc_id'];
-    let s_cluster  = this.cluster_groups[uc_id];
-    let t_cluster = this.cluster_groups[fc_id];
+    let s_cluster  = weight['uc'];
+    let t_cluster = weight['fc'];
 
     let source = {"uc_id": uc_id, x: s_cluster.u_render.x, y: s_cluster.u_render.y + s_cluster.u_render.height / 2};
     let target = {"fc_id": fc_id, x: t_cluster.f_render.x + _this.link_region_width, y: t_cluster.f_render.y + t_cluster.f_render.height / 2};
@@ -1326,12 +1326,13 @@ DistributionMatrix.prototype.draw_linkage = function(h){
       'type': true
     })
   });
-
   linkages.sort((a, b) => (a.source.uc_id > b.source.uc_id) ? 1 : -1);
 
+
+  console.log('linkages', linkages);
   let sub_linkages = [];
   linkages.forEach(function(link_obj){
-    if(link_obj['weight'] > h || (link_obj['target']['fc_id'] == link_obj['source']['uc_id'])){
+    if(link_obj['weight'] > h ){
       sub_linkages.push(link_obj);
     }
   });
@@ -1349,13 +1350,16 @@ DistributionMatrix.prototype.draw_linkage = function(h){
       let weight = d['weight'];
       if( weight >= 0 && weight < 0.1){
         // 1-3
-        return weight * 20 + 1;
+        return weight * 10 + 1;
       }else if(weight >= 0.1 && weight < 0.2){
         // 3-5
-        return weight * 20 + 1;
+        return weight * 15 + 1;
       }else if(weight >= 0.2 && weight <= 0.3){
         // 5-10
-        return weight * 50 - 5;
+        return weight * 20 - 5;
+      }else if(weight >= 0.3 ){
+        // 5-10
+        return weight * 20 - 5;
       }
     })
     .attr('stroke-opacity', 0.2)
@@ -1366,7 +1370,7 @@ DistributionMatrix.prototype.draw_linkage = function(h){
 DistributionMatrix.prototype.draw_slider = function(){
   let _this = this;
   var x = d3.scaleLinear()
-    .domain([0, 0.3])
+    .domain([0, 1])
     .range([0, this.canvas_width * 1/3])
     .clamp(true);
 
@@ -1411,90 +1415,9 @@ DistributionMatrix.prototype.draw_slider = function(){
     _this.draw_linkage(threshold);
   }
 }
-////////Not now
-DistributionMatrix.prototype.color = function(d){
-  const scale = d3.scaleOrdinal(d3.schemeCategory20);
-  return scale(d.cid);
-};
-
-DistributionMatrix.prototype.render_untis = function(){
-
-  let n_cell= this.units_stats_data.length;
-
-  this.row_num = 8;
-  this.column_num = Math.ceil(n_cell / this.row_num);
-
-  this.cell_height = this.unit_box.height / this.row_num;
-  this.cell_width = this.unit_box.width / this.column_num;
-
-
-  this.cell_render_config = {
-    offset_x: this.cell_margin_x,
-    offset_y: this.cell_margin_y,
-    height: (this.unit_box.height / this.row_num) - 2 * this.cell_margin_y,
-    width: (this.unit_box.width / this.column_num) - 2 * this.cell_margin_x
-  };
-
-  for(let i = 0, ilen = data.length; i < ilen; i++){
-    let r_index = i % this.row_num;
-    let c_index = parseInt(i / this.row_num)
-    data[i]['render_config'] = {
-      'x': c_index * this.cell_width,
-      'y': r_index * this.cell_height
-    }
-  }
-  this.unit_cell_container = this.unitContainer.selectAll('.cell_container').data(data)
-    .enter()
-    .append('g')
-    .attr('class', 'cell_container')
-    .attr('transform', d=>'translate(' + d['render_config']['x']+ ',' + d['render_config']['y'] + ')')
 
 
 
-
-  let boundary_rect = this.unit_cell_container.append('rect').attr('class' ,'container_rect')
-    .attr('x', this.cell_render_config['offset_x'])
-    .attr('y', this.cell_render_config['offset_y'])
-    .attr('width', this.cell_render_config['width'])
-    .attr('height', this.cell_render_config['height'])
-    .attr('fill', 'white').attr('stroke', 'red').attr('stroke-opacity', '0.2')
-    .attr('rx', 5)
-    .attr('ry', 5)
-  boundary_rect.append('title').text(d=>d.uid)
-
-  let cell_x = d3.scaleLinear()
-
-    .range([this.cell_margin_x, this.cell_render_config['width']- this.cell_margin_x])
-
-  let cell_y = d3.scaleLinear()
-
-    .range([this.cell_render_config['height'], this.cell_margin_y + 2]);
-
-  let line = d3.line()
-    .x((d, i) => { return cell_x(i); })
-    .y((d, i) => { return cell_y(d); });
-
-  this.unit_cell_container.each(function(d){
-    if(!d['kde_point']){
-      return
-    }
-
-    cell_x.domain([0, d['kde_point'].length])
-
-    cell_y.domain([0,  d3.max(d['kde_point'])])
-
-
-    d3.select(this).append('path')
-      .datum(d['kde_point'])
-      .attr("fill", "none")
-      .attr("opacity", ".8")
-      .attr("stroke", "#08b5fa")
-      .attr("stroke-width", 1)
-      .style("stroke-dasharray", "4,4")
-      .attr("stroke-linejoin", "round")
-      .attr("d",line)
-  })
-};
 
 
 //Old version

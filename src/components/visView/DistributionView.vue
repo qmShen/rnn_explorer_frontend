@@ -94,7 +94,7 @@
         this.distributionMatrix.initialize_cluster_render(new_val);
         // this.distributionMatrix.initialize_bicluster_render(new_val);
 
-        // this.distributionMatrix.layout_cells();
+        this.distributionMatrix.layout_cells();
         // this.distributionMatrix.draw_linkage();
 
 
