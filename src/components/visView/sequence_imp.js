@@ -21,7 +21,7 @@ Sequence.prototype.update_sequence_render = function(data){
   this.seq_n = data.cluster_io_list.length;
   this.seq_n = 5;
   this.seq_gap = 20;
-  this.gradient_filter_weight = 0.075;
+  this.gradient_filter_weight = 0.1;
   if(data['cluster_io_list'].length == 0){
     return
   }
@@ -197,9 +197,10 @@ Sequence.prototype.update_sequence_render = function(data){
 
     ioContainer.each(function(t_id){
       let state_io = mean_io_seq[t_id];
+      console.log('state_io', state_io);
       let dif_io = difference_io_seq[t_id];
-      let unit_height = d.height / state_io.length;
-      let max_mean = 0.7;
+      let unit_height = (d.height / state_io.length) * 0.7 ;
+      let max_mean = 1;
       let _bar_container = d3.select(this);
       _bar_container.selectAll('.unit_cluster_bar')
         .data(state_io).enter().append('rect').attr('class', 'unit_cluster_bar')
@@ -228,11 +229,11 @@ Sequence.prototype.update_sequence_render = function(data){
             return '#f03b20'
           }
         }).attr('stroke',(d,_i)=>{
-           if(dif_io[_i] > 0){
-            return '#08b5fa'
-          }else{
-            return '#f03b20'
-          }
+        if(dif_io[_i] > 0){
+          return '#08b5fa'
+        }else{
+          return '#f03b20'
+        }
       }).attr('stroke-width', 0.2);
     });
 
@@ -240,7 +241,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
     let gradient_cell_width = (_this.timetsamp_width) * gradient_io_ratio
     let gradientContainer = timestamp_containers.append('g');
-
+    this.gradient_filter_weight = 0.055;
     gradientContainer.each(function(t_id){
       if(t_id == 0){
         return
@@ -286,18 +287,20 @@ Sequence.prototype.update_sequence_render = function(data){
         .x(function(d){return d.x})
         .y(function(d){return d.y});
 
-      _container.selectAll('.link').data(top_linkages).enter().append('path').attr('class', 'link')
+      let weight_links = _container.selectAll('.link').data(top_linkages).enter().append('path').attr('class', 'link')
         .style("stroke", "grey")
         .attr('d', link)
         .attr('fill', 'none')
         .attr('stroke-width', function(link){
 
           let weight = link['v'];
-          let weight_dif = weight - _this.gradient_filter_weight;
-          return 1 + (weight_dif / (0.2 - _this.gradient_filter_weight)) * 3;
+          let weight_dif = weight - _this.gradient_filter_weight
+
+
+          return  (weight_dif / (0.5 - _this.gradient_filter_weight)) * 3;
         })
         .attr('stroke-opacity', 0.5)
-
+      weight_links.append('title').text(link=>link['v']);
     });
 
     // _container.append('rect')
@@ -311,7 +314,7 @@ Sequence.prototype.update_sequence_render = function(data){
         let _u_t = unit_times[i];
         if(!selected_timestamp_obj) return 'white'
         if(selected_timestamp_obj[_u_t] == undefined){
-          return 'white'
+          return 'none'
         }else{
           let class_id = selected_timestamp_obj[_u_t]['class_ids'][0];
           return _this.colors[parseInt(class_id)]

@@ -347,7 +347,7 @@ DistributionMatrix.prototype.highlight_unit_group = function(uc_id){
       })
     }
   });
-}
+};
 // unhighlight unit_group
 DistributionMatrix.prototype.unhighlight_unit_group = function(uc_id){
   let _this = this;
@@ -358,7 +358,7 @@ DistributionMatrix.prototype.unhighlight_unit_group = function(uc_id){
     }
   });
   d3.selectAll('.feature_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
-}
+};
 // highlight feature_group
 DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
   let highlight_outline = 1.8
@@ -381,7 +381,8 @@ DistributionMatrix.prototype.highlight_feature_group = function(fc_id){
       // console.log(d['weight']);
     }
   });
-}
+};
+
 // unhighlight feature_group
 DistributionMatrix.prototype.unhighlight_feature_group = function(fc_id){
   let _this = this;
@@ -392,7 +393,7 @@ DistributionMatrix.prototype.unhighlight_feature_group = function(fc_id){
     }
   });
   d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
-}
+};
 
 DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
 
@@ -434,7 +435,7 @@ DistributionMatrix.prototype.sort_features = function(d){
 
 
   this.single_feature_container.each(function(d, i){
-    let new_order = []
+    let new_order = [];
     order.forEach(function(item){
       d['f_ids'].forEach(function(feature){
         var name_obj = _this.parse_feature_name(feature);
@@ -464,7 +465,7 @@ DistributionMatrix.prototype.update_feature_sorting_render = function(){
   let _this = this;
   d3.selectAll('.feature_cell').each(function(d){
     d3.select(this).selectAll('*').remove()
-  })
+  });
 
   this.single_feature_container.each(function(d, i){
     let _margin = 2 ;
@@ -600,7 +601,7 @@ DistributionMatrix.prototype.mouseover_unit = function(_id){
       d3.select(this).select('.top_unit_outline').attr('stroke','black').attr('stroke-opacity', 1)
     }
   })
-}
+};
 
 DistributionMatrix.prototype.mouseover_feature = function(_id){
   let _this = this;
