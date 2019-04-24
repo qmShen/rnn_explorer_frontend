@@ -32,7 +32,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   this.timestamp_n = data['cluster_io_list'][0][0].length;
   // this.timestamp_n = 10;
-  console.log(' this.$el.clientHeight', this.$el.clientHeight)
+
   this.seq_height = this.canvas_height / this.seq_n - this.seq_gap;
   this.timetsamp_width = this.canvas_width / this.timestamp_n;
   let gradient_io_ratio = 0.4;
@@ -199,7 +199,7 @@ Sequence.prototype.update_sequence_render = function(data){
       let state_io = mean_io_seq[t_id];
       console.log('state_io', state_io);
       let dif_io = difference_io_seq[t_id];
-      let unit_height = (d.height / state_io.length) * 0.7 ;
+      let unit_height = (d.height / state_io.length)  ;
       let max_mean = 1;
       let _bar_container = d3.select(this);
       _bar_container.selectAll('.unit_cluster_bar')

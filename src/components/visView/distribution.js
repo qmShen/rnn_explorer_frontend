@@ -202,7 +202,7 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
 
 
 DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_cluster_group, feature_cluster_group){
-  console.log('Uneven,', cluster_groups, unit_cluster_group, feature_cluster_group);
+
   let _this = this;
   this.f_col_max_n = 10;
   this.u_col_max_n = 5;
@@ -1329,8 +1329,6 @@ DistributionMatrix.prototype.draw_linkage = function(h){
   });
   linkages.sort((a, b) => (a.source.uc_id > b.source.uc_id) ? 1 : -1);
 
-
-  console.log('linkages', linkages);
   let sub_linkages = [];
   linkages.forEach(function(link_obj){
     if(link_obj['weight'] > h ){
