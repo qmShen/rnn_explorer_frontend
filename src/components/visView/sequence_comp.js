@@ -17,10 +17,11 @@ let Sequence = function(el){
 
 Sequence.prototype.update_sequence_render = function(data){
   let cluster_io_list = data['cluster_io_list'];
-  let cluster_gradient_list = data['cluster_gradient_list'];
+  let cluster_gradient_list = data['feature_cluster_gradient_list'];
   this.cluster_io_list = cluster_io_list;
   this.cluster_gradient_list = cluster_gradient_list;
-
+  console.log('unit_gradient', data['unit_cluster_gradient_list']);
+  console.log("feature_gradient", data['feature_cluster_gradient_list'])
   let seq_n = cluster_io_list.length;
 
   if(seq_n ==0 || seq_n == undefined)
@@ -33,9 +34,18 @@ Sequence.prototype.update_sequence_render = function(data){
   console.log('u_c_n', u_c_n);
   console.log('timestamp_n', timestamp_n);
 
-  let cluster_column_ids = [0,1,2,3,4,5,6,7,8,9,10,11];
-  let cluster_row_ids = [0,1,2,3,4,5,6,7,8,9,10,11];
+  // let cluster_column_ids = [0,1,2,3,4,5,6,7,8,9,10,11];
+  // let cluster_row_ids = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
+  let cluster_column_ids = [];
+  let cluster_row_ids = [];
 
+  data['unit_cluster_gradient_list'][0][0].forEach((d,i)=>{
+    cluster_column_ids.push(i)
+  });
+
+  data['feature_cluster_gradient_list'][0][0].forEach((d,i)=>{
+    cluster_row_ids.push(i)
+  });
   this.init_render(cluster_column_ids, cluster_row_ids)
 };
 
@@ -48,7 +58,7 @@ Sequence.prototype.init_render = function(cluster_column_ids, cluster_row_ids){
   let container_width = this.canvas_width - left_margin - right_margin;
 
   container_width = container_width / 2;
-  let chart_cell_width = container_width / cluster_row_ids.length;
+  let chart_cell_width = container_width / cluster_column_ids.length;
 
   let io_height = 50;
 
@@ -122,7 +132,7 @@ Sequence.prototype.init_render = function(cluster_column_ids, cluster_row_ids){
     .clamp(true);
 
   let gy = d3.scaleLinear()
-    .domain([0, 0.5])
+    .domain([0, 0.2])
     .range([gradient_cell_height, 0]);
 
   let glink = d3.line()
@@ -148,7 +158,6 @@ Sequence.prototype.init_render = function(cluster_column_ids, cluster_row_ids){
         _s_t_list.push(gradient[target_cluster_id][source_cluster_id])
       });
 
-      console.log('source_id', _s_t_list);
       _cell_container.selectAll('.link').data(_s_t_list).enter().append('path').attr('class', 'link')
         .style("stroke", "grey")
         .attr('d', glink)
