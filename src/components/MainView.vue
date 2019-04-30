@@ -163,7 +163,7 @@
         let selected_ids = selected_data['seq_ids'];
         let selected_timestamps = selected_data['selected_timestamps'];
         let colors = selected_data['colors'];
-        dataService.getSequenceClusterData('GRU_1',
+        dataService.getFeatureSequenceGradientClusterToEnd('GRU_1',
           selected_ids,function(records){
             console.log("recieved sequence cluster", records);
             records['sequence_time'] = selected_ids;
@@ -180,9 +180,18 @@
       dataService.getInitScatter(function(records){
         _this.input_scatter = records
       });
-
+      //test
       dataService.getAllStats('GRU_1','15', function(records){
         _this.allStats = records;
+      });
+
+
+      //  For test
+      console.log('here xxx');
+      pipeService.emitSequenceSelected({
+        'seq_ids': [1519801200, 1518681600, 1519038000],
+        'selected_timestamps': null,
+        'colors': _this.colors
       });
 
     },

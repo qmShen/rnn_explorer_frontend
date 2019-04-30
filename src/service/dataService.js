@@ -71,7 +71,6 @@ function getFeatureStats(mid, callback) {
 function getAllStats(mid, nc, callback) {
   const url = `${dataServerUrl}/all_stats`;
   $http.post(url, {'mid': mid, 'nc': nc}).then(response => {
-    console.log("response data:",response.data)
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)
@@ -121,6 +120,15 @@ function getScatterPlotBySelectedData(mid, subGroup, callback ) {
 
 function getSequenceClusterData(mid, tid, callback) {
   const url = `${dataServerUrl}/sequence_cluster`
+  $http.post(url, {'mid': mid, 'tid': tid}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function getFeatureSequenceGradientClusterToEnd(mid, tid, callback) {
+  const url = `${dataServerUrl}/feature_gradient_cluster_to_end`
   $http.post(url, {'mid': mid, 'tid': tid}).then(response => {
     callback(response.data)
   }, errResponse => {
@@ -194,6 +202,7 @@ export default{
   getFeatureStats,
   getAllStats,
   getScatterPlotBySelectedData,
-  getSequenceClusterData
+  getSequenceClusterData,
+  getFeatureSequenceGradientClusterToEnd
 
 }

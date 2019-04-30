@@ -33,6 +33,8 @@
             time_map[_tid] = 1;
           }
 
+
+
         });
 
         // seq_ids
@@ -44,6 +46,7 @@
           'selected_timestamps': _this.selected_timestamps,
           'colors': _this.colors
         });
+        console.log('sequencssss', seq_ids, _this.selected_timestamps)
       }
     },
     watch:{
@@ -150,6 +153,7 @@
 
       };
       this.option = option;
+
 
     },
   }

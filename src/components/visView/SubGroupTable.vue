@@ -112,6 +112,7 @@
           //Old version
           // _this.distributionMatrix.update_units_distribution_difference(sub_group_data);
         });
+
       },
 
       handleSelectionChange(val) {

@@ -7,7 +7,7 @@
 <script>
   // import Sequence from './sequence.js'
   // import Sequence from './sequence_imp.js'
-  import Sequence from './sequence_comp.js'
+  import Sequence from './sequence_theme.js'
   export default {
     name: "SequenceView",
     props:['gradients_io',"gradients_io_cluster"],
