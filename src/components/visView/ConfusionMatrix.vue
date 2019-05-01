@@ -19,14 +19,19 @@
     watch:{
       trend_data:function(new_val, old_val){
         let _this = this;
+
         if(!new_val){
           return
         }
 
         let values = [];
-        for(let i = 0, ilen = new_val.length; i < ilen; i++){
-          let item = new_val[i];
-          values.push([item['Pre_PM25'],item['PM25']])
+        let temp_vals = new_val.slice(7000);
+
+        for(let i = 0, ilen = temp_vals.length; i < ilen; i++){
+          if(i % 2 ==0){
+            let item = new_val[i];
+            values.push([item['Pre_PM25'],item['PM25']]);
+          }
         }
 
         this.myChart = echarts.init(this.$el);
@@ -60,21 +65,7 @@
             right: 80
           },
           dataZoom: [
-            // {
-            //   type: 'slider',
-            //   show: true,
-            //   xAxisIndex: [0],
-            //   start: 1,
-            //   end: 35
-            // },
-            // {
-            //   type: 'slider',
-            //   show: true,
-            //   yAxisIndex: [0],
-            //   left: '93%',
-            //   start: 29,
-            //   end: 36
-            // },
+
             {
               type: 'inside',
               xAxisIndex: [0],

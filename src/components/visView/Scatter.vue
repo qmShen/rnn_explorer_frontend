@@ -32,9 +32,6 @@
             seq_ids.push(_tid);
             time_map[_tid] = 1;
           }
-
-
-
         });
 
         // seq_ids
@@ -51,13 +48,21 @@
     },
     watch:{
       scatter_data:function(new_val, old_val) {
+        console.log('new_val', new_val);
         let _this = this;
         if(!new_val) return;
 
         if(this.myChart) this.myChart.dispose();
 
         this.myChart = echarts.init(this.$el);
-        this.option.series[0]['data'] = new_val;
+        let new_data_val = [];
+        new_val.forEach(function(d, i){
+          if(i % 4 == 0){
+            new_data_val.push(d);
+          }
+        });
+        console.log('length', new_data_val.length)
+        this.option.series[0]['data'] = new_data_val;
         this.myChart.setOption(this.option);
         this.myChart.on('click', function(params){
           console.log('click', params);
@@ -105,21 +110,7 @@
         },
         dataZoom: [
 
-          // {
-          //   type: 'slider',
-          //   show: true,
-          //   xAxisIndex: [0],
-          //   start: 1,
-          //   end: 35
-          // },
-          // {
-          //   type: 'slider',
-          //   show: true,
-          //   yAxisIndex: [0],
-          //   left: '93%',
-          //   start: 29,
-          //   end: 36
-          // },
+
           {
             type: 'inside',
             xAxisIndex: [0],

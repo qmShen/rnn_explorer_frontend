@@ -65,10 +65,17 @@ DistributionMatrix.prototype.register_selected_data = function(domain, d){
 
 
 DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeCategory20"]);
+let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#dd4477", "#990099",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+
+DistributionMatrix.prototype.bicluster_colorScale = d3.scaleOrdinal().range(color_list_feature);
+
+
 DistributionMatrix.prototype.bicluster_colorScale  = function(){
   return 'grey'
 };
 DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory20"]);
+
+DistributionMatrix.prototype.feature_color = d3.scaleOrdinal().range(color_list_feature);
 DistributionMatrix.prototype.feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 
 DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_stats){

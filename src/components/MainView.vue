@@ -165,7 +165,6 @@
         let colors = selected_data['colors'];
         dataService.getFeatureSequenceGradientClusterToEnd('GRU_1',
           selected_ids,function(records){
-            console.log("recieved sequence cluster", records);
             records['sequence_time'] = selected_ids;
             records['selected_timestamp'] = selected_timestamps;
             records['colors'] = colors;
@@ -187,7 +186,7 @@
 
 
       //  For test
-      console.log('here xxx');
+
       pipeService.emitSequenceSelected({
         'seq_ids': [1519801200, 1518681600, 1519038000],
         'selected_timestamps': null,
@@ -243,7 +242,7 @@
   /*height: 75%*/
   /*}*/
   .individual_container{
-    height: calc(60%);
+    height: calc(70%);
   }
 
   .sequence_container{
@@ -252,7 +251,7 @@
 
   }
   .temporal_container{
-    height: calc(40%);
+    height: calc(30%);
   }
   .statistics_container{
     height: calc(100%);
