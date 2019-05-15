@@ -5,7 +5,7 @@ let Sequence = function(el){
   let _this = this;
   this.$el = el;
   this.target_features  = ['NO2', 'O3', 'SO2', 'PM10', 'PM25'];
-  this.canvas_width = this.$el.clientWidth * 0.7;
+  this.canvas_width = this.$el.clientWidth ;
   this.canvas_height = this.$el.clientHeight;
   this.sequence_margin = 2;
   this.cell_margin = 10;
@@ -18,7 +18,8 @@ let Sequence = function(el){
 
   this.left_margin = 10;
 
-  this.canvas_width = 400 ;
+  // this.canvas_width = 400 ;
+  this.sequence_width = this.canvas_width / 2 - 50;
   this.paral_width = 400 ;
   this.sequence_height_max = 150;
   this.init_render()
@@ -29,7 +30,7 @@ Sequence.prototype.render_circular_sequence = function(_container, sequence){
   sequence['cell_render'] = [];
   let cell_data_sequence = sequence['feature_cluster_gradient'];
   let n_cell = cell_data_sequence.length;
-  let cell_width = (this.canvas_width - this.left_margin * 2) / n_cell;
+  let cell_width = (this.sequence_width - this.left_margin * 2) / n_cell;
   for(let i = 0, ilen = n_cell; i < ilen; i++){
     sequence['cell_render'].push({'off_x': i * cell_width, 'width':cell_width, 'height': this.sequence_height_min})
   }
@@ -68,8 +69,8 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
     (gradient);
 
   var x = d3.scaleLinear()
-    .domain([0, gradient.length])
-    .range([ 0, this.canvas_width - 2 * this.left_margin]);
+    .domain([0, gradient.length - 1])
+    .range([ 0, this.sequence_width - 2 * this.left_margin]);
 
   let min_val = d3.min(stack_data, function(layer) { return d3.min(layer, function(d) { return d[0]; }); });
   let max_val = d3.max(stack_data, function(layer) { return d3.max(layer, function(d) { return d[1]; }); });
@@ -116,21 +117,19 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
     if(sequence.render.level == undefined){
       // console.log('--------1---------', sequence.render.level);
       sequence.render.level = 'cluster';
-      console.log('here', _container_id)
       this.render_area_chart(_container, sequence, null);
-      this.update_single_parallel_coordinate(_container_id, null)
+      // this.update_single_parallel_coordinate(_container_id, null)
     }else if(sequence.render.level == 'feature'){
       // console.log('--------2---------', sequence.render.level);
       sequence.render.level = 'cluster';
       this.render_area_chart(_container, sequence, null);
-      this.update_single_parallel_coordinate(_container_id, null)
+      // this.update_single_parallel_coordinate(_container_id, null)
     }
     else if(sequence.render.level == 'cluster'){
       // console.log('--------3---------', sequence.render.level);
       sequence.render.level = 'feature';
       this.render_area_chart(_container, sequence, i);
-
-      this.update_single_parallel_coordinate(_container_id, i)
+      // this.update_single_parallel_coordinate(_container_id, i)
     }else{
       console.log('--------4---------', sequence.render.level);
       console.log('nonnon');
@@ -143,16 +142,13 @@ let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618",
 let feature_color = d3.scaleOrdinal().range(color_list_feature);
 feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 Sequence.prototype.render_area_sequence = function(_container, sequence){
-
   this.render_area_chart(_container, sequence);
-
-
 };
 Sequence.prototype.init_render = function(){
   // cluster_column_ids: target_ids, cluster_row_ids: source_ids
   this.root_container = d3.select(this.$el).append('g').attr('class', 'root_container').attr('transform', 'translate('+ 0 + ',' + 0 + ')');
-  this.root_container.append('rect')
-    .attr('width', this.canvas_width).attr('height', this.canvas_height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
+  // this.root_container.append('rect')
+  //   .attr('width', this.sequence_width).attr('height', this.canvas_height).attr('fill', 'none').attr('stroke', 'red').attr('stroke-width', 1);
 
 };
 
@@ -173,10 +169,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
 
   let sequence_list = data['feature_gradient_to_end'][this.default_feature];
-  // sequence_list.forEach((d,i)=>{
-  //
-  // }
-  console.log('sequence_list', sequence_list);
+
 
   // console.log('feature', this.feature_cluster)
   if(sequence_list.length == 0)return;
@@ -195,7 +188,7 @@ Sequence.prototype.update_sequence_render = function(data){
 
   let area_containers = sequence_container.append('g').attr('class', 'area_container');
   let rects = area_containers.append('rect')//.attr('x', 30)
-    .attr('width', this.canvas_width - 2 * left_margin + 30).attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 0.5);
+    .attr('width', this.sequence_width - 2 * left_margin + 60).attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 0.5);
 
 
   // .attr('width', this.canvas_width - 2 * left_margin + 30).attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 0.5);
@@ -203,7 +196,7 @@ Sequence.prototype.update_sequence_render = function(data){
     d['index'] = i;
     let _container = d3.select(this).append('g').attr('class', 'c_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  0 + ')');
     let rect = _container.append('rect').attr('stroke-width', 0.5).attr('stroke', 'orange')
-      .attr('width', _this.canvas_width - 2 * left_margin).attr('height', 0)
+      .attr('width', _this.sequence_width - 2 * left_margin).attr('height', 0)
     rect.transition().attr('height', _this.sequence_height_max).attr('fill', 'white').duration(450).on('end', function () {
       _this.render_area_sequence(_container, d);
     });
@@ -216,22 +209,32 @@ Sequence.prototype.update_sequence_render = function(data){
       if(i == index){
         if(d['render']['clicked'] == true){
           d['render']['clicked'] = undefined;
-          d['render']['areaContainer'].selectAll('*').remove();
+          // d['render']['areaContainer'].selectAll('*').remove();
+          d['render']['addContainer'].selectAll('*').remove();
           extend = false;
           return
         }else{
           d['render']['clicked'] = true;
           extend = true;
         }
-        let _container = d3.select(this).append('g').attr('class', 'area_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  _this.sequence_height_min + ')');
-        let rect = _container.append('rect').attr('stroke-width', 0.5).attr('stroke', 'orange')
-          .attr('width', _this.canvas_width - 2 * left_margin).attr('height', 0)
-        rect.transition().attr('height', _this.sequence_height_max).attr('fill', 'white').duration(450).on('end', function () {
-          _this.render_area_sequence(_container, d, seq);
-        });
-        d['render']['areaContainer'] = _container;
+        /*
+        * For area chart
+        * */
+        // let _container = d3.select(this).append('g').attr('class', 'area_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  _this.sequence_height_min + ')');
+        // let rect = _container.append('rect').attr('stroke-width', 0.5).attr('stroke', 'orange')
+        //   .attr('width', _this.sequence_width - 2 * left_margin).attr('height', 0)
+        // rect.transition().attr('height', _this.sequence_height_max).attr('fill', 'white').duration(450).on('end', function () {
+        //   _this.render_area_sequence(_container, d, seq);
+        // });
+        // d['render']['addContainer'] = _container;
 
-
+        /*
+        * For PCP
+        * */
+        let _container = d3.select(this).append('g').attr('class', 'pcp_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  _this.sequence_height_min + ')');
+        let selected_feature_value = _this.feature_value;
+        _this.render_parallel_coordinate(_container, selected_feature_value[i], null);
+        d['render']['addContainer'] = _container;
 
       }else if(i > index){
         let _container = d3.select(this);
@@ -247,28 +250,27 @@ Sequence.prototype.update_sequence_render = function(data){
     _this.render_circular_sequence(circular_sequence_container, d)
   });
 
-
-  let parall_container = sequence_container.append('g').attr('class', 'parall_container')
-    .attr('transform', 'translate(' + (this.canvas_width - 2 * left_margin + 30) + ',0)')
-
-  parall_container.append('rect')
-    .attr('width', (this.canvas_width - 2 * left_margin + 30) * 2)
-    .attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'green').attr('stroke-width', 0.5);
-
-  parall_container.each(function(d, i){
-    let _container = d3.select(this);
-    let selected_feature_value = _this.feature_value;
-    console.log('ddd', selected_feature_value);
-    _this.render_parallel_coordiate(_container, selected_feature_value[i], null);
-  });
-
-  this.parall_container = parall_container;
+  //
+  // let parall_container = sequence_container.append('g').attr('class', 'parall_container')
+  //   .attr('transform', 'translate(' + (this.sequence_width - 2 * left_margin + 30) + ',0)')
+  //
+  // parall_container.append('rect')
+  //   .attr('width', (this.sequence_width - 2 * left_margin + 30) * 2)
+  //   .attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'green').attr('stroke-width', 0.5);
+  //
+  // parall_container.each(function(d, i){
+  //   let _container = d3.select(this);
+  //   let selected_feature_value = _this.feature_value;
+  //   _this.render_parallel_coordinate(_container, selected_feature_value[i], null);
+  // });
+  //
+  // this.parall_container = parall_container;
 
 };
 
-Sequence.prototype.render_parallel_coordiate = function(_container, selected_feature_value, i){
+Sequence.prototype.render_parallel_coordinate = function(_container, selected_feature_value, i){
   _container.selectAll('*').remove();
-  let width =  (this.canvas_width - 2 * 30) * 1.5;
+  let width =  (this.sequence_width - 2 * this.left_margin);
   let height = this.sequence_height_max;
   let values = selected_feature_value.value;
 
@@ -330,7 +332,7 @@ Sequence.prototype.update_single_parallel_coordinate = function(container_index,
       let _container = d3.select(this);
       let selected_feature_value = _this.feature_value;
       console.log('ddd', selected_feature_value);
-      _this.render_parallel_coordiate(_container, selected_feature_value[i], cluster_index);
+      _this.render_parallel_coordinate(_container, selected_feature_value[i], cluster_index);
     }
 
   });

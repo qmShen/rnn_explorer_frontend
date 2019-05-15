@@ -7,6 +7,8 @@
 
   import * as echarts from 'echarts/dist/echarts.js';
   import pipeService from '../../service/pipeService.js';
+  // import * as tsne from '@tensorflow/tfjs-tsne';
+
 
   export default {
     name: "ConfusionMatrix",

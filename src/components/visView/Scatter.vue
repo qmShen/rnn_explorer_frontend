@@ -4,7 +4,9 @@
 
 <script>
   import * as echarts from 'echarts/dist/echarts.js';
-  import pipeService from '../../service/pipeService'
+  import pipeService from '../../service/pipeService';
+  import * as tsne from '@tensorflow/tfjs-tsne';
+  import * as tf from '@tensorflow/tfjs'
 
   export default {
     name: "Scatter",
@@ -43,7 +45,7 @@
           'selected_timestamps': _this.selected_timestamps,
           'colors': _this.colors
         });
-        console.log('sequencssss', seq_ids, _this.selected_timestamps)
+
       }
     },
     watch:{
@@ -79,6 +81,13 @@
 
     mounted: function(){
       let _this = this;
+
+      // Create some data
+
+      // const data = tf.randomUniform([200,10]);
+      // const tsneOpt = tsne.tsne(data);
+      // console.log('data', data);
+
       pipeService.onSelectedScatterPlot(function(d){
         _this.scatter_data = d['data'];
         _this.selected_timestamps = d['selected_timestamps'];
@@ -144,6 +153,10 @@
 
       };
       this.option = option;
+
+
+
+
 
 
     },
