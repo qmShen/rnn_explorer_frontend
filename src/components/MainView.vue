@@ -251,7 +251,7 @@
 
   }
   .temporal_container{
-    height: calc(30%);
+    height: calc(50%);
   }
   .statistics_container{
     height: calc(100%);

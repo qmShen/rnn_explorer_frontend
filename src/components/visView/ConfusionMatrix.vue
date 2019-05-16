@@ -25,19 +25,18 @@
         if(!new_val){
           return
         }
-
+        console.log('listddddd', new_val);
         let values = [];
-        let temp_vals = new_val.slice(7000);
+        let temp_vals = new_val;
 
         for(let i = 0, ilen = temp_vals.length; i < ilen; i++){
-          if(i % 2 ==0){
-            let item = new_val[i];
-            values.push([item['Pre_PM25'],item['PM25']]);
-          }
+
+          let item = new_val[i];
+          values.push([item['Pre_PM25'],item['PM25'], item['val']]);
         }
 
         this.myChart = echarts.init(this.$el);
-
+        console.log('valuvalue', values);
         let option = {
           brush: {
             outOfBrush: {
@@ -52,6 +51,19 @@
             throttleType: 'debounce',
             throttleDelay: 300,
             geoIndex: 0
+          },
+          visualMap: {
+            min: 0,
+            max: 0.6,
+            dimension: 2,
+            // orient: 'vertical',
+            // right: 10,
+            // top: 'val',
+            // text: ['HIGH', 'LOW'],
+            // calculable: true,
+            inRange: {
+              color: ["#ffffcc","#ffeda0","#fed976","#feb24c","#fd8d3c","#fc4e2a","#e31a1c","#bd0026","#800026"]
+            }
           },
           xAxis: {
             // scale: true,
