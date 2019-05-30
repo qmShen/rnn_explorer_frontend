@@ -7,13 +7,14 @@
 <script>
   // import Sequence from './sequence.js'
   // import Sequence from './sequence_imp.js'
-  import Sequence from './sequence_theme.js'
+  // import Sequence from './sequence_theme.js'
+  import Sequence from './sequence_horizonchart.js'
   export default {
     name: "SequenceView",
     props:['gradients_io',"gradients_io_cluster"],
     watch:{
       // gradients_io:function(new_data){
-      //   this.sequence.update_sequence_render(new_data);
+      //   this.sequencose.update_sequence_render(new_data);
       // },
       gradients_io_cluster:function(new_data){
         this.sequence.update_sequence_render(new_data);
