@@ -102,7 +102,7 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
     fillValue = function(d) { return fillScale(fill(d)); };
 
   let area = d3.area()
-    .curve(d3.curveBasis)
+    // .curve(d3.curveBasis)
     .x(xValue)
     .y0(y0Value)
     .y1(y1Value);
