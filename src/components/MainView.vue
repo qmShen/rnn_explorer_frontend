@@ -1,12 +1,18 @@
 <template>
   <div class = 'main'>
     <el-row :gutter="3" class="horizontal_stripe">
-      <el-col :span="8" class="horizontal_stripe">
+      <el-col :span="6" class="horizontal_stripe">
         <div class="bg-purple column">
           <!--<ControlView class = 'left_top boundary'></ControlView>-->
           <!--<StatisticsView :input_scatter = 'input_scatter'-->
           <!--:trend_data = 'trend_data_json'-->
           <!--class = "left_top"></StatisticsView>-->
+
+
+          <ConfusionMatrix class="projection_container"
+                           :trend_data = "trend_data_json">
+          </ConfusionMatrix>
+
 
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
@@ -20,19 +26,20 @@
       </el-col>
 
 
-      <el-col :span="16" class="horizontal_stripe">
+      <el-col :span="18" class="horizontal_stripe">
         <div class="grid-content bg-purple">
 
           <div class = 'temporal_container boundary'>
             <el-row :gutter="3" class="horizontal_stripe">
-              <el-col :span="4" class="table_horizontal_stripe boundary">
-                <div class="mini_head">
-                  <div class = 'mini_title'>Subgroup</div>
-                </div>
-                <SubGroupTable :colors="groupColors"></SubGroupTable>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+              <!--<subgroupo></subgroupo>-->
+              <!--<el-col :span="4" class="table_horizontal_stripe boundary">-->
+                <!--<div class="mini_head">-->
+                  <!--<div class = 'mini_title'>Subgroup</div>-->
+                <!--</div>-->
+                <!--<SubGroupTable :colors="groupColors"></SubGroupTable>-->
+                <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
 
-              </el-col>
+              <!--</el-col>-->
               <el-col :span="9" class="horizontal_stripe">
                 <div class="mini_head">
                   <div class = 'mini_title'>Projection</div>
@@ -49,9 +56,9 @@
                 </div>
                 <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
 
-                <ConfusionMatrix class="linechart_container matrix_container"
-                                 :trend_data = "trend_data_json">
-                </ConfusionMatrix>
+                <!--<ConfusionMatrix class="linechart_container matrix_container"-->
+                <!--:trend_data = "trend_data_json">-->
+                <!--</ConfusionMatrix>-->
 
                 <!--<el-tabs class="horizontal_stripe"  v-model="activeName">-->
                 <!--<el-tab-pane class="horizontal_stripe" label="Temporal" name="first">-->
@@ -263,8 +270,12 @@
   .left_top{
     height: calc(20%);
   }
+
+  .projection_container{
+    height: calc(30%);
+  }
   .distribution_container{
-    height: calc(90%);
+    height: calc(70%);
   }
   .scatter_container{
     height: calc(100%);
