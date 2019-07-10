@@ -238,6 +238,8 @@ Sequence.prototype.update_sequence_render = function(data){
 };
 
 Sequence.prototype.render_parallel_coordinate = function(_container, selected_feature_value, i){
+  console.log('rerere', selected_feature_value);
+
   _container.selectAll('*').remove();
   let width =  (this.sequence_width - 2 * this.left_margin);
   let height = this.sequence_height_max;

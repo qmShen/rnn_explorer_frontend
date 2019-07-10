@@ -29,75 +29,29 @@
       <el-col :span="18" class="horizontal_stripe">
         <div class="grid-content bg-purple">
 
-          <div class = 'temporal_container boundary'>
-            <el-row :gutter="3" class="horizontal_stripe">
-              <!--<subgroupo></subgroupo>-->
-              <!--<el-col :span="4" class="table_horizontal_stripe boundary">-->
-                <!--<div class="mini_head">-->
-                  <!--<div class = 'mini_title'>Subgroup</div>-->
-                <!--</div>-->
-                <!--<SubGroupTable :colors="groupColors"></SubGroupTable>-->
-                <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
+          <div class = 'boundary temporal_container'>
 
-              <!--</el-col>-->
-              <el-col :span="9" class="horizontal_stripe">
+            <el-col style = 'height: 100%'>
+              <div class="mini_head">
+                <div class = 'mini_title'>Temporal Feature</div>
+              </div>
+              <FeaturePCP class="feature_value" :feature_values_scaled="feature_values_scaled"></FeaturePCP>
+              <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
+            </el-col>
+
+          </div>
+
+          <div class = 'boundary FC_container'>
+            <el-row :gutter="3" >
+              <el-col>
                 <div class="mini_head">
-                  <div class = 'mini_title'>Projection</div>
+                  <div class = 'mini_title'>FC distribution</div>
                 </div>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-                <Scatter :selected_sequence="selected_sequence" :colors="groupColors" class="scatter_container" ></Scatter>
-              </el-col>
-
-
-
-              <el-col :span="11" class="horizontal_stripe">
-                <div class="mini_head">
-                  <div class = 'mini_title'>Time</div>
-                </div>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-
-                <!--<ConfusionMatrix class="linechart_container matrix_container"-->
-                <!--:trend_data = "trend_data_json">-->
-                <!--</ConfusionMatrix>-->
-
-                <!--<el-tabs class="horizontal_stripe"  v-model="activeName">-->
-                <!--<el-tab-pane class="horizontal_stripe" label="Temporal" name="first">-->
-
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-                <!--</el-tab-pane>-->
-
-                <!--<el-tab-pane class="horizontal_stripe" label="Confusion Matrix" name="second">-->
-                <!--<ConfusionMatrix :trend_data = "trend_data_json"-->
-                <!--class='matrix_container'>-->
-                <!--</ConfusionMatrix>-->
-                <!--&lt;!&ndash;<StatisticsView :input_scatter = 'input_scatter'&ndash;&gt;-->
-                <!--&lt;!&ndash;:trend_data = 'trend_data_json'&ndash;&gt;-->
-                <!--&lt;!&ndash;class = "statistics_container"></StatisticsView>&ndash;&gt;-->
-                <!--</el-tab-pane>-->
-                <!--</el-tabs>-->
-
               </el-col>
             </el-row>
           </div>
 
-
-          <!--<div class = 'temporal_container boundary'>-->
-          <!--<div class="mini_head">-->
-          <!--<div class = 'mini_title'>Temporal</div>-->
-          <!--</div>-->
-          <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
-          <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
-          <!--</div>-->
-
           <div class = 'individual_container boundary'>
-            <!--<el-col :span="8" class="horizontal_stripe boundary">-->
-            <!--<div class="mini_head">-->
-            <!--<div class = 'mini_title'>Scatter</div>-->
-            <!--</div>-->
-            <!---->
-            <!--<Scatter :selected_sequence="selected_sequence" class="scatter_container" ></Scatter>-->
-            <!--</el-col>-->
-
             <el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto'>
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence</div>
@@ -136,6 +90,9 @@
   import SubGroupTable from './visView/SubGroupTable.vue'
   import ConfusionMatrix from './visView/ConfusionMatrix.vue'
 
+
+  import FeaturePCP from './visView/FeaturePCP.vue'
+
   export default {
     name: "MainView",
     data() {
@@ -150,7 +107,8 @@
         allStats: null,
         selected_sequence:[],
         activeName:'second',
-        groupColors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598']
+        groupColors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598'],
+        feature_values_scaled:null
 
       }
     },
@@ -179,23 +137,47 @@
           });
       });
 
+      let start_time = new Date()
+      console.log('run here')
 
-      dataService.getTemporal(function(records){
-        _this.trend_data_json = records
-      });
-      dataService.getInitScatter(function(records){
-        _this.input_scatter = records
-      });
-      //test
+
+
+      // Unit feature cluster
       dataService.getAllStats('GRU_1','15', function(records){
         _this.allStats = records;
+//        console.log('333', records);
+        console.log('1', new Date() - start_time);
       });
 
+
+      // Gradient scatter
+      dataService.getTemporal(function(records){
+        _this.trend_data_json = records;
+        console.log('2', new Date() - start_time);
+      });
+
+      // Feature trend
+//      dataService.getFeatureValues('GRU_1',this.selected_features, function(records){
+//        _this.feature_values = records;
+//        console.log('all feature values', records)
+//        console.log('3', new Date() - start_time);
+//      });
+
+      // Feature trend
+      dataService.getFeatureValuesScaled( function(records){
+        _this.feature_values_scaled = records;
+        console.log('4', new Date() - start_time);
+      });
+
+//      dataService.getInitScatter(function(records){
+//        _this.input_scatter = records
+//        console.log('2', new Date() - start_time);
+//      });
 
       //  For test
 
       pipeService.emitSequenceSelected({
-        'seq_ids': [1519801200, 1518681600, 1519038000],
+        'seq_ids': [1519801200],
         'selected_timestamps': null,
         'colors': _this.colors
       });
@@ -209,7 +191,8 @@
       SequenceView,
       Scatter,
       SubGroupTable,
-      ConfusionMatrix
+      ConfusionMatrix,
+      FeaturePCP
     },
     watch:{
       selected_sequence:function(new_data, old_data){
@@ -258,7 +241,13 @@
 
   }
   .temporal_container{
-    height: calc(50%);
+    height: calc(20%);
+  }
+  .feature_value{
+    height: 100%
+  }
+  .FC_container{
+    height: calc(20%);
   }
   .statistics_container{
     height: calc(100%);

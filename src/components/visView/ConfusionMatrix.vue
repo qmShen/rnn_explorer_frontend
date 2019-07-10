@@ -25,7 +25,6 @@
         if(!new_val){
           return
         }
-        console.log('listddddd', new_val);
         let values = [];
         let temp_vals = new_val;
 
@@ -36,7 +35,7 @@
         }
 
         this.myChart = echarts.init(this.$el);
-        console.log('valuvalue', values);
+
         let option = {
           brush: {
             outOfBrush: {

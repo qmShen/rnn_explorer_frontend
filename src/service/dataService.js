@@ -98,6 +98,14 @@ function getFeatureValues(mid, features, callback) {
   })
 }
 
+function getFeatureValuesScaled(callback) {
+  const url = `${dataServerUrl}/feature_values_scaled`
+  $http.post(url, {}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
 function getSubgroupStats(mid, selectFeatures, selectUnits, r_len,  dif_type, callback) {
   const url = `${dataServerUrl}/subgroup_stats`
@@ -203,6 +211,7 @@ export default{
   getAllStats,
   getScatterPlotBySelectedData,
   getSequenceClusterData,
-  getFeatureSequenceGradientClusterToEnd
+  getFeatureSequenceGradientClusterToEnd,
+  getFeatureValuesScaled
 
 }
