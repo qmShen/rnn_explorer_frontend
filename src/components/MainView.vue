@@ -42,23 +42,25 @@
           </div>
 
           <div class = 'boundary FC_container'>
-            <el-row :gutter="3" >
-              <el-col>
-                <div class="mini_head">
-                  <div class = 'mini_title'>FC distribution</div>
-                </div>
-              </el-col>
-            </el-row>
-          </div>
+            <el-col style="width: 100%; height: 100%;overflow-x: scroll;  " >
+              <div class="mini_head" style="width: calc(56000px)">
+                <div class = 'mini_title'>FC distribution</div>
+              </div>
+              <div style="height: calc(100% - 20px); width: calc(56000px); ">
+                <FeatureBoxplot class="boundary" style="display:inline-block; width: 300px; height: 100%"  v-for="item in input_feature_gradient_statistics.feature_statics"
+                                v-bind:key="item.feature_name"
+                                v-bind:item="item"></FeatureBoxplot>
+              </div>
+            </el-col>
 
+          </div>
           <div class = 'individual_container boundary'>
             <el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto'>
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence</div>
               </div>
-              <SequenceView class="sequence_container" :gradients_io="gradients_io" :gradients_io_cluster="gradients_io_cluster"></SequenceView>
+              <SequenceView class="sequence_container " :gradients_io="gradients_io" :gradients_io_cluster="gradients_io_cluster"></SequenceView>
             </el-col>
-
           </div>
         </div>
       </el-col>
@@ -93,6 +95,8 @@
 
   import FeaturePCP from './visView/FeaturePCP.vue'
 
+  import FeatureBoxplot from './visView/InputFeatureBoxplot.vue'
+
   export default {
     name: "MainView",
     data() {
@@ -108,8 +112,8 @@
         selected_sequence:[],
         activeName:'second',
         groupColors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598'],
-        feature_values_scaled:null
-
+        feature_values_scaled:null,
+        input_feature_gradient_statistics: {feature_statics:[]}
       }
     },
     mounted: function(){
@@ -137,15 +141,11 @@
           });
       });
 
-      let start_time = new Date()
-      console.log('run here')
-
-
+      let start_time = new Date();
 
       // Unit feature cluster
       dataService.getAllStats('GRU_1','15', function(records){
         _this.allStats = records;
-//        console.log('333', records);
         console.log('1', new Date() - start_time);
       });
 
@@ -163,12 +163,18 @@
 //        console.log('3', new Date() - start_time);
 //      });
 
-      // Feature trend
-      dataService.getFeatureValuesScaled( function(records){
-        _this.feature_values_scaled = records;
-        console.log('4', new Date() - start_time);
-      });
+      // Feature trend test removed, render the feature value
+//      dataService.getFeatureValuesScaled( function(records){
+//        _this.feature_values_scaled = records;
+//        console.log('4', new Date() - start_time);
+//      });
 
+
+      // Feature gradient
+      dataService.getInputFeatureGradientStatistics('GRU_1','PM25', function(records){
+        _this.input_feature_gradient_statistics = records;
+        console.log('log', records);
+      });
 //      dataService.getInitScatter(function(records){
 //        _this.input_scatter = records
 //        console.log('2', new Date() - start_time);
@@ -192,7 +198,8 @@
       Scatter,
       SubGroupTable,
       ConfusionMatrix,
-      FeaturePCP
+      FeaturePCP,
+      FeatureBoxplot
     },
     watch:{
       selected_sequence:function(new_data, old_data){

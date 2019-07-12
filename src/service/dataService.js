@@ -143,6 +143,15 @@ function getFeatureSequenceGradientClusterToEnd(mid, tid, callback) {
     console.log(errResponse)
   })
 }
+
+function getInputFeatureGradientStatistics(mid, target_feature, callback) {
+  const url = `${dataServerUrl}/input_feature_gradient_statistics`
+  $http.post(url, {'mid': mid, 'target_feature': target_feature}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 //get_subgroup_stats
 
 // function getAllRecordsForOneCity(cityId, callback) {
@@ -212,6 +221,7 @@ export default{
   getScatterPlotBySelectedData,
   getSequenceClusterData,
   getFeatureSequenceGradientClusterToEnd,
-  getFeatureValuesScaled
+  getFeatureValuesScaled,
+  getInputFeatureGradientStatistics
 
 }
