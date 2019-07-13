@@ -42,12 +42,12 @@
           </div>
 
           <div class = 'boundary FC_container'>
-            <el-col style="width: 100%; height: 100%;overflow-x: scroll;  " >
+            <el-col style="width: 100%; height: 100%;overflow-x: scroll;  " class="scrollstyle">
               <div class="mini_head" style="width: calc(56000px)">
                 <div class = 'mini_title'>FC distribution</div>
               </div>
               <div style="height: calc(100% - 20px); width: calc(56000px); ">
-                <FeatureBoxplot class="boundary" style="display:inline-block; width: 300px; height: 100%"  v-for="item in input_feature_gradient_statistics.feature_statics"
+                <FeatureBoxplot class="boundary" style="display:inline-block; width: 200px; height: calc(100% - 15px)"  v-for="item in input_feature_gradient_statistics.feature_statics"
                                 v-bind:key="item.feature_name"
                                 v-bind:item="item"></FeatureBoxplot>
               </div>
@@ -254,7 +254,7 @@
     height: 100%
   }
   .FC_container{
-    height: calc(20%);
+    height: calc(15%);
   }
   .statistics_container{
     height: calc(100%);
@@ -299,4 +299,29 @@
   .el-tabs__nav-scroll{
     background: rgb(243,243,243);
   }
+
+  .scrollstyle{
+    scrollbar-width: thin;
+  }
+
+  .scrollstyle::-webkit-scrollbar-track
+  {
+    -webkit-box-shadow: inset 0 0 2px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+  }
+
+  .scrollstyle::-webkit-scrollbar
+  {
+    /*width: 2px;*/
+    background-color: #F5F5F5;
+  }
+
+  .scrollstyle::-webkit-scrollbar-thumb
+  {
+    background-color: #98a1a5;
+
+    /*width: 2px;*/
+  }
+
+
 </style>
