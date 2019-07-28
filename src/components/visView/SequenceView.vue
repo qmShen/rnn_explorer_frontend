@@ -8,8 +8,8 @@
   // import Sequence from './sequence.js'
   // import Sequence from './sequence_imp.js'
   // import Sequence from './sequence_theme.js'
-  // import Sequence from './sequence_horizonchart.js'
-  import Sequence from './sequence_horizonchart_3seg.js'
+   import Sequence from './sequence_horizonchart.js'
+//  import Sequence from './sequence_horizonchart_3seg.js'
   export default {
     name: "SequenceView",
     props:['gradients_io',"gradients_io_cluster"],

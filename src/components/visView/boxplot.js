@@ -73,13 +73,12 @@ Boxplot.prototype.render_data = function(item){
   boxContainer.append('rect').attr('width', boxWidth)
     .attr('x', boxMargin)
     .attr('y', (d,i) => {
-      // console.log('yscale', yScale(d[6]))
       return yScale(d[6])
     })
     .attr('height', d=> yScale(d[4]) - yScale(d[6]))
-    .attr('stroke', 'red')
+    .attr('stroke', 'black')
     .attr('stroke-width', 0.2)
-    .attr('fill-opacity', 0.2)
+    .attr('fill-opacity', 0.01)
 
 
   boxContainer.append('line')
