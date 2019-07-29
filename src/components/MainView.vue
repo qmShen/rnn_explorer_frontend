@@ -8,19 +8,55 @@
           <!--:trend_data = 'trend_data_json'-->
           <!--class = "left_top"></StatisticsView>-->
 
+          <!--Left top -->
+          <!--<ConfusionMatrix class="projection_container"-->
+          <!--:trend_data = "trend_data_json">-->
+          <!--</ConfusionMatrix>-->
 
-          <ConfusionMatrix class="projection_container"
-                           :trend_data = "trend_data_json">
-          </ConfusionMatrix>
+          <!---->
+          <!--<div class="projection_container">-->
+          <!--<div class="mini_head">-->
+          <!--<el-dropdown @command="handleCommand">-->
+          <!--<span class="el-dropdown-link " style="font-family: monospace">-->
+          <!--Select Model<i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
+          <!--</span>-->
+          <!--<el-dropdown-menu slot="dropdown">-->
+          <!--<el-dropdown-item-->
+          <!--v-for="model in model_list"-->
+          <!--v-bind:key="model.model_id"-->
+          <!--v-bind:model="model"-->
+          <!--command=model.model_name>{{model.model_name}}</el-dropdown-item>-->
+          <!--</el-dropdown-menu>-->
 
+          <!--</el-dropdown>-->
+          <!--</div>-->
+          <!--</div>-->
+
+          <div class="projection_container">
+            <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelectModel">
+              <el-submenu index="select_model">
+                <template slot="title">Select Model</template>
+                <el-menu-item
+                  v-for="model in model_list"
+                  v-bind:model="model"
+                  v-bind:key="model.model_id"
+                  index="$model"
+                >{{model.model_name}}</el-menu-item>
+              </el-submenu>
+            </el-menu>
+            <div style="width: 100px">
+              {{model_id}}
+            </div>
+            <div style="width: 100px">
+              {{model_name}}
+            </div>
+          </div>
 
           <DistributionView class="distribution_container boundary "
                             :all_feature_stats="all_feature_stats"
                             :all_units_stats="all_units_stats"
                             :allStats="allStats"
-
           ></DistributionView>
-
         </div>
 
       </el-col>
@@ -31,13 +67,13 @@
 
           <!--<div class = 'boundary temporal_container'>-->
 
-            <!--<el-col style = 'height: 100%'>-->
-              <!--<div class="mini_head">-->
-                <!--<div class = 'mini_title'>Temporal Feature</div>-->
-              <!--</div>-->
-              <!--<FeaturePCP class="feature_value" :feature_values_scaled="feature_values_scaled"></FeaturePCP>-->
-              <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
-            <!--</el-col>-->
+          <!--<el-col style = 'height: 100%'>-->
+          <!--<div class="mini_head">-->
+          <!--<div class = 'mini_title'>Temporal Feature</div>-->
+          <!--</div>-->
+          <!--<FeaturePCP class="feature_value" :feature_values_scaled="feature_values_scaled"></FeaturePCP>-->
+          <!--&lt;!&ndash;<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>&ndash;&gt;-->
+          <!--</el-col>-->
 
           <!--</div>-->
 
@@ -71,7 +107,7 @@
               </div>
               <div style="height: calc(100% - 20px);  ">
                 <IndividualSequenceView class="boundary" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"
-                     v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item"></IndividualSequenceView>
+                                        v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item"></IndividualSequenceView>
               </div>
             </el-col>
           </div>
@@ -117,6 +153,10 @@
     name: "MainView",
     data() {
       return {
+        model_list:[],
+        current_model: null,
+        model_name: '',
+        model_id:'',
         trend_data_json: null,
         input_scatter: null,
         all_feature_stats: null,
@@ -130,11 +170,17 @@
         groupColors: ['#4BA453', '#239FFC', '#CE373E',  '#9B4EE2', '#996F4A',  '#2C922D', '#FDB150', '#326598'],
         feature_values_scaled:null,
         input_feature_gradient_statistics: {feature_statics:[]},
-        featureGradientObjs: []
+        featureGradientObjs: [],
+
       }
     },
     mounted: function(){
       let _this = this;
+
+      dataService.loadModelList(function(d){
+        _this.model_list = d;
+        console.log('model_list', d);
+      });
       //
       // pipeService.onSequenceSelected(function(selected_ids){
       //   console.log('sequence selected', selected_ids);
@@ -182,19 +228,13 @@
 
       let start_time = new Date();
 
-      // Unit feature cluster
-      dataService.getAllStats('GRU_1','15', function(records){
-        _this.allStats = records;
-//        console.log('1', new Date() - start_time);
-      });
 
 
-      // Gradient scatter
-      dataService.getTemporal(function(records){
-//          console.log('records',records);
+
+      // Gradient scatter, scatter plot
+//      dataService.getTemporal(function(records){
 //        _this.trend_data_json = records;
-//        console.log('2', new Date() - start_time);
-      });
+//      });
 
       // Feature trend
 //      dataService.getFeatureValues('GRU_1',this.selected_features, function(records){
@@ -210,11 +250,7 @@
 //      });
 
 
-      // Feature gradient
-      dataService.getInputFeatureGradientStatistics('GRU_1','PM25', function(records){
-        _this.input_feature_gradient_statistics = records;
-//        console.log('log', records);
-      });
+
 //      dataService.getInitScatter(function(records){
 //        _this.input_scatter = records
 //        console.log('2', new Date() - start_time);
@@ -222,14 +258,14 @@
 
       //  For test
 
-      pipeService.emitSequenceSelected({
-        'seq_ids': [1519801200,
+//      pipeService.emitSequenceSelected({
+//        'seq_ids': [1519801200,
 //          1519801200 + 3600 * 24,
 //          1519801200 + 3600 * 24 * 2,
-          1519801200 + 3600 * 24 * 3],
-        'selected_timestamps': null,
-        'colors': _this.colors
-      });
+//          1519801200 + 3600 * 24 * 3],
+//        'selected_timestamps': null,
+//        'colors': _this.colors
+//      });
 
     },
     components: {
@@ -247,8 +283,45 @@
     },
     watch:{
       selected_sequence:function(new_data, old_data){
+      },
+      current_model:function(new_model, old_model){
+        let _this = this;
+        if(new_model == undefined || new_model == null){
+          return
+        }
+        console.log('Select new model!', new_model);
+
+        dataService.loadSelectedModel(this.current_model['model_id'], function(records){
+
+          //  _this.allStats = records;
+
+          // Feature gradient
+          dataService.getInputFeatureGradientStatistics(_this.current_model['model_id'], 'PM25', function(records){
+            _this.input_feature_gradient_statistics = records;
+          });
+        });
+
+        // Read cluster information;
+        // Unit feature cluster
+//        dataService.getAllStats(this.current_model['model_id'], 'None', function(records){
+//          _this.allStats = records;
+//        });
+        //       Feature gradient
+//        dataService.getInputFeatureGradientStatistics(this.current_model['model_id'],'PM25', function(records){
+//          _this.input_feature_gradient_statistics = records;
+//
+//        });
+
+      }
+    },
+    methods:{
+      handleSelectModel(index,unknow, ele) {
+        this.current_model = ele.$attrs.model;
+        this.model_name = this.current_model.model_name;
+        this.model_id = this.current_model.model_id;
       }
     }
+
   }
 </script>
 
@@ -366,5 +439,29 @@
     /*width: 2px;*/
   }
 
+  /*Drop down*/
 
+  .el-dropdown-link {
+    cursor: pointer;
+    color: #98a1a5;
+  }
+  .el-icon-arrow-down {
+    font-size: 12px;
+  }
+
+  .el-menu--horizontal>.el-submenu .el-submenu__title {
+    height: 30px;
+    line-height: 30px;
+    border-bottom: 5px solid transparent;
+    color: #909399;
+  }
+
+  .el-menu--horizontal .el-menu .el-menu-item, .el-menu--horizontal .el-menu .el-submenu__title {
+    background-color: #FFF;
+    float: none;
+    height: 20px;
+    line-height: 20px;
+    padding: 0 10px;
+    color: #909399;
+  }
 </style>

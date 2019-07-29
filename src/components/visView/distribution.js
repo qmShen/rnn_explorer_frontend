@@ -595,7 +595,7 @@ DistributionMatrix.prototype.update_feature_sorting_render = function(){
 };
 
 
-// mouseover 
+// mouseover
 DistributionMatrix.prototype.mouseover_unit = function(_id){
   let unit_id = Number(_id);
   d3.selectAll('.unit_cell').each(function(uid){

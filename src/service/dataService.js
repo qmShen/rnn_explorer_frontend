@@ -12,6 +12,36 @@ const dataServerUrl = "http://127.0.0.1:9930";
 // const dataServerUrl = Config.serverLink == ""? "" : Config.serverLink.substring(0,  Config.serverLink.length - 1);
 const $http = Vue.http;
 
+
+function loadModelList(callback){
+  const url = `${dataServerUrl}/model_list`
+  $http.post(url).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function loadSelectedModel(mid, callback){
+  const url = `${dataServerUrl}/load_selected_model`
+  $http.post(url, {'mid': mid}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+function getInputFeatureGradientStatistics(mid, target_feature, callback) {
+  const url = `${dataServerUrl}/input_feature_gradient_statistics`
+  $http.post(url, {'mid': mid, 'target_feature': target_feature}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+
+
+
 function getTemporal(callback){
   const url = `${dataServerUrl}/temporal_trend`;
   $http.get(url).then(response => {
@@ -144,14 +174,10 @@ function getFeatureSequenceGradientClusterToEnd(mid, tid, callback) {
   })
 }
 
-function getInputFeatureGradientStatistics(mid, target_feature, callback) {
-  const url = `${dataServerUrl}/input_feature_gradient_statistics`
-  $http.post(url, {'mid': mid, 'target_feature': target_feature}).then(response => {
-    callback(response.data)
-  }, errResponse => {
-    console.log(errResponse)
-  })
-}
+
+
+
+
 //get_subgroup_stats
 
 // function getAllRecordsForOneCity(cityId, callback) {
@@ -209,6 +235,10 @@ function getInputFeatureGradientStatistics(mid, target_feature, callback) {
 // }
 
 export default{
+  loadModelList,
+  loadSelectedModel,
+
+
   getFeatureValues,
   getTestData,
   getGradientsAndIO,
@@ -222,6 +252,7 @@ export default{
   getSequenceClusterData,
   getFeatureSequenceGradientClusterToEnd,
   getFeatureValuesScaled,
-  getInputFeatureGradientStatistics
+  getInputFeatureGradientStatistics,
+
 
 }
