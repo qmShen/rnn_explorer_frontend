@@ -91,6 +91,7 @@ IndividualSequence.prototype.set_Data = function(data){
   this.date = toDateTime(data['timestamp'])
 
   let featureNames = data['allFeature'];
+  console.log('all_features  data  data', data);
   // Process raw feature value
   let featureValue = data['featureValue']['value'];
   let features = [];
@@ -99,6 +100,7 @@ IndividualSequence.prototype.set_Data = function(data){
       features.push({'name':r, 'type': parse_attribute_name(featureNames[r])});
     }
   }
+  console.log('features------------------', features);
   this.features = features;
   this.nTime = featureValue.length;
   let date_string = format_date(this.date);
@@ -132,7 +134,7 @@ IndividualSequence.prototype.renderFeatureTrend = function(container, config, da
   // data 24 * 265, timestamp * feature_number
   let nTime = this.nTime;
   let nFeature = data[0].length;
-
+  console.log('data', data);
   let featureTimeData = [];
 
   for(let i = 0, ilen = nFeature; i < ilen; i++){

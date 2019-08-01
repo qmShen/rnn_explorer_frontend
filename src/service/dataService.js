@@ -40,7 +40,16 @@ function getInputFeatureGradientStatistics(mid, target_feature, callback) {
   })
 }
 
+function getGradientProject(mid, target_feature, callback) {
+  const url = `${dataServerUrl}/get_gradient_projection`
+  $http.post(url, {'mid': mid, 'target_feature': target_feature}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 
+//------------------------------------------------------------------------------------------------
 
 function getTemporal(callback){
   const url = `${dataServerUrl}/temporal_trend`;
@@ -237,7 +246,7 @@ function getFeatureSequenceGradientClusterToEnd(mid, tid, callback) {
 export default{
   loadModelList,
   loadSelectedModel,
-
+  getGradientProject,
 
   getFeatureValues,
   getTestData,

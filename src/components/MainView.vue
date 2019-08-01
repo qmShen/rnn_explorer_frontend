@@ -32,7 +32,7 @@
           <!--</div>-->
           <!--</div>-->
 
-          <div class="projection_container">
+          <div class="projection_container boundary">
             <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelectModel">
               <el-submenu index="select_model">
                 <template slot="title">Select Model</template>
@@ -78,7 +78,7 @@
           <!--</div>-->
 
           <div class = 'boundary FC_container'>
-            <el-col style="width: 100%; height: 100%;overflow-x: scroll;  " class="scrollstyle">
+            <el-col style="width: 100%; height: 100%;overflow-x: scroll;" class="scrollstyle">
               <div class="mini_head" style="width: calc(56000px)">
                 <div class = 'mini_title'>FC distribution</div>
               </div>
@@ -92,25 +92,34 @@
           </div>
 
 
-          <!--<div class = 'individual_container boundary'>-->
-          <!--<el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto'>-->
-          <!--<div class="mini_head">-->
-          <!--<div class = 'mini_title'>Sequence</div>-->
-          <!--</div>-->
-          <!--<SequenceView class="sequence_container " :gradients_io="gradients_io" :gradients_io_cluster="gradients_io_cluster"></SequenceView>-->
-          <!--</el-col>-->
-          <!--</div>-->
+
           <div class = 'individual_container boundary'>
             <el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto;'>
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence List</div>
               </div>
               <div style="height: calc(100% - 20px);  ">
-                <IndividualSequenceView class="boundary" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"
-                                        v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item"></IndividualSequenceView>
+                <GradientScatter
+                  :gradientScatter="gradientScatter"
+                  style="height: 100%; width: 100%"></GradientScatter>
               </div>
             </el-col>
           </div>
+
+
+
+          <!--IndividualSequence not used yet!-->
+          <!--<div class = 'individual_container boundary'>-->
+          <!--<el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto;'>-->
+          <!--<div class="mini_head">-->
+          <!--<div class = 'mini_title'>Sequence List</div>-->
+          <!--</div>-->
+          <!--<div style="height: calc(100% - 20px);  ">-->
+          <!--<IndividualSequenceView class="boundary" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"-->
+          <!--v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item"></IndividualSequenceView>-->
+          <!--</div>-->
+          <!--</el-col>-->
+          <!--</div>-->
 
 
         </div>
@@ -149,6 +158,8 @@
   import FeatureBoxplot from './visView/InputFeatureBoxplot.vue'
   import IndividualSequenceView from './visView/individual_sequence/IndividualSequenceView.vue'
 
+  import GradientScatter from './visView/gradient_scatter/GradientScatter.vue'
+
   export default {
     name: "MainView",
     data() {
@@ -171,6 +182,7 @@
         feature_values_scaled:null,
         input_feature_gradient_statistics: {feature_statics:[]},
         featureGradientObjs: [],
+        gradientScatter: null
 
       }
     },
@@ -208,16 +220,19 @@
         return featureGradientObjs
       };
       pipeService.onSequenceSelected(function(selected_data){
+
         let selected_ids = selected_data['seq_ids'];
         let selected_timestamps = selected_data['selected_timestamps'];
         let colors = selected_data['colors'];
-        dataService.getFeatureSequenceGradientClusterToEnd('GRU_1',
+        let model_id = _this.current_model['model_id'];
+        dataService.getFeatureSequenceGradientClusterToEnd(model_id,
           selected_ids, function(records){
             // Old version
             records['sequence_time'] = selected_ids;
             records['selected_timestamp'] = selected_timestamps;
             records['colors'] = colors;
             _this.gradients_io_cluster = records;
+            console.log('sequence_data', records);
 
             // New version
 
@@ -256,8 +271,7 @@
 //        console.log('2', new Date() - start_time);
 //      });
 
-      //  For test
-
+//  For test
 //      pipeService.emitSequenceSelected({
 //        'seq_ids': [1519801200,
 //          1519801200 + 3600 * 24,
@@ -279,7 +293,8 @@
       ConfusionMatrix,
       FeaturePCP,
       FeatureBoxplot,
-      IndividualSequenceView
+      IndividualSequenceView,
+      GradientScatter
     },
     watch:{
       selected_sequence:function(new_data, old_data){
@@ -291,26 +306,24 @@
         }
         console.log('Select new model!', new_model);
 
-        dataService.loadSelectedModel(this.current_model['model_id'], function(records){
-
-          //  _this.allStats = records;
-
-          // Feature gradient
-          dataService.getInputFeatureGradientStatistics(_this.current_model['model_id'], 'PM25', function(records){
-            _this.input_feature_gradient_statistics = records;
-          });
-        });
-
-        // Read cluster information;
-        // Unit feature cluster
-//        dataService.getAllStats(this.current_model['model_id'], 'None', function(records){
+//        dataService.loadSelectedModel(this.current_model['model_id'], function(records){
+//          console.log('cluster_result', records);
 //          _this.allStats = records;
-//        });
-        //       Feature gradient
-//        dataService.getInputFeatureGradientStatistics(this.current_model['model_id'],'PM25', function(records){
-//          _this.input_feature_gradient_statistics = records;
 //
 //        });
+
+//        this.getFeatureGradientStatistics('PM25', (records)=>{
+//            _this.input_feature_gradient_statistics = records;
+//        });
+
+        this.getGradientProjection('PM25', (records)=>{
+            _this.gradientScatter = records;
+        });
+
+//        this.getSequenceSelected(
+//          [//1519801200, 1519801200 + 3600 * 24, 1519801200 + 3600 * 24 * 2,
+//            1519801200 + 3600 * 24 * 3]
+//        );
 
       }
     },
@@ -319,7 +332,26 @@
         this.current_model = ele.$attrs.model;
         this.model_name = this.current_model.model_name;
         this.model_id = this.current_model.model_id;
-      }
+      },
+      getSequenceSelected(seqIds){
+        pipeService.emitSequenceSelected({
+          'seq_ids': seqIds,
+          'selected_timestamps': null,
+          'colors': this.colors
+        });
+      },
+      getGradientProjection(targetFeature, callBack){
+        let _this = this;
+        dataService.getGradientProject(_this.current_model['model_id'], targetFeature, function(records){
+          callBack(records);
+        });
+      },
+      getFeatureGradientStatistics(targetFeature, callBack){
+        let _this = this;
+        dataService.getInputFeatureGradientStatistics(_this.current_model['model_id'], targetFeature, function(records){
+            callBack(records)
+        });
+      },
     }
 
   }
@@ -450,9 +482,9 @@
   }
 
   .el-menu--horizontal>.el-submenu .el-submenu__title {
-    height: 30px;
-    line-height: 30px;
-    border-bottom: 5px solid transparent;
+    height: 20px;
+    line-height: 20px;
+    border-bottom: 2px solid transparent;
     color: #909399;
   }
 

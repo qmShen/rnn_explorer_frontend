@@ -22,6 +22,7 @@
 
     mounted: function(){
         this.handler = new IndividualSequence(this.$el);
+        console.log('this.item', this.item);
         this.handler.set_Data(this.item)
     },
     methods:{

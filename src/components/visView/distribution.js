@@ -124,20 +124,7 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
 
 
   // ----------------------------------- Old  ----------------------------------------
-  let bicluster = feature_units_stats['bicluster']['bi_clusters'];
-  let cluster_groups = [];
 
-  for(let cid in bicluster){
-    let _obj = {
-      'cid': cid,
-      'size': bicluster[cid]['f_ids'].length + bicluster[cid]['u_ids'].length,
-      'f_ids': bicluster[cid]['f_ids'],
-      'u_ids': bicluster[cid]['u_ids']
-    };
-    cluster_groups.push(_obj);
-  }
-
-  this.cluster_groups = cluster_groups;
   // this.cluster_weights = feature_units_stats['bicluster']['weights'];
 
   // ----------------------------------- Old End --------------------------------------
@@ -197,7 +184,7 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
   this.top_unit_plot_conatiner = this.top_unit_container.append('g').attr('class', 'top_unit_plot_conatiner').selectAll('.top_units');
 
   // ---important---
-  this.calc_position(cluster_groups, unit_cluster_group, feature_cluster_group);
+  this.calc_position(unit_cluster_group, feature_cluster_group);
 
   var zoomer = d3.zoom().scaleExtent([1 / 2, 4]).on("zoom", zoom);
   this.selected_feature_container.call(zoomer);
@@ -208,7 +195,7 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
 };
 
 
-DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_cluster_group, feature_cluster_group){
+DistributionMatrix.prototype.calc_position = function(unit_cluster_group, feature_cluster_group){
 
   let _this = this;
   this.f_col_max_n = 10;
@@ -218,8 +205,6 @@ DistributionMatrix.prototype.calc_position = function(cluster_groups, unit_clust
   this.u_cell_gap = 10;
   this.f_cell_gap = 10;
 
-  // this.u_total_gap = this.u_cell_gap * (cluster_groups.length + 1);
-  // this.f_total_gap = this.f_cell_gap * (cluster_groups.length + 1);
 
   this.u_total_gap = this.u_cell_gap * (unit_cluster_group.length + 1);
   this.f_total_gap = this.f_cell_gap * (feature_cluster_group.length + 1);
