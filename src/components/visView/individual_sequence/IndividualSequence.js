@@ -261,7 +261,7 @@ IndividualSequence.prototype.renderRankTrend = function(container, config, data)
     .attr('fill', 'none')//.attr('fill-opacity', 0.05)
     .attr('stroke','grey');
 
-  let nTopFeature = 10;
+  let nTopFeature = 20;
 
   let topNFeatureList = [];
   for(let i = 0, ilen = data.length; i < ilen; i++){
