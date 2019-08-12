@@ -11,13 +11,13 @@
     props:['trend_data'],
     mounted:function(){
       this.LineChart = new BrushLineChart(this.$el);
+      this.LineChart.update_render(this.trend_data);
     },
     watch:{
       trend_data: function(new_data, d2){
         if(new_data != null){
           this.update_line_chart(new_data)
         }
-
       }
     },
     methods:{

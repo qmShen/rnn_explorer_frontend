@@ -137,9 +137,9 @@ function getFeatureValues(mid, features, callback) {
   })
 }
 
-function getFeatureValuesScaled(callback) {
+function getFeatureValuesScaled(features, callback) {
   const url = `${dataServerUrl}/feature_values_scaled`
-  $http.post(url, {}).then(response => {
+  $http.post(url, {'features': features}).then(response => {
     callback(response.data)
   }, errResponse => {
     console.log(errResponse)

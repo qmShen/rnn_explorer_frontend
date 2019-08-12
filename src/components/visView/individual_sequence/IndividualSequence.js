@@ -12,9 +12,10 @@ let IndividualSequence = function(el){
     .attr('width', this.canvas_width)
     .attr('height', this.canvas_height);
 
+
   this.row0Config = {
     'top': 0,
-    'height': 15,
+    'height': 1,
     'width': this.canvas_width
   };
   this.row1Config = {
@@ -91,7 +92,7 @@ IndividualSequence.prototype.set_Data = function(data){
   this.date = toDateTime(data['timestamp'])
 
   let featureNames = data['allFeature'];
-  console.log('all_features  data  data', data);
+
   // Process raw feature value
   let featureValue = data['featureValue']['value'];
   let features = [];
@@ -100,15 +101,16 @@ IndividualSequence.prototype.set_Data = function(data){
       features.push({'name':r, 'type': parse_attribute_name(featureNames[r])});
     }
   }
-  console.log('features------------------', features);
+
   this.features = features;
   this.nTime = featureValue.length;
   let date_string = format_date(this.date);
 
-  let title = this.titleContainer.append('text').text(format_date(this.date)).attr('font-size', 10);
-  let box = title.node().getBBox();
-  title.attr('x', this.canvas_width / 2 - box['width'] / 2).attr('y', 12)
-  console.log('bbox', box);
+  // Remove thitle and move to component
+  // let title = this.titleContainer.append('text').text(date_string).attr('font-size', 10);
+  // let box = title.node().getBBox();
+  // title.attr('x', this.canvas_width / 2 - box['width'] / 2).attr('y', 12);
+
   this.renderFeatureTrend(this.trendContainer, this.trendConfig, featureValue, features);
 
   // Process cluster gradient
@@ -134,7 +136,7 @@ IndividualSequence.prototype.renderFeatureTrend = function(container, config, da
   // data 24 * 265, timestamp * feature_number
   let nTime = this.nTime;
   let nFeature = data[0].length;
-  console.log('data', data);
+
   let featureTimeData = [];
 
   for(let i = 0, ilen = nFeature; i < ilen; i++){
@@ -207,8 +209,14 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   let seqContainers = container.selectAll('.barContainer').data(clusterGradient).enter().append('g').attr('class', 'barContainer')
     .attr('transform', (d,i)=>'translate(' + [0, i * seqHeight] + ')');
 
+
+  console.log('clusterGradient__', clusterGradient);
   seqContainers.append('rect').attr('width', config['width']).attr('height', seqHeight).attr('fill-opacity', 0)
     .attr('stroke', 'red').attr('stroke-width', 0.2);
+
+  seqContainers.append('title').text(function(_d, i){
+    return "Cluster " + i;
+  });
 
   let gHorizon = seqContainers.selectAll('.horizon').data(horizonData)
     .enter().append('g')
@@ -230,9 +238,7 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
       .attr('x', (d, t)=> xScale(t)).attr('y', (d,i)=> seqHeight - yScale(d))
       .attr('width', barWidth).attr('height', (d,i)=>yScale(d))
       .style('fill', fillValue(d))
-    _container.append('title').text(function(_d){
-      return _d;
-    })
+
   })
 
 };
@@ -341,11 +347,16 @@ IndividualSequence.prototype.renderRankTrend = function(container, config, data)
   //     .attr('fill', 'red')
   // })
 
-}
+};
 
-
-
-
-;
+IndividualSequence.prototype.on = function(eventName, method){
+  if(eventName == 'mouseover') {
+    this.mouseover = method;
+    this.svg.on('mouseover', this.mouseover);
+  }else if(eventName == 'mouseout'){
+    this.mouseout = method;
+    this.svg.on('mouseout', this.mouseout);
+  }
+};
 
 export default IndividualSequence

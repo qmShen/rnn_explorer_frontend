@@ -8,9 +8,9 @@ let BrushLineChart = function(el){
   this.svg = d3.select(this.$el);
   this.canvas_clientWidth = this.$el.clientWidth;
   this.canvas_height = this.$el.clientHeight;
-  this.margin = {top: 20, right: 100, bottom: 20, left: 40, gap: 25};
+  this.margin = {top: 5, right: 20, bottom: 20, left: 50, gap: 25};
 
-  this.focus_ratio = 0.7;
+  this.focus_ratio = 0.8;
 
   this.focus_region = {
     top: this.margin.top,
@@ -48,9 +48,9 @@ let BrushLineChart = function(el){
     var s = d3.event.selection || x2.range();
     _this.x.domain(s.map(_this.x2.invert, _this.x2));
     _this.Line_chart.select(".line").attr("d", _this.line);
-    _this.pointsContainer.selectAll("circle")
-      .attr('cx', (d, i) => _this.x(d.Date))
-      .attr('cy', (d, i) => _this.y(d.PM25))
+    // _this.pointsContainer.selectAll("circle")
+    //   .attr('cx', (d, i) => _this.x(d.Date))
+    //   .attr('cy', (d, i) => _this.y(d.PM25))
 
     _this.focus.select(".axis--x").call(_this.xAxis);
     _this.svg.select(".zoom").call(_this.zoom.transform, d3.zoomIdentity
@@ -74,21 +74,26 @@ let BrushLineChart = function(el){
 
   this.line = d3.line()
     .x(function (d) { return _this.x(d.Date); })
-    .y(function (d) { return _this.y(d.Pre_PM25); });
+    .y(function (d) { return _this.y(d.PM25); });
 
   this.line2 = d3.line()
     .x(function (d) { return _this.x2(d.Date); })
-    .y(function (d) { return _this.y2(d.Pre_PM25); });
+    .y(function (d) { return _this.y2(d.PM25); });
 
 };
+function toDateTime(secs) {
+    var t = new Date(1970, 0, 1); // Epoch
+    t.setSeconds(secs);
+    return t;
+}
 
 BrushLineChart.prototype.update_render = function(data){
-
+  console.log('data len', data.length);
   for(let i = 0, ilen = data.length; i < ilen; i++){
     let d = data[i]
-    d['Date'] = new Date(d['time']);
+    d['Date'] = toDateTime(d['seconds']);
   }
-  let render_data = data.slice(data.length - 2000);
+  let render_data = data;
 
   this.x.domain(d3.extent(render_data, function(d) { return d.Date; }));
   this.y.domain([0, d3.max(data, function (d) { return d.PM25; })]);
@@ -142,13 +147,13 @@ BrushLineChart.prototype.update_render = function(data){
     .attr('stroke-width', '1.5px');
 
 
-  this.pointsContainer.selectAll('.point').data(render_data).enter()
-    .append('circle')
-    .attr('class', '.point')
-    .attr('cx', (d, i) => this.x(d.Date))
-    .attr('cy', (d, i) => this.y(d.PM25))
-    .attr('fill', 'red')
-    .attr('r',1)
+  // this.pointsContainer.selectAll('.point').data(render_data).enter()
+  //   .append('circle')
+  //   .attr('class', '.point')
+  //   .attr('cx', (d, i) => this.x(d.Date))
+  //   .attr('cy', (d, i) => this.y(d.PM25))
+  //   .attr('fill', 'red')
+  //   .attr('r',1)
   this.context.append("path")
     .datum(render_data)
     .attr("class", "line")

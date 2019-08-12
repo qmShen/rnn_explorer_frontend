@@ -14,7 +14,7 @@
     "@tensorflow/tfjs-tsne": "^0.2.0",
     "d3": "^4.13.0",
     "echarts": "^4.2.1",
-    "element-ui": "^2.10.1",
+    "element-ui": "^2.11.1",
     "numjs": "^0.16.0",
     "vue": "^2.6.10",
     "vue-resource": "^1.5.1",

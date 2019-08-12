@@ -4,8 +4,8 @@
       <div class = 'mini_title'>Distribution</div>
     </div>
     <svg class="distribution_svg"></svg>
-    <el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>
-    <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
+    <!--<el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>-->
+    <!--<el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>-->
     <el-dialog class = "popup_dialog"
 
                title="Filter"
@@ -25,7 +25,6 @@
 <script>
   import DistributionMatrix from "./distribution.js"
   import FilterPCP from "./FilterPCP.vue"
-
   import dataService from "../../service/dataService.js"
   import pipeService from "../../service/pipeService.js"
 
@@ -176,32 +175,32 @@
 
   /*opacity: 0.4;*/
   /*}*/
-.ticks {
-  font: 10px sans-serif;
-}
+  .ticks {
+    font: 10px sans-serif;
+  }
 
-.track,
-.track-inset,
-.track-overlay {
-  stroke-linecap: round;
-}
+  .track,
+  .track-inset,
+  .track-overlay {
+    stroke-linecap: round;
+  }
 
-.track {
-  stroke: #000;
-  stroke-opacity: 0.5;
-  stroke-width: 10px;
-}
+  .track {
+    stroke: #000;
+    stroke-opacity: 0.5;
+    stroke-width: 10px;
+  }
 
-.track-inset {
-  stroke: rgb(255, 255, 255);
-  stroke-width: 8px;
-}
+  .track-inset {
+    stroke: rgb(255, 255, 255);
+    stroke-width: 8px;
+  }
 
-.track-overlay {
-  pointer-events: stroke;
-  stroke-width: 50px;
-  stroke: transparent;
-  cursor: crosshair;
-}
+  .track-overlay {
+    pointer-events: stroke;
+    stroke-width: 50px;
+    stroke: transparent;
+    cursor: crosshair;
+  }
 
 </style>
