@@ -4,7 +4,7 @@
       <el-col :span="7" class="horizontal_stripe">
         <div class="bg-purple column">
 
-          <div class="projection_container boundary">
+          <div class="control_container boundary">
             <el-menu class="el-menu-demo" mode="horizontal" @select="handleSelectModel">
               <el-submenu index="select_model">
                 <template slot="title">Select Model</template>
@@ -150,8 +150,8 @@
                 <div class = 'mini_title'>Sequence List</div>
               </div>
               <div style="height: calc(100% - 20px);">
-                <IndividualSequenceView class="boundary" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"
-                                        v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item"></IndividualSequenceView>
+                <IndividualSequenceView class="" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"
+                                        v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item" v-bind:targetFeature="targetFeature"></IndividualSequenceView>
               </div>
             </el-col>
           </div>
@@ -164,6 +164,9 @@
 
 
 <script>
+  import * as d3 from "d3";
+
+
   import StatisticsView from './Statistics.vue'
   import ControlView from './Control.vue'
   import Scatter from './visView/Scatter.vue'
@@ -217,17 +220,13 @@
         },
         feature_list:[
           {'type': 'feature', 'feature': 'NO2' },
-          {'type': 'feature', 'feature': 'O2' },
+          {'type': 'feature', 'feature': 'O3' },
           {'type': 'feature', 'feature': 'PM25' },
           {'type': 'feature', 'feature': 'PM10' },
           {'type': 'feature', 'feature': 'SO2' }
         ],
         selectedFeatureGradient:{},
         selectedIndividualMap:{}
-
-
-
-
       }
     },
     mounted: function(){
@@ -291,8 +290,12 @@
         let selected_timestamps = selected_data['selected_timestamps'];
         let colors = selected_data['colors'];
         let model_id = _this.current_model['model_id'];
+
+        console.log('selected_data', selected_data);
         dataService.getFeatureSequenceGradientClusterToEnd(model_id,
           selected_ids, function(records){
+
+            console.log('featureGradientToEnd', records);
             // Old version
             records['sequence_time'] = selected_ids;
             records['selected_timestamp'] = selected_timestamps;
@@ -348,6 +351,9 @@
       GradientScatter
     },
     watch:{
+      targetFeature:function(new_data, old_data){
+        console.log('target ,', new_data);
+      },
       selected_sequence:function(new_data, old_data){
       },
       current_model:function(new_model, old_model){
@@ -355,9 +361,6 @@
         if(new_model == undefined || new_model == null){
           return
         }
-
-        console.log('Select new model!', new_model);
-
         dataService.loadSelectedModel(this.current_model['model_id'], (records)=>{
           this.allStats = records;
           this.dropSelection.disableTargetFeature = false;
@@ -384,9 +387,10 @@
 //  For test
         pipeService.emitSequenceSelected({
           'seq_ids': [1519801200,
-            1519801200 + 3600 * 24,
-            1519801200 + 3600 * 24 * 2,
-            1519801200 + 3600 * 24 * 3],
+//            1519801200 + 3600 * 24,
+//            1519801200 + 3600 * 24 * 2,
+//            1519801200 + 3600 * 24 * 3
+          ],
           'selected_timestamps': null,
           'colors': _this.colors
         });
@@ -427,12 +431,20 @@
         }else if(model.type == 'feature'){
           this.targetFeature = ele.$attrs.model.feature;
           this.getFeatureGradientStatistics(this.targetFeature, (records)=>{
-            records['feature_statics'] = records['feature_statics'].slice(0, 3);
+//              test test test2
+            records['feature_statics'].sort((a,b)=>{
+              let l = a['temporal_statistics'].length;
+              let x = d3.sum(a['temporal_statistics'].slice(l - 6, l), d=>d[1]);
+              let y = d3.sum(b['temporal_statistics'].slice(l - 6, l), d=>d[1]);
+              return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+            })
+            records['feature_statics'] = records['feature_statics'].slice(0, 30);
             this.input_feature_gradient_statistics = records;
+            console.log('input_feature_gradient', this.input_feature_gradient_statistics);
           });
           this.getGradientProjection(this.targetFeature, (records)=>{
-            console.log('records', records);
-            this.gradientScatter = records;
+//              test test test2
+            this.gradientScatter = records//.slice(80,90);
             this.dropSelection.disableProjection = false
           });
         }
@@ -523,11 +535,13 @@
     height: calc(20%);
   }
 
-  .projection_container{
-    height: calc(30%);
+  .control_container{
+    height: calc(20%);
   }
+
+
   .distribution_container{
-    height: calc(70%);
+    height: calc(80%);
   }
   .scatter_container{
     height: calc(100%);

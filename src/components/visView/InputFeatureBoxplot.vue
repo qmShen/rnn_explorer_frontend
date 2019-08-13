@@ -35,20 +35,18 @@
       });
 
       pipeService.onCheckIndividual(msg=>{
-        console.log('check msg', msg);
         if(msg.checked == true){
           this.selectedIndividualMap[msg['timestamp']] = true;
           pipeService.emitSelectedIndividuals(dictKeyList(this.selectedIndividualMap));
           let seconds = dictKeyList(this.selectedIndividualMap);
           this.boxplotHandler.onSelect(seconds);
-          console.log('selected keys 1', dictKeyList(this.selectedIndividualMap))
+
 
         }else if(msg.checked == false){
           delete this.selectedIndividualMap[msg['timestamp']];
           pipeService.emitSelectedIndividuals(dictKeyList(this.selectedIndividualMap));
           let seconds = dictKeyList(this.selectedIndividualMap);
           this.boxplotHandler.removeSelect();
-          console.log('selected keys 2', dictKeyList(this.selectedIndividualMap))
 
         }
       });

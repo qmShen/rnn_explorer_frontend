@@ -1,5 +1,5 @@
 <template>
-  <div style="font-size: 10px"><el-checkbox
+  <div  style="font-size: 10px"><el-checkbox
     size="mini" v-model="checked" class="checkbox"
   >{{title}}</el-checkbox></div>
 </template>
@@ -12,7 +12,7 @@
 
   export default {
     name: "IndividualSequence",
-    props:['item'],
+    props:['item', 'targetFeature'],
     data(){
       return {
         option: null,
@@ -27,7 +27,6 @@
 
       },
       checked: function(new_val, old_val){
-        console.log('invidual checked!', new_val);
         pipeService.emitCheckIndividual({
           'timestamp': this.timestamp,
           'checked': this.checked
@@ -36,7 +35,7 @@
     },
 
     mounted: function(){
-      this.handler = new IndividualSequence(this.$el);
+      this.handler = new IndividualSequence(this.$el, this.targetFeature);
       this.handler.on('mouseover', this.handleMouseover);
       this.handler.on('mouseout', this.handleMouseout);
       this.handler.set_Data(this.item);

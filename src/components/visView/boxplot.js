@@ -38,9 +38,11 @@ Boxplot.prototype.render_data = function(item){
   //   .attr('stroke-opacity', 0.4)
   //   .attr('fill-opacity', 0.01)
   //   .attr('stroke', 'red');
+  console.log('item', item);
 
+  let maxVal = d3.max(temporal_statistics, d=>d[1])
   let yScale = d3.scaleLinear()
-    .domain([0, 0.2]).range([renderHeight, 0]);
+    .domain([0, maxVal]).range([renderHeight, 0]);
 
   let xScale = d3.scaleLinear()
     .domain([0, temporal_statistics.length]).range([0, renderWidth]);
@@ -176,7 +178,7 @@ Boxplot.prototype.set_selected_data = function(selectedData){
 };
 
 Boxplot.prototype.onHoverOn = function(second){
-  if(this.secondsMap[second] == undefined){
+  if(this.secondsMap == undefined || this.secondsMap[second] == undefined){
     console.log('No seconds hover', second);
     return
   }
