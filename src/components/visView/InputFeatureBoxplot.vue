@@ -18,6 +18,8 @@
     mounted: function(){
       this.boxplotHandler = new BoxPlot(this.$el);
       this.boxplotHandler.set_data(this.item);
+      this.boxplotHandler.on('mouseover', this.handleMouseover);
+      this.boxplotHandler.on('mouseout', this.handleMouseout);
 
       let dictKeyList = function(dict){
         let list = [];
@@ -58,6 +60,14 @@
       },
       selectedFeatureGradient: function(new_data){
         this.boxplotHandler.set_selected_data(new_data);
+      }
+    },
+    methods:{
+      handleMouseover(){
+          pipeService.emitMouseoverFeature(this.item.feature_name);
+      },
+      handleMouseout(){
+          pipeService.emitMouseoverFeature();
       }
     }
   }

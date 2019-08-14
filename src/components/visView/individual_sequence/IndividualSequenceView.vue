@@ -56,13 +56,25 @@
       };
       // ----------------------------------%%%%%%%%%%%%%%%%%----------------------------------
       this.title = format_date(toDateTime(this.item.timestamp));
+
+
+      // Response to the interaction of feature importance boxplot
+
+      pipeService.onMouseoverFeature(msg=>{
+        if(msg == undefined){
+            this.handler.onHoverOut();
+        }else{
+            this.handler.onHoverOn(msg);
+        }
+      });
+
     },
     methods:{
       handleSelected(params){
 
       },
       handleMouseover(){
-        pipeService.emitMouseOverIndividual(this.item.timestamp)
+        pipeService.emitMouseOverIndividual(this.item.timestamp);
       },
       handleMouseout(){
         pipeService.emitMouseOverIndividual();

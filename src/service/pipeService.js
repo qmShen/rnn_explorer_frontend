@@ -11,7 +11,9 @@ var pipeService = new Vue({
     SELECTEDINIDIVUDUAL: 'selected_indiviual_selected',
 
     MOUSEOVERINDIVIDUAL: 'mosueover_individual',
-    CHECKINDIVIDUAL: 'check_individual'
+    CHECKINDIVIDUAL: 'check_individual',
+
+    MOUSEOVERFEATUREIMPORTANCE: 'mouseover_featureimportance_boxplot'
 
   },
 
@@ -73,6 +75,23 @@ var pipeService = new Vue({
         callback(msg);
       })
     },
+
+
+
+    //------------------------------------------------------------
+    //When an feature importance boxplot is hovered
+    //If msg is undefined(not set), remove the mouseover effect, if msg is timestamp, add mouseover effect
+    emitMouseoverFeature: function(msg){
+      this.$emit(this.MOUSEOVERFEATUREIMPORTANCE, msg);
+    },
+    onMouseoverFeature: function(callback){
+      this.$on(this.MOUSEOVERFEATUREIMPORTANCE,function(msg){
+        callback(msg);
+      })
+    },
+
+
+
     //Not used yet
     //When a subgroup is selected in distribution view, emit this message
     emitSelectedIndividuals: function(msg){

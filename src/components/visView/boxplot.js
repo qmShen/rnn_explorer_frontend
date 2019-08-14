@@ -38,7 +38,7 @@ Boxplot.prototype.render_data = function(item){
   //   .attr('stroke-opacity', 0.4)
   //   .attr('fill-opacity', 0.01)
   //   .attr('stroke', 'red');
-  console.log('item', item);
+  // console.log('item', item);
 
   let maxVal = d3.max(temporal_statistics, d=>d[1])
   let yScale = d3.scaleLinear()
@@ -142,14 +142,14 @@ Boxplot.prototype.set_data = function(item){
 };
 
 Boxplot.prototype.set_selected_data = function(selectedData){
-  console.log('data------------data', selectedData[this.featureName]);
+  // console.log('data------------data', selectedData[this.featureName]);
   let gradientValues = selectedData[this.featureName]['gradientList'];
-  console.log('gradientValues', gradientValues);
+  // console.log('gradientValues', gradientValues);
   this.secondsMap = {};
   gradientValues.forEach((d,i)=>{
     this.secondsMap[d['timestamp']] = d;
   });
-  console.log('secondsmap', this.secondsMap);
+  // console.log('secondsmap', this.secondsMap);
   let line = d3.line()
     .x( (d, i)=>{ return this.xScale(i) + this.boxWidth / 2 + this.boxMargin; })
     .y( (d, i)=>{ return this.yScale(d);});
@@ -202,6 +202,17 @@ Boxplot.prototype.onSelect = function(seconds){
 Boxplot.prototype.removeSelect = function(){
   this.lineContainer.selectAll('path').attr('stroke', 'grey');
 };
+
+Boxplot.prototype.on = function(eventName, method){
+  if(eventName == 'mouseover') {
+    this.mouseover = method;
+    this.svg.on('mouseover', this.mouseover);
+  }else if(eventName == 'mouseout'){
+    this.mouseout = method;
+    this.svg.on('mouseout', this.mouseout);
+  }
+};
+
 export default Boxplot;
 
 

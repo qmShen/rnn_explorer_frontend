@@ -60,7 +60,7 @@ let IndividualSequence = function(el, targetFeature){
 
 //  -----------------------------------------------------------------
   this.targetFeature = targetFeature;
-  console.log('targetFeature', this.targetFeature);
+  // console.log('targetFeature', this.targetFeature);
 };
 
 
@@ -149,15 +149,21 @@ IndividualSequence.prototype.renderFeatureTrend = function(container, config, da
   let nTime = this.nTime;
   let nFeature = data[0].length;
 
-  let featureTimeData = [];
+  let featureTrend = [];
 
   for(let i = 0, ilen = nFeature; i < ilen; i++){
     let featureArray = [];
     for(let j = 0, jlen = nTime; j <jlen; j++){
       featureArray.push(data[j][i]);
     }
-    featureTimeData.push(featureArray);
+    // name, value
+    featureTrend.push({
+      'feature':features[i].fullName,
+      'value': featureArray,
+    });
   }
+
+  this.featureTrend = featureTrend;
   let offsetX = (config['width'] - this.marginLeft) / this.nTime / 2;
 
   let xScale = d3.scaleLinear().domain([0, nTime-1]).range([this.marginLeft, config['width']]);
@@ -166,18 +172,33 @@ IndividualSequence.prototype.renderFeatureTrend = function(container, config, da
     .x(function (d, i) { return xScale(i); })
     .y(function (d, i) { return yScale(d);});
 
-  let eLine = container.selectAll('.feature_line')
-    .data(featureTimeData)
+  let LineContainer = container.selectAll('.feature_line')
+    .data(featureTrend)
     .enter()
-    .append('path')
-    .attr('class', 'feature_line')
-    .attr('d', line)
-    .attr('stroke', (d, i) => {
-      return feature_color(features[i]['name'])})
-    .attr('fill', 'none')
-    .attr('opacity', 0.4)
-    .attr('stroke-width', 0.3);
+    .append('g')
+    .attr('class', 'feature_line');
 
+
+  this.LineContainer = LineContainer;
+  LineContainer.each(function(d, i){
+    let _container = d3.select(this);
+    _container.datum(d.value).append('path')
+      .attr('d', line)
+      .attr('stroke', () => {
+        return feature_color(features[i]['type'])})
+      .attr('fill', 'none')
+      .attr('opacity', 0.4)
+      .attr('stroke-width', 0.3);
+    if(d.render == undefined){
+      d['render'] = {};
+    }
+    d['render']['container'] = this;
+  });
+
+  this.featureMap = {};
+  featureTrend.forEach(d=>{
+    this.featureMap[d.feature] = d;
+  });
 };
 
 IndividualSequence.prototype.renderGradientTrend = function(container, config, data){
@@ -191,10 +212,10 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   let nCluster = data[0].length;
   let seqHeight = config['height'] / nCluster;
   let xScale = d3.scaleLinear().range([this.marginLeft, config['width']]).domain([0, this.nTime]);
-  let yScale = d3.scaleLinear().clamp(true).range([0, seqHeight])
+  let yScale = d3.scaleLinear().clamp(true).range([0, seqHeight]);
   let barWidth = config['width'] / this.nTime;
 
-  let clusterGradient = []
+  let clusterGradient = [];
   for(let i = 0, ilen = nCluster; i < ilen; i++){
     let clusterArray = [];
     for(let j = 0, jlen = this.nTime; j <jlen; j++){
@@ -217,12 +238,8 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
       });
   }
 
-
-  // console.log('domain', gradient_T.map(function(d) { return d.cluster_id; }))
   let seqContainers = container.selectAll('.barContainer').data(clusterGradient).enter().append('g').attr('class', 'barContainer')
     .attr('transform', (d,i)=>'translate(' + [0, i * seqHeight] + ')');
-
-
 
   seqContainers.append('title').text(function(_d, i){
     return "Cluster " + i;
@@ -447,7 +464,7 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
     let _glyphContainer = d3.select(this);
     _this.renderGlyph(_glyphContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
   });
-  console.log('use time', new Date() - __start_time);
+  // console.log('use time', new Date() - __start_time);
 };
 
 IndividualSequence.prototype.renderGlyph = function(container, width, height, ofx, ofy, name){
@@ -540,6 +557,21 @@ IndividualSequence.prototype.on = function(eventName, method){
     this.mouseout = method;
     this.svg.on('mouseout', this.mouseout);
   }
+};
+
+
+IndividualSequence.prototype.onHoverOn = function(featureName){
+
+  if(this.featureMap == undefined || this.featureMap[featureName] == undefined){
+    console.log('No featureName hover', featureName);
+    return
+  }
+  d3.select(this.featureMap[featureName]['render']['container']).selectAll('path').attr('stroke-width', 2.5).attr('opacity', 1);
+
+};
+
+IndividualSequence.prototype.onHoverOut = function(){
+  this.LineContainer.selectAll('path').attr('stroke-width', 0.3).attr('stroke-opacity', 0.4);
 };
 
 export default IndividualSequence

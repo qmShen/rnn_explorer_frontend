@@ -29,6 +29,8 @@
 
 
               <el-menu-item :disabled = "dropSelection.disableProjection" @click="drawer = true">Projection</el-menu-item>
+
+              <el-menu-item  @click="sortFeatureBoxplot()">Sort</el-menu-item>
               <!--<el-menu-item index="3" > Projection </el-menu-item>-->
             </el-menu>
             <div style="width: 100px">
@@ -164,6 +166,13 @@
 
 
 <script>
+  let dictKeyList = function(dict){
+    let list = [];
+    for(let key in dict){
+      list.push(key)
+    }
+    return list;
+  };
   import * as d3 from "d3";
 
 
@@ -231,13 +240,7 @@
     },
     mounted: function(){
 
-      let dictKeyList = function(dict){
-        let list = [];
-        for(let key in dict){
-          list.push(key)
-        }
-        return list;
-      };
+
 
 
       let _this = this;
@@ -295,17 +298,14 @@
         dataService.getFeatureSequenceGradientClusterToEnd(model_id,
           selected_ids, function(records){
 
-            console.log('featureGradientToEnd', records);
             // Old version
             records['sequence_time'] = selected_ids;
             records['selected_timestamp'] = selected_timestamps;
             records['colors'] = colors;
             _this.gradients_io_cluster = records;
 
-
             // New version
             _this.featureGradientObjs = splitGroup(records);
-            console.log('gradient', _this.featureGradientObjs);
           });
       });
 
@@ -335,6 +335,18 @@
 
 
 
+      pipeService.onCheckIndividual(msg=>{
+        if(msg.checked == true){
+          this.selectedIndividualMap[msg['timestamp']] = true;
+          let list = dictKeyList(this.selectedIndividualMap);
+          console.log('list', list,  );
+        }else if(msg.checked == false){
+          delete this.selectedIndividualMap[msg['timestamp']];
+          pipeService.emitSelectedIndividuals(dictKeyList(this.selectedIndividualMap));
+          let list = dictKeyList(this.selectedIndividualMap);
+          console.log('list', list);
+        }
+      });
     }, //mounted
     components: {
       StatisticsView,
@@ -387,8 +399,8 @@
 //  For test
         pipeService.emitSequenceSelected({
           'seq_ids': [1519801200,
-//            1519801200 + 3600 * 24,
-//            1519801200 + 3600 * 24 * 2,
+            1519801200 + 3600 * 24,
+            1519801200 + 3600 * 24 * 2,
 //            1519801200 + 3600 * 24 * 3
           ],
           'selected_timestamps': null,
@@ -419,6 +431,20 @@
       }
     },
     methods:{
+      sortFeatureBoxplot(){
+        console.log('sort');
+        let list = dictKeyList(this.selectedIndividualMap);
+
+        console.log('list', list, this.selectedIndividualMap);
+        console.log('dataobject', this.featureGradientObjs);
+        let individualList = [];
+        this.featureGradientObjs.forEach(d=>{
+            if(this.selectedIndividualMap[d['timestamp']] != undefined){
+              individualList.push(d);
+            }
+        })
+        console.log('individualList', individualList);
+      },
       handleSelectModel(index,unknow, ele) {
         let model = ele.$attrs.model;
         if(model == undefined){
@@ -437,10 +463,9 @@
               let x = d3.sum(a['temporal_statistics'].slice(l - 6, l), d=>d[1]);
               let y = d3.sum(b['temporal_statistics'].slice(l - 6, l), d=>d[1]);
               return ((x < y) ? 1 : ((x > y) ? -1 : 0));
-            })
-            records['feature_statics'] = records['feature_statics'].slice(0, 30);
+            });
+            records['feature_statics'] = records['feature_statics'].slice(0, 50);
             this.input_feature_gradient_statistics = records;
-            console.log('input_feature_gradient', this.input_feature_gradient_statistics);
           });
           this.getGradientProjection(this.targetFeature, (records)=>{
 //              test test test2
