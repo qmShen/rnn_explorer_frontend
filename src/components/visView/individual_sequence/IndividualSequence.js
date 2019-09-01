@@ -11,6 +11,9 @@ let IndividualSequence = function(el, targetFeature){
   this.svg = d3.select(el).append('svg')
     .attr('width', this.canvas_width)
     .attr('height', this.canvas_height);
+  this.svg.append('rect')
+    .attr('width', this.canvas_width).attr('height', this.canvas_height)
+    .attr('fill', 'white')
 
   this.firstBatch = 20;
   this.topN = 10;
@@ -294,10 +297,12 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
 
   let nTopFeature = this.firstBatch;
 
-  data = transpose(data);
+  let dataT = transpose(data);
   let topNFeatureList = [];
-  for(let i = 0, ilen = data.length; i < ilen; i++){
-    topNFeatureList.push(sortArrayRI(data[i], nTopFeature));
+
+
+  for(let i = 0, ilen = dataT.length; i < ilen; i++){
+    topNFeatureList.push(sortArrayRI(dataT[i], nTopFeature));
   }
 
   let FID2Seq = {};
@@ -317,12 +322,15 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
     }
   }
   let rankingList = [];
+
   for(let key in FID2Seq){
     rankingList.push({
       'feature_index': key,
-      'topList': FID2Seq[key]
+      'topList': FID2Seq[key],
+      'gradient_sum': d3.sum(data[key])
     })
   }
+
   rankingList.sort((a, b)=>{
     let x = a['topList'].length;
     let y = b['topList'].length;
@@ -439,17 +447,12 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
       }else if(seg['pre']['t'] == seg['t']-1){}
     });
 
-
-
-
     _container.selectAll('.exist').data(featureObj['topList']).enter().append('circle').attr('class', 'exist')
       .attr('cx', d=>xScale(d['t'])).attr('cy', featureHeight / 2)
       .attr('r', 4)
       .attr('fill', 'white')
       .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
       .attr('stroke-width', 2);
-
-    // console.log('dd', featureObj);
   });
 
   let glyphContainers = topNFeatureContainers.append('g');
@@ -464,7 +467,6 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
     let _glyphContainer = d3.select(this);
     _this.renderGlyph(_glyphContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
   });
-  // console.log('use time', new Date() - __start_time);
 };
 
 IndividualSequence.prototype.renderGlyph = function(container, width, height, ofx, ofy, name){

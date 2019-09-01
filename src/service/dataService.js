@@ -184,6 +184,15 @@ function getFeatureSequenceGradientClusterToEnd(mid, tid, callback) {
 }
 
 
+function getRegionSector(region, callback) {
+  const url = `${dataServerUrl}/get_region_sector`
+  $http.post(url, {'target': 'KC_A'}).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
+// KC_A_region
 
 
 
@@ -247,6 +256,8 @@ export default{
   loadModelList,
   loadSelectedModel,
   getGradientProject,
+  getRegionSector,
+
 
   getFeatureValues,
   getTestData,
@@ -262,6 +273,7 @@ export default{
   getFeatureSequenceGradientClusterToEnd,
   getFeatureValuesScaled,
   getInputFeatureGradientStatistics,
+
 
 
 }

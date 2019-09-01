@@ -51,9 +51,16 @@
     border-color: #d3dce6;
     border-width: 1px;
   }
-
+  .cardbox{
+    border-style: solid;
+    border-color: #16171e;
+    border-width: 1px;
+  }
   .el-dialog__body{
     height: 60vh
 
+  }
+  .el-checkbox__inner{
+    z-index: initial;
   }
 </style>

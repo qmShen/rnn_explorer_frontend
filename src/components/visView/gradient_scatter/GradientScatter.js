@@ -10,9 +10,11 @@ feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER"
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 
-let gradient_color_list = ["#ffff8c","#f9d057","#f29e2e","#e76818","#d7191c"];
+// let gradient_color_list = ["#f9d057", "#f9d057", "#f29e2e", "#e76818","#d7191c", '#67000d'];
+let gradient_color_list = ["#f9d057", "#f9d057", "#fc4e2a", "#e76818","#bd0026", '#67000d'];
+// gradient_color_list = ["#F6CAD9","#E6A3B6", "#B05E6A", "#984B53", "#6E3132", 'black'];
 let colorScaleRainbow = d3.scaleLinear()
-  .domain([0,0.2,0.3,0.4,1])
+  .domain([0.0,0.2,0.35,0.4, 0.6, 1])
   .range(gradient_color_list)
   .interpolate(d3.interpolateHcl);
 
@@ -103,6 +105,14 @@ GradientScatter.prototype.setData = function(data, targetFeature){
   this.plot(this.data);
 };
 
+GradientScatter.prototype.setTimeRange = function(timeRange){
+  this.timeRange = timeRange;
+  if(timeRange == undefined || timeRange.end == undefined || timeRange.start == undefined){
+    this.timeRange = undefined
+  }
+}
+
+;
 GradientScatter.prototype.update_quadtree = function(){
   if(this.quadtree == undefined) return
 
@@ -120,6 +130,10 @@ GradientScatter.prototype.update_quadtree = function(){
 
 GradientScatter.prototype.plot = function(data){
   // Init Scales
+  console.log('Run plot!');
+  if(data == undefined){
+    data = this.data;
+  }
   this.xScale = d3.scaleLinear().domain(d3.extent(data, (d) => d.x)).range([20, this.canvasWidth]).nice();
   this.yScale = d3.scaleLinear().domain(d3.extent(data, (d) => d.y)).range([40, this.canvasHeight]).nice();
 
@@ -139,6 +153,13 @@ GradientScatter.prototype.plot = function(data){
 };
 
 GradientScatter.prototype.drawPoints = function(transform){
+  let timeRange = this.timeRange
+  let start = -1;
+  let end = Number.MAX_SAFE_INTEGER;
+  if(timeRange != undefined && timeRange.start != undefined && timeRange.end != undefined){
+      start = timeRange.start;
+      end = timeRange.end;
+  }
   let _this = this;
   this.lastTransform = transform;
 
@@ -151,10 +172,14 @@ GradientScatter.prototype.drawPoints = function(transform){
   this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
   let k = transform.k;
-  let r = k * 2 > 3 ? 3: k * 2;
-
+  let r = k * 1.5 > 3 ? 3: k * 1.5;
   this.data.forEach(point => {
-    this.drawPoint(scaleX, scaleY, point, r);
+    if(point.seconds > start && point.seconds < end){
+      this.drawPoint(scaleX, scaleY, point, r);
+    }else{
+      this.drawPoint(scaleX, scaleY, point, r, '#d9d9d9');
+    }
+
   });
 
 
@@ -178,19 +203,19 @@ GradientScatter.prototype.drawPoints = function(transform){
   this.initializeOperation();
 };
 
-GradientScatter.prototype.drawPoint = function(scaleX, scaleY, point, r) {
+GradientScatter.prototype.drawPoint = function(scaleX, scaleY, point, r, color) {
 
   this.context.beginPath();
 
 
   const px = scaleX(point.x);
   const py = scaleY(point.y);
-  this.context.fillStyle = colorScaleRainbow(point[this.targetFeature]);
-  // this.context.strokeWidth = 0.1;
+  this.context.fillStyle = color == undefined ? colorScaleRainbow(point[this.targetFeature]): color;
+  this.context.strokeWidth = 0.3;
   this.context.strokeStyle = 'white';
-  this.context.arc(px, py, r  , 0, 2 * Math.PI, false);
+  this.context.arc(px, py, r , 0, 2 * Math.PI, false);
   this.context.fill();
-  this.context.stroke();
+  // this.context.stroke();
 };
 
 GradientScatter.prototype.initializeOperation = function(){
@@ -284,7 +309,8 @@ GradientScatter.prototype.draw_selected_points = function (){
       .attr('r', 3)
       .attr('cx', d=>xScale(d.x))
       .attr('cy', d=>yScale(d.y))
-      .attr('fill', 'yellow')
+      .attr('stroke', 'steelblue')
+      .attr('fill', 'none')
   }
 
 
@@ -299,7 +325,9 @@ GradientScatter.prototype.draw_selected_points = function (){
     .attr('r', 3)
     .attr('cx', d=>xScale(d.x))
     .attr('cy', d=>yScale(d.y))
-    .attr('fill', 'red')
+    .attr('stroke', 'black')
+    .attr('stroke-width', '0.5')
+    .attr('fill', 'none')
 };
 
 GradientScatter.prototype.addToSelection = function(){
@@ -344,4 +372,5 @@ GradientScatter.prototype.setInteraction = function(model){
     this.svgChart.style("z-index", -1);
   }
 };
+
 export default GradientScatter

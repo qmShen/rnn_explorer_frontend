@@ -33,12 +33,18 @@
               <el-menu-item  @click="sortFeatureBoxplot()">Sort</el-menu-item>
               <!--<el-menu-item index="3" > Projection </el-menu-item>-->
             </el-menu>
-            <div style="width: 100px">
-              {{model_id}}
-            </div>
-            <div style="width: 100px">
-              {{model_name}}
-            </div>
+
+
+            <el-row :gutter="3" style="height: 100%; width: 100%">
+
+              <el-col :span="24" style="height: 100%" class="boundary">
+                <Info style="height:calc(100% - 20px); width:100%;"
+                      :model_name="model_name"
+                      v-bind:targetStation="targetStation"
+                      v-bind:regionSector="regionSector"></Info>
+              </el-col>
+
+            </el-row>
           </div>
 
           <DistributionView class="distribution_container boundary "
@@ -72,7 +78,7 @@
 
 
           <el-drawer
-            style="z-index: 0; pointer-events:none;"
+            style="z-index: 1000; pointer-events:none;"
             title="Projection-PM25"
             :visible.sync="drawer"
             :direction="direction"
@@ -85,7 +91,7 @@
             size="50%">
 
             <div style="height: calc(100% - 20px); width:calc(100% - 40px); pointer-events: auto">
-              <el-row :gutter="3" class="horizontal_stripe boundary" style="left:20px; right: 20px; height: 15%">
+              <el-row :gutter="3" class="horizontal_stripe boundary" style="left:20px; right: 20px; height: 30%">
                 <LineChart class="linechart_container" :trend_data="target_feature_value"> </LineChart>
               </el-row>
               <el-row :gutter="3" class="horizontal_stripe" style="left:20px; right: 20px; height: 65%">
@@ -151,9 +157,15 @@
               <div class="mini_head">
                 <div class = 'mini_title'>Sequence List</div>
               </div>
-              <div style="height: calc(100% - 20px);">
-                <IndividualSequenceView class="" style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px"
-                                        v-for="item in featureGradientObjs" v-bind:key="item.timestamp" v-bind:item="item" v-bind:targetFeature="targetFeature"></IndividualSequenceView>
+              <div id="individual_container" style="height: calc(100% - 20px); position: relative">
+                <IndividualSequenceView
+                  class="cardbox"
+                  style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px; background-color: white; "
+                  v-bind:style="{top:item.position.y +'px', left:item.position.x +'px'}"
+                  v-for="item in featureGradientObjs"
+                  v-bind:key="item.timestamp"
+                  v-bind:item="item"
+                  v-bind:targetFeature="targetFeature"></IndividualSequenceView>
               </div>
             </el-col>
           </div>
@@ -173,9 +185,8 @@
     }
     return list;
   };
+
   import * as d3 from "d3";
-
-
   import StatisticsView from './Statistics.vue'
   import ControlView from './Control.vue'
   import Scatter from './visView/Scatter.vue'
@@ -195,6 +206,8 @@
   import IndividualSequenceView from './visView/individual_sequence/IndividualSequenceView.vue'
 
   import GradientScatter from './visView/gradient_scatter/GradientScatter.vue'
+
+  import Info from './visView/info/Info.vue'
 
   export default {
     name: "MainView",
@@ -235,13 +248,16 @@
           {'type': 'feature', 'feature': 'SO2' }
         ],
         selectedFeatureGradient:{},
-        selectedIndividualMap:{}
+        selectedIndividualMap:{},
+        targetStation: {
+          'station_id': 'KC_A',
+          'station_name': 'Kwai Chung ' + 'Station',
+          'location':[22.3586, 114.1271]
+        },
+        'regionSector':null
       }
     },
     mounted: function(){
-
-
-
 
       let _this = this;
 //      pipeService.onMouseOverIndividual(function(msg){
@@ -287,6 +303,61 @@
         }
         return featureGradientObjs
       };
+
+      let clusterIndividuals = function(featureGradientObjs){
+        if(featureGradientObjs.length == 0){
+            return
+        }
+        featureGradientObjs.sort((a,b)=>{
+          let x = a['timestamp'].length;
+          let y = b['timestamp'].length;
+          return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+        });
+
+        let clusters = [];
+        let current_cluster = [];
+        let ptime = featureGradientObjs[0]['timestamp']
+        featureGradientObjs.forEach((obj, i)=>{
+          if(Math.abs(obj['timestamp'] - ptime) <= 3600 * 6){
+            current_cluster.push(obj);
+          }else{
+
+            clusters.push(current_cluster);
+            current_cluster = [obj];
+          }
+          ptime = obj['timestamp'];
+        });
+
+        clusters.push(current_cluster);
+        console.log('clusterssss', clusters);
+
+        let w = 5, h = 4;
+        let element = document.getElementById('individual_container');
+        let parentConfig = element.getBoundingClientRect();
+        let totalWidth = parentConfig['width'];
+
+        console.log('positionInfo', parentConfig);
+        for(let i = 0, ilen = clusters.length; i < ilen; i++){
+          // Calculate cluster position
+          let cluster = clusters[i];
+          let clusterRender = {
+            'x': (i % 3) * totalWidth / 3,
+            'y': parseInt(i / 3) * 450,
+            'offsetWidth': (cluster.length - 1) * w,
+            'offsetHeight': (cluster.length - 1) * h,
+          };
+          console.log('cluster render', clusterRender);
+
+          cluster.forEach((individual, index)=>{
+            individual['position'] = {
+              'x': clusterRender['x'] + index * w,
+              'y': clusterRender['y'] + index * h,
+            }
+          })
+        };
+        console.log('layout ele', featureGradientObjs);
+      };
+
       pipeService.onSequenceSelected(function(selected_data){
 
         let selected_ids = selected_data['seq_ids'];
@@ -305,7 +376,14 @@
             _this.gradients_io_cluster = records;
 
             // New version
-            _this.featureGradientObjs = splitGroup(records);
+            let featureGradientObjs = splitGroup(records);
+
+            clusterIndividuals(featureGradientObjs);
+//            featureGradientObjs.forEach((d, i)=>{
+//              d['position'] = i * 4
+//            });
+
+            _this.featureGradientObjs = featureGradientObjs;
           });
       });
 
@@ -360,7 +438,8 @@
       FeaturePCP,
       FeatureBoxplot,
       IndividualSequenceView,
-      GradientScatter
+      GradientScatter,
+      Info,
     },
     watch:{
       targetFeature:function(new_data, old_data){
@@ -398,21 +477,42 @@
         });
 //  For test
         pipeService.emitSequenceSelected({
-          'seq_ids': [1519801200,
-            1519801200 + 3600 * 24,
-            1519801200 + 3600 * 24 * 2,
+          'seq_ids': [
+            1519801200,
+//            1519801200 + 3600 * 2 ,
+//            1519801200 + 3600 * 3 ,
+//
+//            1519801200 + 3600 * 12,
+//            1519801200 + 3600 * 13,
+//
+//            1519801200 + 3600 * 25,
+//            1519801200 + 3600 * 26,
+//            1519801200 + 3600 * 27,
+//            1519801200 + 3600 * 28,
+//
+//            1519801200 + 3600 * 45,
+//            1519801200 + 3600 * 46,
+//            1519801200 + 3600 * 47,
+//            1519801200 + 3600 * 48,
 //            1519801200 + 3600 * 24 * 3
           ],
           'selected_timestamps': null,
           'colors': _this.colors
         });
+        dataService.getRegionSector('KC_A', (record)=>{
+          this.regionSector = record;
+        });
       },
+
       featureGradientObjs: function(new_data, old_data){
         let allFeature = null;
         if(new_data != undefined && new_data.length>0){
           allFeature = new_data[0]['allFeature']
         }
         let featureMap = {};
+        if(allFeature == null || allFeature == undefined){
+            return
+        }
         allFeature.forEach(feature=>{
           featureMap[feature] = {'feature': feature, 'gradientList':[]}
         });
@@ -432,18 +532,56 @@
     },
     methods:{
       sortFeatureBoxplot(){
-        console.log('sort');
+        //Need feature list, sort the feature list by the feature importance on selected individuals
+
         let list = dictKeyList(this.selectedIndividualMap);
 
-        console.log('list', list, this.selectedIndividualMap);
-        console.log('dataobject', this.featureGradientObjs);
         let individualList = [];
         this.featureGradientObjs.forEach(d=>{
-            if(this.selectedIndividualMap[d['timestamp']] != undefined){
-              individualList.push(d);
-            }
-        })
-        console.log('individualList', individualList);
+          if(this.selectedIndividualMap[d['timestamp']] != undefined){
+            individualList.push(d);
+          }
+        });
+
+        if(individualList.length == 0){
+          return
+        }
+        let gradientList = [];
+        for(let i = 0, ilen = individualList.length; i < ilen; i++){
+          let ind = individualList[i];
+          let gradient1 =ind['featureGradientToEnd'][this.targetFeature]['feature_gradient'];
+          let sumGradient = [];
+          gradient1.forEach(featureGradient=>{
+            sumGradient.push(d3.sum(featureGradient))
+          })
+          gradientList.push(sumGradient);
+        }
+        let importanceList = [];
+
+
+        let length = this.input_feature_gradient_statistics.feature_statics.length;
+        for(let i = 0; i < length; i++){
+          importanceList.push({
+            'feature_index': i,
+            'importance':d3.sum(gradientList, gradient=>gradient[i])
+          })
+        }
+
+        if(this.input_feature_gradient_statistics.feature_statics.length != 0){
+          for(let i = 0, ilen = this.input_feature_gradient_statistics.feature_statics.length; i < ilen; i++){
+            this.input_feature_gradient_statistics.feature_statics[i]['feature_importance'] = importanceList[i]['importance'];
+          }
+
+          this.input_feature_gradient_statistics.feature_statics.sort((a,b)=>{
+            let x = a['feature_importance'];
+            let y = b['feature_importance'];
+            return ((x < y) ? 1 : ((x > y) ? -1 : 0));
+          });
+          console.log('input_feature_gradient_statistics', this.input_feature_gradient_statistics);
+        }
+        console.log('gradient statustucs, ', this.input_feature_gradient_statistics)
+        console.log('gradient', gradientList);
+        console.log('gradientSum', importanceList);
       },
       handleSelectModel(index,unknow, ele) {
         let model = ele.$attrs.model;
@@ -464,7 +602,7 @@
               let y = d3.sum(b['temporal_statistics'].slice(l - 6, l), d=>d[1]);
               return ((x < y) ? 1 : ((x > y) ? -1 : 0));
             });
-            records['feature_statics'] = records['feature_statics'].slice(0, 50);
+            records['feature_statics'] = records['feature_statics']//slice(0, 10);
             this.input_feature_gradient_statistics = records;
           });
           this.getGradientProjection(this.targetFeature, (records)=>{
@@ -561,12 +699,12 @@
   }
 
   .control_container{
-    height: calc(20%);
+    height: calc(30%);
   }
 
 
   .distribution_container{
-    height: calc(80%);
+    height: calc(70%);
   }
   .scatter_container{
     height: calc(100%);
@@ -618,6 +756,10 @@
     /*width: 2px;*/
   }
 
+  .cardbox{
+    border-color: #d3dce6;
+    border-width: 1px;
+  }
   /*Drop down*/
 
   /*.el-dropdown-link {*/

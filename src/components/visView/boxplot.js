@@ -196,7 +196,7 @@ Boxplot.prototype.onSelect = function(seconds){
       console.log('No seconds select', second);
       return
     }
-    d3.select(this.secondsMap[second]['render']['container']).selectAll('path').attr('stroke', 'red');
+    d3.select(this.secondsMap[second]['render']['container']).selectAll('path').attr('stroke', 'red').attr('stroke-width', 3);
   })
 };
 Boxplot.prototype.removeSelect = function(){

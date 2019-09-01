@@ -29,9 +29,12 @@ let BrushLineChart = function(el){
   this.width = this.canvas_clientWidth - this.margin.left - this.margin.right;
 
   this.x = d3.scaleTime().range([0, this.width]);
-  this.x2 = d3.scaleTime().range([0, this.width]);
   this.y = d3.scaleLinear().range([this.focus_region.height, 0]);
+
+  this.x2 = d3.scaleTime().range([0, this.width]);
   this.y2 = d3.scaleLinear().range([this.overview_region.height, 0]);
+
+
 
   this.xAxis = d3.axisBottom(this.x);
   this.xAxis2 = d3.axisBottom(this.x2);
@@ -41,11 +44,14 @@ let BrushLineChart = function(el){
 
   this.brush = d3.brushX()
     .extent([[0, 0], [this.width, this.overview_region.height]])
-    .on("brush end", brushed);
-//
+    .on("end", brushed);
+
   function brushed() {
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    var s = d3.event.selection || x2.range();
+    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom" ) return; // ignore brush-by-zoom
+    // For now
+    // if (x2 == undefined) return
+    // var s = d3.event.selection || x2.range();
+    var s = d3.event.selection;
     _this.x.domain(s.map(_this.x2.invert, _this.x2));
     _this.Line_chart.select(".line").attr("d", _this.line);
     // _this.pointsContainer.selectAll("circle")
@@ -57,6 +63,38 @@ let BrushLineChart = function(el){
       .scale(_this.width / (s[1] - s[0]))
       .translate(-s[0], 0));
   }
+
+  this.brush_focus = d3.brushX()
+    .extent([[0, 0], [this.width, this.focus_region.height]])
+    .on("end", brushed_focus);
+
+  function brushed_focus() {
+    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+    // var s = d3.event.selection || x.range();
+    if(d3.event.selection == undefined){
+      _this.select_time_range(undefined, undefined);
+      return
+    }
+    let left = d3.event.selection[0];
+
+    let right = d3.event.selection[1];
+    let left_date = _this.x.invert(left);
+    let right_date =  _this.x.invert(right);
+    console.log('run');
+
+    _this.select_time_range(parseInt(left_date.getTime() / 1000), parseInt(right_date.getTime() / 1000));
+    // if (_this._t) clearTimeout(_this._t);
+    // _this.t = setTimeout(function(){
+    //   console.log('focus ,', [left_date, right_date], [parseInt(left_date.getTime() / 1000), parseInt(right_date.getTime() / 1000)]);
+    // }, 800);
+
+
+    // _this.svg.select(".zoom").call(_this.zoom.transform, d3.zoomIdentity
+    //   .scale(_this.width / (s[1] - s[0]))
+    //   .translate(-s[0], 0));
+  }
+
+
   this.zoom = d3.zoom()
     .scaleExtent([1, Infinity])
     .translateExtent([[0, 0], [this.width, this.focus_region.height]])
@@ -82,9 +120,9 @@ let BrushLineChart = function(el){
 
 };
 function toDateTime(secs) {
-    var t = new Date(1970, 0, 1); // Epoch
-    t.setSeconds(secs);
-    return t;
+  // var t = new Date(1970, 0, 1); // Epoch
+  // t.setSeconds(secs);
+  return new Date(parseInt(secs) * 1000);
 }
 
 BrushLineChart.prototype.update_render = function(data){
@@ -124,6 +162,12 @@ BrushLineChart.prototype.update_render = function(data){
     .attr("class", "focus")
     .attr("transform", "translate(" + this.focus_region.left + "," + this.focus_region.top + ")");
 
+  this.focus.append("g")
+    .attr("class", "brush")
+    .call(this.brush_focus)
+  // .call(this.brush.move, this.x.range());
+
+
   this.context = this.svg.append("g")
     .attr("class", "context")
     .attr("transform", "translate(" + this.overview_region.left + "," + this.overview_region.top + ")");
@@ -132,7 +176,8 @@ BrushLineChart.prototype.update_render = function(data){
   this.focus.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + this.focus_region.height + ")")
-    .call(this.xAxis);
+    .call(this.xAxis)
+
 
   this.focus.append("g")
     .attr("class", "axis axis--y")
@@ -185,6 +230,13 @@ BrushLineChart.prototype.update_render = function(data){
     .call(this.zoom);
 
 
+};
+
+BrushLineChart.prototype.setInteraction = function(model, method){
+  if(model == 'brush_select'){
+    console.log('switch brush');
+    this.select_time_range = method;
+  }
 };
 
 export default BrushLineChart

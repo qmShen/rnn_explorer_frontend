@@ -4,8 +4,8 @@
       <div class = 'mini_title'>Distribution</div>
     </div>
     <svg class="distribution_svg"></svg>
-    <!--<el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>-->
-    <!--<el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>-->
+    <el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>
+    <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
     <el-dialog class = "popup_dialog"
 
                title="Filter"
@@ -58,6 +58,14 @@
       // });
       this.distributionMatrix = new DistributionMatrix(this.$el);
       // this.distributionMatrix.register_function(this.handleSelectedData)
+
+      pipeService.onMouseoverFeature(msg=>{
+        if(msg == undefined){
+          console.log('mouse out');
+        }else{
+          console.log('mouse on', msg);
+        }
+      });
     },
     watch:{
       all_units_stats: function(new_val, old_val){

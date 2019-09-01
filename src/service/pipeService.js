@@ -13,7 +13,8 @@ var pipeService = new Vue({
     MOUSEOVERINDIVIDUAL: 'mosueover_individual',
     CHECKINDIVIDUAL: 'check_individual',
 
-    MOUSEOVERFEATUREIMPORTANCE: 'mouseover_featureimportance_boxplot'
+    MOUSEOVERFEATUREIMPORTANCE: 'mouseover_featureimportance_boxplot',
+    TIMERANGESELECTED : 'time_range_selected'
 
   },
 
@@ -90,6 +91,18 @@ var pipeService = new Vue({
       })
     },
 
+
+    //------------------------------------------------------------
+    //When time range in time series view is selected this will triger
+    //msg{start: sec, end: sec}
+    emitTimeRangeSelected: function(msg){
+      this.$emit(this.TIMERANGESELECTED, msg);
+    },
+    onTimeRangeSelected: function(callback){
+      this.$on(this.TIMERANGESELECTED, function(msg){
+        callback(msg);
+      })
+    },
 
 
     //Not used yet

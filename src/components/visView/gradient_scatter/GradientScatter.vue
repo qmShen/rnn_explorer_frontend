@@ -28,12 +28,10 @@
     watch:{
       gradientScatter:function(new_val, old_val){
         if(!new_val) return
-
         this.handler.setData(new_val, this.targetFeature);
       },
       targetFeature: function(newVal, oldVal){
         if(!new_val) return
-        console.log('valval feature', newVal);
       }
     },
 
@@ -41,8 +39,13 @@
       this.handler = new GradientScatter(this.$el);
       if(this.gradientScatter!= null || this.gradientScatter!= undefined){
         this.handler.setData(this.gradientScatter, this.targetFeature);
-
       }
+
+      pipeService.onTimeRangeSelected((msg)=>{
+        this.handler.setTimeRange(msg);
+        this.handler.plot();
+        console.log('on select time range', msg);
+      })
     },
     methods:{
       handleSelected(params){

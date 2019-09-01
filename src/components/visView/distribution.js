@@ -608,7 +608,7 @@ DistributionMatrix.prototype.mouseover_feature = function(_id){
         .style("stroke-dasharray", "10,4").attr('stroke-opacity', 1);
     }
   })
-}
+};
 
 // mouseout
 DistributionMatrix.prototype.mouseout_unit = function(_id){
@@ -624,7 +624,7 @@ DistributionMatrix.prototype.mouseout_unit = function(_id){
       d3.select(this).select('.top_unit_outline').attr('stroke','grey').attr('stroke-opacity', 0.5)
     }
   })
-}
+};
 
 DistributionMatrix.prototype.mouseout_feature = function(_id){
   let _this = this;

@@ -1,12 +1,14 @@
 <template>
-  <div  style="font-size: 10px"><el-checkbox
+  <div style="font-size: 10px"><el-checkbox
     size="mini" v-model="checked" class="checkbox"
   >{{title}}</el-checkbox></div>
 </template>
 
 <script>
 
-  import IndividualSequence from "./IndividualSequence.js"
+//  import IndividualSequence from "./IndividualSequence.js"
+
+  import IndividualSequence from './IndividualSequence_node_list_save2.js'
   import pipeService from "../../../service/pipeService.js"
 
 
