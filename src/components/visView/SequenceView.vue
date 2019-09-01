@@ -7,8 +7,8 @@
 <script>
   // import Sequence from './sequence.js'
   // import Sequence from './sequence_imp.js'
-  // import Sequence from './sequence_theme.js'
-  import Sequence from './sequence_horizonchart.js'
+   import Sequence from './sequence_theme.js'
+//  import Sequence from './sequence_horizonchart.js'
   export default {
     name: "SequenceView",
     props:['gradients_io',"gradients_io_cluster"],
@@ -23,6 +23,9 @@
     mounted: function(){
       this.sequence = new Sequence(this.$el);
       console.log('Sequence mounted!!');
+
+
+
     },
   }
 

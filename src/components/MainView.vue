@@ -23,55 +23,7 @@
       <el-col :span="16" class="horizontal_stripe">
         <div class="grid-content bg-purple">
 
-          <div class = 'temporal_container boundary'>
-            <el-row :gutter="3" class="horizontal_stripe">
-              <el-col :span="4" class="table_horizontal_stripe boundary">
-                <div class="mini_head">
-                  <div class = 'mini_title'>Subgroup</div>
-                </div>
-                <SubGroupTable :colors="groupColors"></SubGroupTable>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
 
-              </el-col>
-              <el-col :span="9" class="horizontal_stripe">
-                <div class="mini_head">
-                  <div class = 'mini_title'>Projection</div>
-                </div>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-                <Scatter :selected_sequence="selected_sequence" :colors="groupColors" class="scatter_container" ></Scatter>
-              </el-col>
-
-
-
-              <el-col :span="11" class="horizontal_stripe">
-                <div class="mini_head">
-                  <div class = 'mini_title'>Time</div>
-                </div>
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-
-                <ConfusionMatrix class="linechart_container matrix_container"
-                                 :trend_data = "trend_data_json">
-                </ConfusionMatrix>
-
-                <!--<el-tabs class="horizontal_stripe"  v-model="activeName">-->
-                <!--<el-tab-pane class="horizontal_stripe" label="Temporal" name="first">-->
-
-                <!--<LineChart class="linechart_container" :trend_data = 'trend_data_json'></LineChart>-->
-                <!--</el-tab-pane>-->
-
-                <!--<el-tab-pane class="horizontal_stripe" label="Confusion Matrix" name="second">-->
-                <!--<ConfusionMatrix :trend_data = "trend_data_json"-->
-                <!--class='matrix_container'>-->
-                <!--</ConfusionMatrix>-->
-                <!--&lt;!&ndash;<StatisticsView :input_scatter = 'input_scatter'&ndash;&gt;-->
-                <!--&lt;!&ndash;:trend_data = 'trend_data_json'&ndash;&gt;-->
-                <!--&lt;!&ndash;class = "statistics_container"></StatisticsView>&ndash;&gt;-->
-                <!--</el-tab-pane>-->
-                <!--</el-tabs>-->
-
-              </el-col>
-            </el-row>
-          </div>
 
 
           <!--<div class = 'temporal_container boundary'>-->
@@ -99,6 +51,8 @@
             </el-col>
 
           </div>
+
+
         </div>
       </el-col>
 
@@ -188,10 +142,36 @@
       //  For test
 
       pipeService.emitSequenceSelected({
-        'seq_ids': [1519801200, 1518681600, 1519038000],
+        'seq_ids': [
+          1519801200 + 3600 * 2 ,
+          1519801200 + 3600 * 12,
+          1519801200 + 3600 * 27,
+          1519801200 + 3600 * 25,
+          1519801200 + 3600 * 35,
+          1519801200 + 3600 * 45,
+//          1519801200 + 3600 * 3 ,
+
+
+//          1519801200 + 3600 * 13,
+
+//          1519801200 + 3600 * 26,
+
+//          1519801200 + 3600 * 27,
+//          1519801200 + 3600 * 28,
+//
+//          1519801200 + 3600 * 45,
+//          1519801200 + 3600 * 46,
+//          1519801200 + 3600 * 47,
+//          1519801200 + 3600 * 48,
+//          1519801200 + 3600 * 24 * 3
+
+
+        ],
         'selected_timestamps': null,
         'colors': _this.colors
       });
+
+
 
     },
     components: {
@@ -242,12 +222,12 @@
   /*height: 75%*/
   /*}*/
   .individual_container{
-    height: calc(70%);
+    height: calc(100%);
   }
 
   .sequence_container{
     /*height: calc(100% - 20px);*/
-    width: 100%;
+    width: 60%;
 
   }
   .temporal_container{

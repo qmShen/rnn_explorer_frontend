@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import DistributionMatrix from "./distribution";
 
 let Sequence = function(el){
   let _this = this;
@@ -26,8 +25,9 @@ let Sequence = function(el){
 };
 
 Sequence.prototype.render_circular_sequence = function(_container, sequence){
-
+  console.log('ss', sequence);
   sequence['cell_render'] = [];
+  this.timestamp = sequence['timestamp'];
   let cell_data_sequence = sequence['feature_cluster_gradient'];
   let n_cell = cell_data_sequence.length;
   let cell_width = (this.sequence_width - this.left_margin * 2) / n_cell;
@@ -38,6 +38,8 @@ Sequence.prototype.render_circular_sequence = function(_container, sequence){
   //   .attr('transform', (d, i)=>'translate('+ d['off_x'] + ',' + 0 + ')');
   // cell_containers.append('rect').attr('width', d => d['width']).attr('height', d=>d['height'])
   //   .attr('fill', 'none').attr('stroke', 'purple').attr('stroke-width', 0.5);
+
+
 };
 
 
@@ -64,7 +66,7 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
   let vertical_margin = 20;
   let stack_data = d3.stack()
     .keys(d3.range(gradient[0].length))
-    .order(d3.stackOrderAscending)
+    // .order(d3.stackOrderAscending)
     .offset(d3.stackOffsetSilhouette)
     (gradient);
 
@@ -94,9 +96,10 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
     .enter()
     .append("path").attr('class', 'mylayers');
   area
-  // .style('stroke', function(d, i) {  return color(i); })
+    .style('stroke', function(d, i) {  return color(i); })
+    .style('stroke-width', function(d, i) {  return 0.1; })
     .style("fill", function(d, i) {  return color(i); })
-    .style('fill-opacity', 0.4)
+    .style('fill-opacity', 0.6)
     // .style('stroke-opacity', 0.4)
     .attr("d", d3.area()
       .x(function(d, i) {
@@ -137,7 +140,42 @@ Sequence.prototype.render_area_chart = function(_container, sequence, cluster_in
 
   })
 };
-let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#dd4477", "#990099",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+let color_list_feature = [
+  "#dc3912",
+  "#3366cc",
+  "#ff9900",
+  "#0099c6",
+  "#109618",
+  "#66aa00",
+  "#dd4477",
+  "#990099",
+  "#b82e2e",
+  "#316395",
+  "#994499",
+  "#22aa99",
+  "#aaaa11",
+  "#6633cc",
+  "#e67300",
+  "#8b0707",
+  "#651067",
+  "#329262",
+  "#5574a6",
+  "#3b3eac"];
+
+color_list_feature =  [
+  "#023858",
+  "#045a8d",
+  "#3690c0",
+  "#74a9cf",
+  "#a6bddb",
+  "#ece7f2",
+  "#023858",
+  "#045a8d",
+  "#3690c0",
+  "#74a9cf",
+  "#a6bddb",
+  "#ece7f2",
+];
 
 let feature_color = d3.scaleOrdinal().range(color_list_feature);
 feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
@@ -193,13 +231,17 @@ Sequence.prototype.update_sequence_render = function(data){
 
   // .attr('width', this.canvas_width - 2 * left_margin + 30).attr('height', this.sequence_height_max).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 0.5);
   area_containers.each(function(d, i){
+    console.log('111', i, d);
     d['index'] = i;
     let _container = d3.select(this).append('g').attr('class', 'c_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  0 + ')');
+
     let rect = _container.append('rect').attr('stroke-width', 0.5).attr('stroke', 'orange')
       .attr('width', _this.sequence_width - 2 * left_margin).attr('height', 0)
     rect.transition().attr('height', _this.sequence_height_max).attr('fill', 'white').duration(450).on('end', function () {
       _this.render_area_sequence(_container, d);
     });
+
+
   });
 
 
@@ -218,8 +260,8 @@ Sequence.prototype.update_sequence_render = function(data){
           extend = true;
         }
         /*
-        * For area chart
-        * */
+         * For area chart
+         * */
         // let _container = d3.select(this).append('g').attr('class', 'area_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  _this.sequence_height_min + ')');
         // let rect = _container.append('rect').attr('stroke-width', 0.5).attr('stroke', 'orange')
         //   .attr('width', _this.sequence_width - 2 * left_margin).attr('height', 0)
@@ -229,8 +271,8 @@ Sequence.prototype.update_sequence_render = function(data){
         // d['render']['addContainer'] = _container;
 
         /*
-        * For PCP
-        * */
+         * For PCP
+         * */
         let _container = d3.select(this).append('g').attr('class', 'pcp_container').attr('transform', ()=>'translate('+ (30 + 10) + ',' +  _this.sequence_height_min + ')');
         let selected_feature_value = _this.feature_value;
         _this.render_parallel_coordinate(_container, selected_feature_value[i], null);
@@ -246,8 +288,11 @@ Sequence.prototype.update_sequence_render = function(data){
   });
 
   sequence_container.each(function(d){
+
     let circular_sequence_container = d3.select(this).append('g').attr('class','circular_container').attr('transform', ()=>'translate('+ 30 + ',' +  0 + ')')
+    circular_sequence_container.append('text').text(d['timestamp']).attr('class', 'xxxxxxxxx').attr('x', 20).attr('y', 20)
     _this.render_circular_sequence(circular_sequence_container, d)
+
   });
 
   //
