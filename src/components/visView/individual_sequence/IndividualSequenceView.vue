@@ -6,9 +6,10 @@
 
 <script>
 
-//  import IndividualSequence from "./IndividualSequence.js"
-
-  import IndividualSequence from './IndividualSequence_node_list_save2.js'
+  //  import IndividualSequence from "./IndividualSequence_al2.js"
+  import IndividualSequence from "./IndividualSequence.js"
+  //
+  //    import IndividualSequence from './IndividualSequence_node_list_save2.js'
   import pipeService from "../../../service/pipeService.js"
 
 
@@ -58,15 +59,15 @@
       };
       // ----------------------------------%%%%%%%%%%%%%%%%%----------------------------------
       this.title = format_date(toDateTime(this.item.timestamp));
-
+//      this.title = this.item.timestamp;
 
       // Response to the interaction of feature importance boxplot
 
       pipeService.onMouseoverFeature(msg=>{
         if(msg == undefined){
-            this.handler.onHoverOut();
+          this.handler.onHoverOut();
         }else{
-            this.handler.onHoverOn(msg);
+          this.handler.onHoverOn(msg);
         }
       });
 

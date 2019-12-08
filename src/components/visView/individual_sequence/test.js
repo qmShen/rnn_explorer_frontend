@@ -1,4 +1,7 @@
 /**
+ * Created by qshen on 1/9/2019.
+ */
+/**
  * Created by qshen on 13/7/2019.
  */
 import * as d3 from "d3";
@@ -98,7 +101,7 @@ IndividualSequence.prototype.set_Data = function(data){
   let features = [];
   if(featureNames.length >= 0){
     for(let r in featureNames) {
-      features.push({'fullName': featureNames[r],'name':r, 'type': parse_attribute_name(featureNames[r])});
+      features.push({'fullName': featureNames[r], 'name':r, 'type': parse_attribute_name(featureNames[r])});
     }
   }
 
@@ -312,6 +315,7 @@ IndividualSequence.prototype.renderRankTrend = function(container, config, data)
   };
 
   let noExtendHeight = 40;
+  this.topN = 263;
   let featureHeight = (config['height'] - noExtendHeight) / 10;
   let size = featureHeight - 4;
 
@@ -319,27 +323,9 @@ IndividualSequence.prototype.renderRankTrend = function(container, config, data)
   featureContainers.each(function(featureObj){
     let _container = d3.select(this);
     let segs = featureObj['seqs'];
-    let _circle_container = _container.append('g').selectAll('.circleFeature').data(segs).enter().append('g').attr('class', "circleFeature")
-      .attr('transform', d=>'translate('+[_xScale(d['t'])- size + 1, _yScale(d['rank'])- size + 3.5] +')');
-
-    _circle_container.each(function(d){
-      let _c = d3.select(this);
-
-      _this.renderGlyph(_c, size, size, 5, (featureHeight - size) / 2,  _this.features[parseInt(featureObj.fid)]['fullName']);
-    })
 
 
 
-    //
-    // _container.selectAll('circle').data(segs).enter().append('circle')
-    //   .attr('cx', d=>_xScale(d['t'])).attr('cy', d=>_yScale(d['rank']))
-    //   .attr('r', 3).attr('stroke', d=>_this.get_color_by_index(featureObj['fid']))
-    //   .attr('fill', 'none')
-    //   .attr('fill', 'white')
-    //   .append('title').text(function(d){
-    //   _this.features[featureObj['fid']]['name'];
-    // })
-    //   .attr('fill', d=>_this.get_color_by_index(featureObj['fid']));
 
     let links = [];
     if(segs.length<=1) return
@@ -351,10 +337,33 @@ IndividualSequence.prototype.renderRankTrend = function(container, config, data)
       })
     }
 
-    _container.append('g').selectAll('.links').data(links).enter().append('line').attr('class', 'link')
+    _container.selectAll('.links').data(links).enter().append('line').attr('class', 'link')
       .attr('x1',  d=>_xScale(d['source']['t'])).attr('y1', d=>_yScale(d['source']['rank']))
       .attr('x2',  d=>_xScale(d['target']['t'])).attr('y2', d=>_yScale(d['target']['rank']))
-      .style('stroke',  d=>_this.get_color_by_index(featureObj['fid'])).style('stroke-width', 2).style('stroke-opacity', 0.5)
+      .style('stroke',  d=>_this.get_color_by_index(featureObj['fid'])).style('stroke-width', 1)
+
+    let _circle_container = _container.selectAll('.circleFeature').data(segs).enter().append('g').attr('class', "circleFeature")
+      .attr('transform', d=>'translate('+[_xScale(d['t']) - size + 1, _yScale(d['rank']) - size + 3] +')');
+
+    // console.log('featureObj', featureObj)
+    _circle_container.each(function(d){
+      let _c = d3.select(this);
+      _this.renderGlyph(_c, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(featureObj.fid)]['fullName']);
+    })
+
+
+
+
+    d3.select(this).selectAll('circle').data(segs).enter().append('circle')
+      .attr('cx', d=>_xScale(d['t'])).attr('cy', d=>_yScale(d['rank']))
+      .attr('r', 3).attr('stroke', d=>_this.get_color_by_index(featureObj['fid']))
+      .attr('fill', 'none')
+      .attr('fill', 'white')
+      .append('title').text(function(d){
+      _this.features[featureObj['fid']]['name'];
+    })
+      .attr('fill', d=>_this.get_color_by_index(featureObj['fid']));
+
   });
 
 
@@ -386,7 +395,7 @@ IndividualSequence.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W
 
 IndividualSequence.prototype.renderGlyph = function(container, width, height, ofx, ofy, name){
   let name_obj = this.parse_feature_name(name);
-
+  console.log('name obj',name_obj);
   let direction = name_obj['direction'];
   let distance = name_obj['distance'];
   let feature = name_obj['feature'];
@@ -399,16 +408,15 @@ IndividualSequence.prototype.renderGlyph = function(container, width, height, of
   let _w =  ((distance_level + 1)) * unit_width * 2;
   let _h = ((distance_level + 1)) * unit_height * 2;
 
+  console.log('range', ofx, distance_level, unit_width);
 
   let _rect = container.append('rect').attr('x', ofx).attr('y', ofy)
     .attr('width', width)
     .attr('height', height)
     .attr('rx', 2).attr('ry', 2)
     .attr('fill', feature_color(feature))
-
     .attr('stroke', feature_color(feature))
-    .attr('stroke-opacity', 0.6 )
-    .attr('opacity', 0.2)
+    .attr('opacity', 0.4)
 
   let boundary_color = 'white';
   let _rect_out = container.append('rect')

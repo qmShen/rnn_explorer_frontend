@@ -44,6 +44,7 @@
       pipeService.onTimeRangeSelected((msg)=>{
         this.handler.setTimeRange(msg);
         this.handler.plot();
+
         console.log('on select time range', msg);
       })
     },

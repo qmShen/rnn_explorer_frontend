@@ -13,7 +13,7 @@ let Boxplot = function(el){
   this.svg = d3.select(el).append('svg').attr('width', this.canvas_width).attr('height', this.canvas_height);
 };
 
-let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#290095", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
 let feature_color = d3.scaleOrdinal().range(color_list_feature);
 feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25",  "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 
@@ -25,8 +25,7 @@ let parse_attribute_name = function(attributes_name){
 
 Boxplot.prototype.render_data = function(item){
 
-  let margin = {top: 10, right: 10, bottom: 20, left: 40};
-  this.margin = margin;
+  let margin = {top: 10, right: 10, bottom: 20, left: 35};
   let renderHeight = this.canvas_height - (margin.top + margin.bottom);
   let renderWidth = this.canvas_width - (margin.left + margin.right);
 
@@ -40,7 +39,7 @@ Boxplot.prototype.render_data = function(item){
 
   let allBoxContainer = rootContainer.append('g').attr('class', 'allboxcontainer')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-  let _this = this;
+
 
   // allBoxContainer.append('rect')
   //   .attr('width', renderWidth)
@@ -52,16 +51,12 @@ Boxplot.prototype.render_data = function(item){
   //   .attr('stroke', 'red');
   // console.log('item', item);
 
-  let ceil = 0.10;
   let maxVal = d3.max(temporal_statistics, d=>d[1])
 
-  ceil = maxVal < ceil ? maxVal: ceil
-  let _yScale = d3.scaleLinear()
-    .domain([0, ceil]).range([renderHeight, 0]);
-  let yScale = function(d){
-    if(d > ceil) return _yScale(ceil);
-    else return _yScale(d);
-  };
+  
+  let yScale = d3.scaleLinear()
+    .domain([0, maxVal]).range([renderHeight, 0]);
+
   let xScale = d3.scaleLinear()
     .domain([0, temporal_statistics.length]).range([0, renderWidth]);
 
@@ -69,9 +64,9 @@ Boxplot.prototype.render_data = function(item){
   this.yScale = yScale;
   this.xScale = xScale;
 
-
+  console.log('scale', this.xScale)
   let xAxis = d3.axisBottom().scale(xScale);
-  let yAxis = d3.axisLeft().scale(_yScale).ticks(4);
+  let yAxis = d3.axisLeft().scale(yScale).ticks(4);
 
 
   let xAxisContainer = allBoxContainer.append('g')
@@ -104,7 +99,7 @@ Boxplot.prototype.render_data = function(item){
   //   .attr('stroke-width', 0.2)
   //   .attr('fill-opacity', 0)
 
-  let boxMargin = 2;
+  let boxMargin = 1;
   this.boxMargin = boxMargin;
   let boxWidth = renderWidth / temporal_statistics.length - boxMargin * 2;
   this.boxWidth = boxWidth;
@@ -156,6 +151,7 @@ Boxplot.prototype.render_data = function(item){
 
 
   boxContainer.append('line')
+
     .attr("x1", d=> boxMargin)
     .attr("y1", d=> yScale(d[0]))
     .attr("x2", d=> boxMargin + boxWidth)
@@ -165,37 +161,19 @@ Boxplot.prototype.render_data = function(item){
     .style('stroke-width',line_width)
 
 
-  boxContainer.each(function(d){
-    let _container = d3.select(this);
-    if(d[1] > ceil){
-      _container.append("path").attr('class', '444444')
-        .attr("d", d3.symbol()
-          .size(function(d) { return 50; } )
-          .type(function(d) { return d3.symbolDiamond}))
-        .attr("transform", (shape, i) => "translate(" + [boxMargin + boxWidth / 2,0] + ")")
-        .attr('fill', _this.feature_color)
-        .attr('fill-opacity', 0.3 + (d[1] - ceil) * 4)
-        .append('title').text(parseInt(d[1] * 100) / 100)
-    };
-  });
-  // if(maxVal > ceil){
-  //   boxContainer.append('circle')
-  //     .attr('cx', xScale())
-  // }
 };
 
 Boxplot.prototype.set_data = function(item){
   let renderWidth = this.canvas_width ;
   this.features = [];
   this.featureName = item.feature_name;
-
+  this.svg.append('text').text(item.feature_name).attr("font-size", "10").attr('y', '20').attr('x', renderWidth / 2);
   // get the information of feature name
   this.feature_type = parse_attribute_name(item.feature_name);
   this.feature_color = feature_color(this.feature_type);
+  console.log('feature ', item.feature_name, parse_attribute_name(item.feature_name));
 
   this.render_data(item);
-  this.svg.append('text').text(item.feature_name).attr("font-size", "13").attr('y', this.margin.top + 10).attr('x', this.margin.left + 5).style('opacity', 0.7);
-
 };
 
 Boxplot.prototype.set_selected_data = function(selectedData){
@@ -244,7 +222,7 @@ Boxplot.prototype.onHoverOn = function(second){
 };
 
 Boxplot.prototype.onHoverOut = function(){
-  this.lineContainer.selectAll('path').attr('stroke-width', 0.3);
+  this.lineContainer.selectAll('path').attr('stroke-width', 1);
 };
 
 Boxplot.prototype.onSelect = function(seconds){

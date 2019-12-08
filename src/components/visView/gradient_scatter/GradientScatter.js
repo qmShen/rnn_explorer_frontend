@@ -14,7 +14,7 @@ let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 let gradient_color_list = ["#f9d057", "#f9d057", "#fc4e2a", "#e76818","#bd0026", '#67000d'];
 // gradient_color_list = ["#F6CAD9","#E6A3B6", "#B05E6A", "#984B53", "#6E3132", 'black'];
 let colorScaleRainbow = d3.scaleLinear()
-  .domain([0.0,0.2,0.35,0.4, 0.6, 1])
+  .domain([0.0,0.2,0.4,0.5, 0.7, 1])
   .range(gradient_color_list)
   .interpolate(d3.interpolateHcl);
 
@@ -103,6 +103,7 @@ GradientScatter.prototype.setData = function(data, targetFeature){
     .addAll(this.data);
 
   this.plot(this.data);
+  this.selectWinter();
 };
 
 GradientScatter.prototype.setTimeRange = function(timeRange){
@@ -152,13 +153,83 @@ GradientScatter.prototype.plot = function(data){
   this.drawPoints(d3.zoomIdentity)
 };
 
+
+GradientScatter.prototype.selectWinter = function(data){
+
+  let r1 = {start: 1543552908, end: 1546182000};
+  let r2 = {start: 1514736000, end: 1519908265};
+  console.log('Run plot!');
+  if(data == undefined){
+    data = this.data;
+  }
+  this.xScale = d3.scaleLinear().domain(d3.extent(data, (d) => d.x)).range([20, this.canvasWidth]).nice();
+  this.yScale = d3.scaleLinear().domain(d3.extent(data, (d) => d.y)).range([40, this.canvasHeight]).nice();
+
+  // Init Axis
+  this.xAxis = d3.axisBottom(this.xScale);
+  this.yAxis = d3.axisLeft(this.yScale);
+
+  this.gxAxis = this.svgChart.append('g')
+    .attr('transform', "translate(0," + this.canvasHeight + ")")
+    .call(this.xAxis);
+
+  this.gyAxis = this.svgChart.append('g')
+    .call(this.yAxis);
+
+  this.update_quadtree();
+
+
+  let _this = this;
+  let transform = d3.zoomIdentity
+  this.lastTransform = transform;
+
+  const scaleX = transform.rescaleX(this.xScale);
+  const scaleY = transform.rescaleY(this.yScale);
+
+  this.gxAxis.call(this.xAxis.scale(scaleX));
+  this.gyAxis.call(this.yAxis.scale(scaleY));
+
+  this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+
+  let k = transform.k;
+  let r = k * 1 > 3 ? 3: k * 1;
+  this.data.forEach(point => {
+    if((point.seconds > r1.start && point.seconds < r1.end) || (point.seconds > r2.start && point.seconds < r2.end)){
+      this.drawPoint(scaleX, scaleY, point, r * 2);
+    }else{
+      this.drawPoint(scaleX, scaleY, point, r* 1, '#d9d9d9');
+    }
+
+  });
+
+  this.zoom_function = d3.zoom().scaleExtent([1, 20])
+    .on('zoom', () => {
+      const transform = d3.event.transform;
+      this.context.save();
+      this.drawPoints(transform);
+      _this.lastTransform = transform;
+      this.context.restore();
+      this.draw_selected_points(transform);
+
+    })
+    .on('end', ()=>{});
+
+  this.svgChart.call(this.zoom_function);
+  // this.canvasChart.call(this.zoom_function);
+
+
+  this.initializeOperation();
+};
+
+
 GradientScatter.prototype.drawPoints = function(transform){
-  let timeRange = this.timeRange
+  let timeRange = this.timeRange;
+  console.log("Time range", this.timeRange);
   let start = -1;
   let end = Number.MAX_SAFE_INTEGER;
   if(timeRange != undefined && timeRange.start != undefined && timeRange.end != undefined){
-      start = timeRange.start;
-      end = timeRange.end;
+    start = timeRange.start;
+    end = timeRange.end;
   }
   let _this = this;
   this.lastTransform = transform;
@@ -172,16 +243,16 @@ GradientScatter.prototype.drawPoints = function(transform){
   this.context.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
   let k = transform.k;
-  let r = k * 1.5 > 3 ? 3: k * 1.5;
+  let r = k * 1 > 3 ? 3: k * 1;
   this.data.forEach(point => {
     if(point.seconds > start && point.seconds < end){
-      this.drawPoint(scaleX, scaleY, point, r);
+      this.drawPoint(scaleX, scaleY, point, r * 1.3);
     }else{
-      this.drawPoint(scaleX, scaleY, point, r, '#d9d9d9');
+      this.drawPoint(scaleX, scaleY, point, r * 0.7, '#b3b3b3');
     }
 
   });
-
+// '#d9d9d9'
 
 
   this.zoom_function = d3.zoom().scaleExtent([1, 20])

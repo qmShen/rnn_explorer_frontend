@@ -1,7 +1,7 @@
 <template>
   <div class = 'main'>
     <el-row :gutter="3" class="horizontal_stripe">
-      <el-col :span="7" class="horizontal_stripe">
+      <el-col :span="6" class="horizontal_stripe">
         <div class="bg-purple column">
 
           <div class="control_container boundary">
@@ -60,20 +60,22 @@
         <div class = 'boundary FC_container'>
           <el-col style="width: 100%; height: 100%;">
             <div class="mini_head" style="width: 100%">
-              <div class = 'mini_title'>FC distribution</div>
+              <div class = 'mini_title'>Feature Importance</div>
             </div>
 
             <div style=" width: calc(100%);height: calc(100% - 20px); overflow-y: scroll;" class="scrollstyle">
-              <FeatureBoxplot class="boundary" style="display:inline-block; width: calc(100% - 10px); height: calc(100% / 10)"  v-for="item in input_feature_gradient_statistics.feature_statics"
-                              v-bind:key="item.feature_name"
-                              v-bind:item="item"
-                              v-bind:selectedFeatureGradient="selectedFeatureGradient"></FeatureBoxplot>
+              <transition-group>
+                <FeatureBoxplot class="boundary" style="display:inline-block; width: calc(100% - 10px); height: calc(100% / 10)"  v-for="item in input_feature_gradient_statistics.feature_statics"
+                                v-bind:key="item.feature_name"
+                                v-bind:item="item"
+                                v-bind:selectedFeatureGradient="selectedFeatureGradient"></FeatureBoxplot>
+              </transition-group>
             </div>
           </el-col>
 
         </div>
       </el-col>
-      <el-col :span="12" class="horizontal_stripe">
+      <el-col :span="13" class="horizontal_stripe">
         <div class="grid-content bg-purple">
 
 
@@ -91,7 +93,7 @@
             size="50%">
 
             <div style="height: calc(100% - 20px); width:calc(100% - 40px); pointer-events: auto">
-              <el-row :gutter="3" class="horizontal_stripe boundary" style="left:20px; right: 20px; height: 30%">
+              <el-row :gutter="3" class="horizontal_stripe boundary" style="left:20px; right: 20px; height: 20%">
                 <LineChart class="linechart_container" :trend_data="target_feature_value"> </LineChart>
               </el-row>
               <el-row :gutter="3" class="horizontal_stripe" style="left:20px; right: 20px; height: 65%">
@@ -116,7 +118,7 @@
                       </div>
                       <div style="height:20px">&nbsp</div>
                       <el-divider>Features</el-divider>
-                      <div style = "width: 100%; height:490px; overflow-y: scroll">
+                      <div style = "width: 100%; height:580px; overflow-y: scroll">
                         <table align="left" style="width: 100%">
                           <tr style="width: 100%" v-for="item in allStats.features" v-bind:key="item.id">
                             <td style="width: 20%; font-size:10px; " align="center">
@@ -155,12 +157,12 @@
           <div class = 'individual_container boundary'>
             <el-col :span="24" class="horizontal_stripe" style ='overflow-y: auto;'>
               <div class="mini_head">
-                <div class = 'mini_title'>Sequence List</div>
+                <div class = 'mini_title'>Individual</div>
               </div>
               <div id="individual_container" style="height: calc(100% - 20px); position: relative">
                 <IndividualSequenceView
                   class="cardbox"
-                  style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px; background-color: white; "
+                  style="display:inline-block; width: calc(100% / 4 - 2px); height: 400px; background-color: white;  position: absolute"
                   v-bind:style="{top:item.position.y +'px', left:item.position.x +'px'}"
                   v-for="item in featureGradientObjs"
                   v-bind:key="item.timestamp"
@@ -306,7 +308,7 @@
 
       let clusterIndividuals = function(featureGradientObjs){
         if(featureGradientObjs.length == 0){
-            return
+          return
         }
         featureGradientObjs.sort((a,b)=>{
           let x = a['timestamp'].length;
@@ -452,6 +454,7 @@
         if(new_model == undefined || new_model == null){
           return
         }
+//        Begin
         dataService.loadSelectedModel(this.current_model['model_id'], (records)=>{
           this.allStats = records;
           this.dropSelection.disableTargetFeature = false;
@@ -465,20 +468,30 @@
 
         });
 
-//        this.getGradientProjection('PM25', (records)=>{
-//          _this.gradientScatter = records;
-//          _this.dropSelection.disableProjection = false
-//        });
+
 
         let start_time = new Date();
         dataService.getFeatureValuesScaled([this.targetFeature], function(records){
           _this.target_feature_value = records;
           console.log('4', new Date() - start_time);
         });
-//  For test
+//      End
+
+
+//  Design: 1519801200 + 3600 * 12,
         pipeService.emitSequenceSelected({
           'seq_ids': [
-            1519801200,
+
+//            1519801200 + 3600 * 2 ,
+//            1519801200 + 3600 * 12,
+//            1519801200 + 3600 * 27,
+//            1519801200 + 3600 * 25,
+//            1519801200 + 3600 * 35,
+//            1519801200 + 3600 * 45,
+//
+//
+//
+//            1519801200,
 //            1519801200 + 3600 * 2 ,
 //            1519801200 + 3600 * 3 ,
 //
@@ -499,6 +512,8 @@
           'selected_timestamps': null,
           'colors': _this.colors
         });
+
+
         dataService.getRegionSector('KC_A', (record)=>{
           this.regionSector = record;
         });
@@ -511,7 +526,7 @@
         }
         let featureMap = {};
         if(allFeature == null || allFeature == undefined){
-            return
+          return
         }
         allFeature.forEach(feature=>{
           featureMap[feature] = {'feature': feature, 'gradientList':[]}
@@ -597,12 +612,12 @@
           this.getFeatureGradientStatistics(this.targetFeature, (records)=>{
 //              test test test2
             records['feature_statics'].sort((a,b)=>{
-              let l = a['temporal_statistics'].length;
-              let x = d3.sum(a['temporal_statistics'].slice(l - 6, l), d=>d[1]);
-              let y = d3.sum(b['temporal_statistics'].slice(l - 6, l), d=>d[1]);
+              let l = a['temporal_statistics'].length; //.slice(l - 6, l)
+              let x = d3.sum(a['temporal_statistics'], d=>d[2]);
+              let y = d3.sum(b['temporal_statistics'], d=>d[2]);
               return ((x < y) ? 1 : ((x > y) ? -1 : 0));
             });
-            records['feature_statics'] = records['feature_statics']//slice(0, 10);
+            records['feature_statics'] = records['feature_statics'].slice(0, 100);
             this.input_feature_gradient_statistics = records;
           });
           this.getGradientProjection(this.targetFeature, (records)=>{
@@ -699,12 +714,12 @@
   }
 
   .control_container{
-    height: calc(30%);
+    height: calc(25%);
   }
 
 
   .distribution_container{
-    height: calc(70%);
+    height: calc(75%);
   }
   .scatter_container{
     height: calc(100%);

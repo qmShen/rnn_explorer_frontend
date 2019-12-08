@@ -1,11 +1,12 @@
 <template>
   <div class="local_container">
     <div class="mini_head">
-      <div class = 'mini_title'>Distribution</div>
+<!--      <div class = 'mini_title' >Distribution</div>-->
     </div>
-    <svg class="distribution_svg"></svg>
-    <el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>
-    <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>
+
+    <svg class="cluster_svg"></svg>
+<!--    <el-button size="mini" class="dist_confirm_button" @click="handleSelectedData">Calc</el-button>-->
+<!--    <el-button size="mini" class="filter_button" @click="handleOpen">Filter</el-button>-->
     <el-dialog class = "popup_dialog"
 
                title="Filter"
@@ -156,7 +157,7 @@
 </script>
 
 <style >
-  .distribution_svg{
+  .cluster_svg{
     height: calc(100% - 20px);
     width: 100%
   }

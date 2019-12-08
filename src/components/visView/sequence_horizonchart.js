@@ -21,11 +21,10 @@ let Sequence = function(el){
   this.sequence_width = this.canvas_width / 2 - 50;
   this.paral_width = 400 ;
   this.sequence_height_max = 150;
-  this.init_render()
+  this.init_render();
 };
 
 Sequence.prototype.render_circular_sequence = function(_container, sequence){
-
   sequence['cell_render'] = [];
   let cell_data_sequence = sequence['feature_cluster_gradient'];
   let n_cell = cell_data_sequence.length;

@@ -73,10 +73,21 @@ DistributionMatrix.prototype.bicluster_colorScale  = d3.scaleOrdinal(d3["schemeC
 //   return 'grey'
 // };
 DistributionMatrix.prototype.feature_color = d3.scaleOrdinal(d3["schemeCategory20"]);
-let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#dd4477", "#990099",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+DistributionMatrix.prototype.features = ["CO", "NO2", "O3", "SO2", "PM10", "PM25", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"];
+// "AQHI", "AQHIER", "#dd4477", "#990099",
+// let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
 
-DistributionMatrix.prototype.feature_color = d3.scaleOrdinal().range(color_list_feature);
-DistributionMatrix.prototype.feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
+
+let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#290095", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+let feature_color = d3.scaleOrdinal().range(color_list_feature);
+feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25",  "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
+
+DistributionMatrix.prototype.feature_color = feature_color;
+
+
+DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
+
+DistributionMatrix.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 6, "NE": 7};
 
 DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_stats){
 
@@ -132,14 +143,16 @@ DistributionMatrix.prototype.initialize_cluster_render = function(feature_units_
 
   this.link_region_width = this.canvas_width * 0.15;
   this.remain_width=  this.canvas_width - this.link_region_width;
-  this.top_unit_width = this.remain_width * 0.15;
-  this.top_feature_width = this.remain_width * 0.15;
-  this.unit_region_width = this.remain_width * 0.3;
-  this.feature_region_width = this.remain_width * 0.4;
+  this.top_unit_width = this.remain_width * 0.05;
+  this.top_feature_width = this.remain_width * 0.05;
+  this.unit_region_width = this.remain_width * 0.4;
+  this.feature_region_width = this.remain_width * 0.5;
+
+
   this.legend_container_height = this.canvas_height * 0.05;
   this.slider_height = this.canvas_height * 0.025;
   this.legend_container_width = this.canvas_width;
-  this.remain_height = this.canvas_height - this.legend_container_height- this.slider_height;
+  this.remain_height = this.canvas_height - this.legend_container_height - this.slider_height;
 
   this.root_container = this.svg.append('g').attr('class', 'root_container');
 
@@ -299,7 +312,6 @@ DistributionMatrix.prototype.calc_position = function(unit_cluster_group, featur
     });
 
 
-
   this.single_feature_container = this.feature_container.selectAll('.feature_group').data(feature_cluster_group).enter().append('g').attr('class','feature_group')
     .attr('transform', (d, i) => 'translate(' + d.f_render.x + ',' + d.f_render.y +')');
 
@@ -387,11 +399,6 @@ DistributionMatrix.prototype.unhighlight_feature_group = function(fc_id){
   d3.selectAll('.unit_group_outline').attr('stroke-width', 1.5).attr('stroke', d=>_this.bicluster_colorScale(d.cid))
 };
 
-DistributionMatrix.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
-
-DistributionMatrix.prototype.features = ["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"];
-
-DistributionMatrix.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 6, "NE": 7};
 
 DistributionMatrix.prototype.parse_feature_name = function(feature_name){
 
@@ -820,7 +827,8 @@ DistributionMatrix.prototype.layout_cells = function(){
         .datum(d['kde_point'])
         .attr("fill", "none")
         .attr("opacity", ".8")
-        .attr("stroke", _this.bicluster_colorScale(d.cid))
+        .attr("stroke", 'grey')
+        // .attr("stroke", _this.bicluster_colorScale(d.cid))
         .attr("stroke-width", 1)
         .attr("stroke-linejoin", "round")
         .attr("d",line)

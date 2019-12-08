@@ -3,7 +3,7 @@
  */
 import * as d3 from "d3";
 
-let IndividualSequence = function(el, targetFeature){
+let IndividualSequence = function(el){
   let _this = this;
   this.$el = el;
   this.canvas_width = this.$el.clientWidth;
@@ -11,39 +11,28 @@ let IndividualSequence = function(el, targetFeature){
   this.svg = d3.select(el).append('svg')
     .attr('width', this.canvas_width)
     .attr('height', this.canvas_height);
-  this.svg.append('rect')
-    .attr('width', this.canvas_width).attr('height', this.canvas_height)
-    .attr('fill', 'white')
 
-  this.firstBatch = 20;
-  this.topN = 10;
 
   this.row0Config = {
-    'marginLeft': 30,
     'top': 0,
     'height': 1,
     'width': this.canvas_width
   };
   this.row1Config = {
-    'marginLeft': 30,
     'top': this.row0Config['top'] + this.row0Config['height'],
     'height': (this.canvas_height - this.row0Config['height']) * 0.2,
     'width': this.canvas_width
   };
   this.row2Config = {
-    'marginLeft': 30,
     'top': this.row1Config['top'] + this.row1Config['height'],
     'height': (this.canvas_height - this.row0Config['height']) * 0.3,
     'width': this.canvas_width
   };
   this.row3Config = {
-    'marginLeft': 30,
     'top': this.row2Config['top'] + this.row2Config['height'],
     'height': (this.canvas_height - this.row0Config['height'])  - this.row2Config['height'] - this.row1Config['height'],
     'width': this.canvas_width
   };
-
-  this.marginLeft = 30;
 
   this.titleConfig = this.row0Config;
   this.trendConfig = this.row1Config;
@@ -62,17 +51,13 @@ let IndividualSequence = function(el, targetFeature){
     .attr('transform', 'translate('+[0, this.rankConfig['top']] +')');
 
 //  -----------------------------------------------------------------
-  this.targetFeature = targetFeature;
-  // console.log('targetFeature', this.targetFeature);
+  this.targetFeature = 'PM25';
 };
 
 
-// let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#290095", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#dd4477", "#990099",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
 let feature_color = d3.scaleOrdinal().range(color_list_feature);
-feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25",  "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
-
-
+feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let toDateTime = function(secs) {
@@ -94,9 +79,6 @@ let format_date = function(date){
   let string = date.getFullYear() + '-' + month + '-' + day + ' ' + hour +':00:00  ' + weekDay[date.getDay()];
   return string;
 };
-//Should be written in config file
-IndividualSequence.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
-IndividualSequence.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 6, "NE": 7};
 
 IndividualSequence.prototype.get_color_by_index = function(index){
 
@@ -116,7 +98,7 @@ IndividualSequence.prototype.set_Data = function(data){
   let features = [];
   if(featureNames.length >= 0){
     for(let r in featureNames) {
-      features.push({'fullName': featureNames[r] ,'name':r, 'type': parse_attribute_name(featureNames[r])});
+      features.push({'name':r, 'type': parse_attribute_name(featureNames[r])});
     }
   }
 
@@ -140,7 +122,7 @@ IndividualSequence.prototype.set_Data = function(data){
 
   let featureGradient = data['featureGradientToEnd'][this.targetFeature]['feature_gradient'];
 
-  this.renderTopFeatures(this.randContainer, this.rankConfig, featureGradient);
+  this.renderRankTrend(this.randContainer, this.rankConfig, featureGradient);
 };
 
 IndividualSequence.prototype.renderFeatureTrend = function(container, config, data, features){
@@ -155,56 +137,35 @@ IndividualSequence.prototype.renderFeatureTrend = function(container, config, da
   let nTime = this.nTime;
   let nFeature = data[0].length;
 
-  let featureTrend = [];
+  let featureTimeData = [];
 
   for(let i = 0, ilen = nFeature; i < ilen; i++){
     let featureArray = [];
     for(let j = 0, jlen = nTime; j <jlen; j++){
       featureArray.push(data[j][i]);
     }
-    // name, value
-    featureTrend.push({
-      'feature':features[i].fullName,
-      'value': featureArray,
-    });
+    featureTimeData.push(featureArray);
   }
+  let offsetX = config['width'] / this.nTime / 2;
 
-  this.featureTrend = featureTrend;
-  let offsetX = (config['width'] - this.marginLeft) / this.nTime / 2;
-
-  let xScale = d3.scaleLinear().domain([0, nTime-1]).range([this.marginLeft, config['width']]);
+  let xScale = d3.scaleLinear().domain([0, nTime-1]).range([0, config['width']]);
   let yScale = d3.scaleLinear().domain([1, 0]).range([0, config['height']]);
   let line = d3.line()
     .x(function (d, i) { return xScale(i); })
     .y(function (d, i) { return yScale(d);});
 
-  let LineContainer = container.selectAll('.feature_line')
-    .data(featureTrend)
+  let eLine = container.selectAll('.feature_line')
+    .data(featureTimeData)
     .enter()
-    .append('g')
-    .attr('class', 'feature_line');
+    .append('path')
+    .attr('class', 'feature_line')
+    .attr('d', line)
+    .attr('stroke', (d, i) => {
+      return feature_color(features[i]['name'])})
+    .attr('fill', 'none')
+    .attr('opacity', 0.4)
+    .attr('stroke-width', 0.3);
 
-
-  this.LineContainer = LineContainer;
-  LineContainer.each(function(d, i){
-    let _container = d3.select(this);
-    _container.datum(d.value).append('path')
-      .attr('d', line)
-      .attr('stroke', () => {
-        return feature_color(features[i]['type'])})
-      .attr('fill', 'none')
-      .attr('opacity', 0.4)
-      .attr('stroke-width', 0.3);
-    if(d.render == undefined){
-      d['render'] = {};
-    }
-    d['render']['container'] = this;
-  });
-
-  this.featureMap = {};
-  featureTrend.forEach(d=>{
-    this.featureMap[d.feature] = d;
-  });
 };
 
 IndividualSequence.prototype.renderGradientTrend = function(container, config, data){
@@ -217,11 +178,11 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   let nHorizons = 3;
   let nCluster = data[0].length;
   let seqHeight = config['height'] / nCluster;
-  let xScale = d3.scaleLinear().range([this.marginLeft, config['width']]).domain([0, this.nTime]);
-  let yScale = d3.scaleLinear().clamp(true).range([0, seqHeight]);
+  let xScale = d3.scaleLinear().range([0, config['width']]).domain([0, this.nTime]);
+  let yScale = d3.scaleLinear().clamp(true).range([0, seqHeight])
   let barWidth = config['width'] / this.nTime;
 
-  let clusterGradient = [];
+  let clusterGradient = []
   for(let i = 0, ilen = nCluster; i < ilen; i++){
     let clusterArray = [];
     for(let j = 0, jlen = this.nTime; j <jlen; j++){
@@ -244,8 +205,15 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
       });
   }
 
+
+  // console.log('domain', gradient_T.map(function(d) { return d.cluster_id; }))
   let seqContainers = container.selectAll('.barContainer').data(clusterGradient).enter().append('g').attr('class', 'barContainer')
     .attr('transform', (d,i)=>'translate(' + [0, i * seqHeight] + ')');
+
+
+  console.log('clusterGradient__', clusterGradient);
+  seqContainers.append('rect').attr('width', config['width']).attr('height', seqHeight).attr('fill-opacity', 0)
+    .attr('stroke', 'red').attr('stroke-width', 0.2);
 
   seqContainers.append('title').text(function(_d, i){
     return "Cluster " + i;
@@ -258,8 +226,7 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   let fill = function(d) {
       return d.yExtent[0] * 20;
     },
-    // fillScale = d3.scaleLinear().range(['lavender', 'purple']).interpolate(d3.interpolateHcl),
-    fillScale = d3.scaleLinear().range(["lavender", "#3e17a5"]).interpolate(d3.interpolateHcl),
+    fillScale = d3.scaleLinear().range(['lavender', 'purple']).interpolate(d3.interpolateHcl),
     fillValue = function(d) { return fillScale(fill(d)); };
 
   gHorizon.each(function(d, i) {
@@ -274,16 +241,14 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
       .style('fill', fillValue(d))
 
   })
-  seqContainers.append('rect').attr('width', config['width']).attr('height', seqHeight).attr('fill-opacity', 0)
-    .attr('stroke', 'grey').attr('stroke-width', 0.2);
+
 };
 let sortArrayRI = function(arr, topN){
   if(topN == undefined){topN = arr.length;}
   let indices = new Array(arr.length);
   for (var i = 0; i < arr.length; ++i) indices[i] = i;
   indices.sort(function (a, b) { return arr[a] < arr[b] ? 1 : arr[a] > arr[b] ? -1 : 0; });
-  let rx = indices.slice(0, topN);
-
+  let rx = indices.slice(0, topN)
   return rx;
 };
 
@@ -291,206 +256,137 @@ function transpose(matrix) {
   return matrix[0].map((col, i) => matrix.map(row => row[i]));
 }
 
-IndividualSequence.prototype.renderTopFeatures = function(container, config, data){
-
-  // Data processing -------------------------------------------------------------------------------
+IndividualSequence.prototype.renderRankTrend = function(container, config, data){
   let __start_time = new Date();
   container.append('rect')
     .attr("width", config['width']).attr('height', config['height'])
     .attr('fill', 'none')//.attr('fill-opacity', 0.05)
     .attr('stroke','grey');
 
-  let nTopFeature = this.firstBatch;
+  let nTopFeature = 10;
 
-  let dataT = transpose(data);
+  data = transpose(data);
   let topNFeatureList = [];
-
-
-  for(let i = 0, ilen = dataT.length; i < ilen; i++){
-    topNFeatureList.push(sortArrayRI(dataT[i], nTopFeature));
+  for(let i = 0, ilen = data.length; i < ilen; i++){
+    topNFeatureList.push(sortArrayRI(data[i], nTopFeature));
   }
-  // console.log('topNFeatureList', topNFeatureList);
-  let FID2Seq = {};
 
+  let xScale = d3.scaleLinear().domain([0, 24]).range([0, config['width']])
+  let yScale = d3.scaleLinear().domain([0, nTopFeature ]).range([0, config['height']])
+
+  let FID2Seq = {};
+  console.log('tsopNFeatureList', topNFeatureList);
   for(let timeI = 0, ilen = topNFeatureList.length; timeI < ilen; timeI++){
     let seqI =topNFeatureList[timeI];
     for(let rank = 0, jlen = seqI.length; rank < jlen; rank++){
       if(FID2Seq[seqI[rank]] == undefined){
         FID2Seq[seqI[rank]] = [];
       }
-      let preObj = FID2Seq[seqI[rank]].length == 0? null: FID2Seq[seqI[rank]][FID2Seq[seqI[rank]].length -1];
-      let obj = {'t': timeI, 'rank': rank, 'pre': preObj, 'next': null};
-      if(preObj){
-        preObj['next'] = obj
-      }
-      FID2Seq[seqI[rank]].push(obj);
+      FID2Seq[seqI[rank]].push({'t': timeI, 'rank': rank});
     }
   }
-  let rankingList = [];
 
-  for(let key in FID2Seq){
-    rankingList.push({
-      'feature_index': key,
-      'topList': FID2Seq[key],
-      'gradient_sum': d3.sum(data[key])
-    })
-  }
 
-  console.log('rankingList', rankingList);
-  rankingList.sort((a, b)=>{
-    // let x = a['topList'].length;
-    // let y = b['topList'].length;
-    let x = a['gradient_sum'];
-    let y = b['gradient_sum'];
-    return ((x < y) ? 1 : ((x > y) ? -1 : 0));
-  });
+  let columnsContainers = container.selectAll('.columnContainer').data(topNFeatureList).enter().append('g').attr('class', 'columnContainer')
+    .attr('transform',(d, i) => 'translate('+ [xScale(i), 0]+')');
+  let _this = this;  let idWithSeq = [];
 
-  let idWithSeq = [];
   for(let fid in FID2Seq){
     idWithSeq.push({'fid': fid, 'seqs': FID2Seq[fid]});
   };
+  console.log('FID2Seq', FID2Seq);
+  let featureContainers = container.append('g').attr('class', 'featureContainer').selectAll('.featureContainer')
+    .data(idWithSeq)
+    .enter()
+    .append('g').attr('class', 'featureContainer');
 
-  //-------------------------------------------------------------------------------------------
-  let _this = this;
+  let offsetY = config['height'] / nTopFeature / 2;
+  let offsetX = config['width'] / this.nTime / 2;
+
+  let _xScale = function(d){
+    return xScale(d) + offsetX;
+  };
+
+  let _yScale = function(d){
+    return yScale(d) + offsetY;
+  };
+
   let noExtendHeight = 40;
-
-
-  let segHeight = 8;
-
-  let temp_rank_list = [];
-
-  rankingList.forEach(d=>{
-    let _feature_index = parseInt(d['feature_index']);
-    if(this.features[_feature_index]['type'] == 'CO'){
-      return
-    }
-    temp_rank_list.push(d)
-  })
-  // let topNList = rankingList.slice(0, this.topN);
-  // let otherList = rankingList.slice(this.topN, rankingList.length);
-
-  let topNList = temp_rank_list.slice(0, this.topN);
-  let otherList = temp_rank_list.slice(this.topN, rankingList.length);
-
   let featureHeight = (config['height'] - noExtendHeight) / this.topN;
-
   let size = featureHeight - 4;
 
-  // Render part -------------------------------------------------------------------------------
-  let xScale = d3.scaleLinear().domain([0, 24]).range([this.marginLeft, config['width']]);
-  let yScale = d3.scaleLinear().domain([0, nTopFeature]).range([0, config['height']] - noExtendHeight);
 
-  let segWidth = xScale(2) - xScale(1);
-  let containerWidth = 2 * segWidth;
-  let lN = parseInt(config['width'] / containerWidth);
-
-  container.append('rect').attr('fill', 'grey')
-    .attr('fill-opacity', 0.0)
-    .attr('y', config['height'] - noExtendHeight)
-    .attr('width', config['width']).attr('height', noExtendHeight);
-
-  // Draw other features
-
-
-  let otherContainer = container.append('g').attr('transform', (d, i)=> 'translate(' + [0, config['height'] - noExtendHeight] + ')');
-  otherContainer.append('rect').attr('fill', 'grey')
-    .attr('fill-opacity', 0.0)
-    .attr('width', config['width']).attr('height', noExtendHeight);
-
-  let level1Container = otherContainer.append('g');
-
-  let level1GlyphContainers = level1Container.selectAll('.glyphContainer').data(otherList.slice(0, lN * 2)).enter()
-    .append('g').attr('class', 'glyphContainer')
-    .attr('transform', (d, i)=> {
-      let ofx = 0;
-      let ofy = 5;
-      if(i < lN){
-        ofx = i * containerWidth;
-      }else{
-        ofx = (i - lN) * containerWidth;
-        ofy = noExtendHeight / 2;
-      }
-      return 'translate(' + [ofx + containerWidth / 4, ofy] + ')'
-    });
-
-
-  level1GlyphContainers.each(function(d){
+  featureContainers.each(function(featureObj){
     let _container = d3.select(this);
-    _this.renderGlyph(_container, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
-  });
+    let segs = featureObj['seqs'];
+    let _circle_container = _container.selectAll('.circleFeature').data(segs).enter().append('g').attr('class', "circleFeature")
+      .attr('transform', d=>'translate('+[_xScale(d['t']), _yScale(d['rank'])] +')');
 
-  let level2Container = otherContainer.append('g').attr('transform', (d, i)=> 'translate(' + [0, noExtendHeight / 2] + ')');
-
-  let topNFeatureContainers = container.append('g').attr('class', 'featureContainers').selectAll('.features')
-    .data(topNList)
-    .enter()
-    .append('g').attr('class', 'features')
-    .attr('transform', (d, i)=>'translate(' + [0, i * featureHeight] + ')');
-
-
-  topNFeatureContainers.append('rect').attr('stroke', 'grey').attr('stroke-width', 0.2).attr('fill', 'white')
-    .attr('width', config['width'])
-    .attr('height', featureHeight);
-
-  topNFeatureContainers.append('title').text(featureObj=>{
-    return this.features[parseInt(featureObj['feature_index'])]['fullName'];
-  });
+    // _circle_container.each(function(d){
+    //   let _c = d3.select(this);
+    //
+    //   _this.renderGlyph(_c, size, size, 5, (featureHeight - size) / 2, '200_E_SO2');
+    // })
 
 
-  topNFeatureContainers.each(function(featureObj){
 
-    let _container = d3.select(this);
 
-    let segContainers = _container.selectAll('.exist').data(featureObj['topList']).enter().append('g').attr('class', 'exist')
-      .attr('transform',(d, i)=>'translate(' + [xScale(d['t']), featureHeight / 2] + ')');
-
-    segContainers.each(function(seg){
-      let cellContainer = d3.select(this);
-      if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) || seg['next']['t'] != seg['t']+1){
-        // Do nothing
-      }else if(seg['pre']['t'] == seg['t']-1){
-        cellContainer.append('rect')
-          .attr('height', segHeight).attr('width', segWidth + 2)
-          .attr('x', -1 * segWidth / 2 - 1).attr('y', -1 * segHeight / 2 )
-          .attr('fill', 'grey').attr('fill-opacity', 0.2)
-      }
-    });
-
-    segContainers.each(function(seg){
-      let cellContainer = d3.select(this);
-      if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) ||seg['next']['t'] != seg['t']+1){
-        cellContainer.append('circle')
-          .attr('r', 4)
-          .attr('fill', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-          .attr('opacity', 0.7)
-          .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-      }else if(seg['pre']['t'] == seg['t']-1){}
-    });
-
-    _container.selectAll('.exist').data(featureObj['topList']).enter().append('circle').attr('class', 'exist')
-      .attr('cx', d=>xScale(d['t'])).attr('cy', featureHeight / 2)
-      .attr('r', 4)
+    _circle_container.append('circle')
+    // .attr('cx', d=>_xScale(d['t'])).attr('cy', d=>_yScale(d['rank']))
+      .attr('r', 3).attr('stroke', d=>_this.get_color_by_index(featureObj['fid']))
+      .attr('fill', 'none')
       .attr('fill', 'white')
-      .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-      .attr('stroke-width', 2);
+      .append('title').text(function(d){
+      _this.features[featureObj['fid']]['name'];
+    })
+     .attr('fill', d=>_this.get_color_by_index(featureObj['fid']));
+
+    let links = [];
+    if(segs.length<=1) return
+    for(let i = 1, ilen = segs.length; i <ilen; i++){
+      if(segs[i]['t'] - segs[i-1]['t'] > 1) continue;
+      links.push({
+        'source': segs[i-1],
+        'target': segs[i]
+      })
+    }
+
+    _container.selectAll('.links').data(links).enter().append('line').attr('class', 'link')
+      .attr('x1',  d=>_xScale(d['source']['t'])).attr('y1', d=>_yScale(d['source']['rank']))
+      .attr('x2',  d=>_xScale(d['target']['t'])).attr('y2', d=>_yScale(d['target']['rank']))
+      .style('stroke',  d=>_this.get_color_by_index(featureObj['fid'])).style('stroke-width', 0.5)
   });
 
-  let glyphContainers = topNFeatureContainers.append('g');
 
-  glyphContainers.append('rect')
-    .attr('x', 5).attr('y', (featureHeight - size) / 2)
-    .attr('width', size).attr('height', size)
-    .attr('fill', featureObj=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-    .attr('fill-opacity', 0.1);
 
-  glyphContainers.each(function(d){
-    let _glyphContainer = d3.select(this);
-    _this.renderGlyph(_glyphContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
-  });
+
+  // columnsContainers.each(function(d,columni){
+  //   d3.select(this).selectAll('.rowCell').data(d).enter().append('circle').attr('class', 'rowCell')
+  //     .attr('r', 2)
+  //     .attr('cx', config['width'] / _this.nTime / 2)
+  //     .attr('cy', (_, j)=> yScale(j) + config['height'] / d.length / 2)
+  //     .attr('fill', 'red')
+  // })
+  console.log('use time', new Date() - __start_time);
 };
+
+IndividualSequence.prototype.on = function(eventName, method){
+  if(eventName == 'mouseover') {
+    this.mouseover = method;
+    this.svg.on('mouseover', this.mouseover);
+  }else if(eventName == 'mouseout'){
+    this.mouseout = method;
+    this.svg.on('mouseout', this.mouseout);
+  }
+};
+
+IndividualSequence.prototype.distance_level = {0: 0, 10: 1, 30: 1, 100:3, 200: 4, 300: 4};
+IndividualSequence.prototype.directions = {'E': 0,  'ES': 1, "S": 2, "SW": 3, "W": 4, "WN": 5, "N": 6, "NE": 7};
+
 
 IndividualSequence.prototype.renderGlyph = function(container, width, height, ofx, ofy, name){
   let name_obj = this.parse_feature_name(name);
+  console.log('name obj',name_obj);
   let direction = name_obj['direction'];
   let distance = name_obj['distance'];
   let feature = name_obj['feature'];
@@ -571,29 +467,5 @@ IndividualSequence.prototype.parse_feature_name = function(feature_name){
 
 
 
-IndividualSequence.prototype.on = function(eventName, method){
-  if(eventName == 'mouseover') {
-    this.mouseover = method;
-    this.svg.on('mouseover', this.mouseover);
-  }else if(eventName == 'mouseout'){
-    this.mouseout = method;
-    this.svg.on('mouseout', this.mouseout);
-  }
-};
-
-
-IndividualSequence.prototype.onHoverOn = function(featureName){
-
-  if(this.featureMap == undefined || this.featureMap[featureName] == undefined){
-    console.log('No featureName hover', featureName);
-    return
-  }
-  d3.select(this.featureMap[featureName]['render']['container']).selectAll('path').attr('stroke-width', 2.5).attr('opacity', 1);
-
-};
-
-IndividualSequence.prototype.onHoverOut = function(){
-  this.LineContainer.selectAll('path').attr('stroke-width', 0.3).attr('stroke-opacity', 0.4);
-};
 
 export default IndividualSequence

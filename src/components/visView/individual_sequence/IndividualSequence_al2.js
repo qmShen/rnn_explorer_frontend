@@ -67,12 +67,9 @@ let IndividualSequence = function(el, targetFeature){
 };
 
 
-// let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
-let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#290095", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
+let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#dd4477", "#990099",  "#b82e2e", "#316395", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
 let feature_color = d3.scaleOrdinal().range(color_list_feature);
-feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25",  "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
-
-
+feature_color.domain(["CO", "NO2", "O3", "SO2", "PM10", "PM25", "AQHI", "AQHIER", "Temp", "Wind", "WindDirection", "RH", "SeaLevelPressure", "DewPt", "CloudCover", "StationPresure"]);
 let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let toDateTime = function(secs) {
@@ -258,8 +255,7 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   let fill = function(d) {
       return d.yExtent[0] * 20;
     },
-    // fillScale = d3.scaleLinear().range(['lavender', 'purple']).interpolate(d3.interpolateHcl),
-    fillScale = d3.scaleLinear().range(["lavender", "#3e17a5"]).interpolate(d3.interpolateHcl),
+    fillScale = d3.scaleLinear().range(['lavender', 'purple']).interpolate(d3.interpolateHcl),
     fillValue = function(d) { return fillScale(fill(d)); };
 
   gHorizon.each(function(d, i) {
@@ -283,7 +279,6 @@ let sortArrayRI = function(arr, topN){
   for (var i = 0; i < arr.length; ++i) indices[i] = i;
   indices.sort(function (a, b) { return arr[a] < arr[b] ? 1 : arr[a] > arr[b] ? -1 : 0; });
   let rx = indices.slice(0, topN);
-
   return rx;
 };
 
@@ -309,7 +304,7 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
   for(let i = 0, ilen = dataT.length; i < ilen; i++){
     topNFeatureList.push(sortArrayRI(dataT[i], nTopFeature));
   }
-  // console.log('topNFeatureList', topNFeatureList);
+
   let FID2Seq = {};
 
   for(let timeI = 0, ilen = topNFeatureList.length; timeI < ilen; timeI++){
@@ -336,12 +331,9 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
     })
   }
 
-  console.log('rankingList', rankingList);
   rankingList.sort((a, b)=>{
-    // let x = a['topList'].length;
-    // let y = b['topList'].length;
-    let x = a['gradient_sum'];
-    let y = b['gradient_sum'];
+    let x = a['topList'].length;
+    let y = b['topList'].length;
     return ((x < y) ? 1 : ((x > y) ? -1 : 0));
   });
 
@@ -357,20 +349,8 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
 
   let segHeight = 8;
 
-  let temp_rank_list = [];
-
-  rankingList.forEach(d=>{
-    let _feature_index = parseInt(d['feature_index']);
-    if(this.features[_feature_index]['type'] == 'CO'){
-      return
-    }
-    temp_rank_list.push(d)
-  })
-  // let topNList = rankingList.slice(0, this.topN);
-  // let otherList = rankingList.slice(this.topN, rankingList.length);
-
-  let topNList = temp_rank_list.slice(0, this.topN);
-  let otherList = temp_rank_list.slice(this.topN, rankingList.length);
+  let topNList = rankingList.slice(0, this.topN);
+  let otherList = rankingList.slice(this.topN, rankingList.length);
 
   let featureHeight = (config['height'] - noExtendHeight) / this.topN;
 
@@ -416,7 +396,7 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
 
   level1GlyphContainers.each(function(d){
     let _container = d3.select(this);
-    _this.renderGlyph(_container, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
+    // _this.renderGlyph(_container, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
   });
 
   let level2Container = otherContainer.append('g').attr('transform', (d, i)=> 'translate(' + [0, noExtendHeight / 2] + ')');
@@ -442,50 +422,55 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
     let _container = d3.select(this);
 
     let segContainers = _container.selectAll('.exist').data(featureObj['topList']).enter().append('g').attr('class', 'exist')
-      .attr('transform',(d, i)=>'translate(' + [xScale(d['t']), featureHeight / 2] + ')');
+      .attr('transform',(d, i)=>'translate(' + [xScale(d['t']), 0] + ')');
 
     segContainers.each(function(seg){
       let cellContainer = d3.select(this);
-      if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) || seg['next']['t'] != seg['t']+1){
-        // Do nothing
-      }else if(seg['pre']['t'] == seg['t']-1){
-        cellContainer.append('rect')
-          .attr('height', segHeight).attr('width', segWidth + 2)
-          .attr('x', -1 * segWidth / 2 - 1).attr('y', -1 * segHeight / 2 )
-          .attr('fill', 'grey').attr('fill-opacity', 0.2)
-      }
+      // if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) || seg['next']['t'] != seg['t']+1){
+      //   // Do nothing
+      // }else if(seg['pre']['t'] == seg['t']-1){
+      //   cellContainer.append('rect')
+      //     .attr('height', segHeight).attr('width', segWidth + 2)
+      //     .attr('x', -1 * segWidth / 2 - 1).attr('y', -1 * segHeight / 2 )
+      //     .attr('fill', 'grey').attr('fill-opacity', 0.2)
+      // }
     });
 
     segContainers.each(function(seg){
       let cellContainer = d3.select(this);
-      if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) ||seg['next']['t'] != seg['t']+1){
-        cellContainer.append('circle')
-          .attr('r', 4)
-          .attr('fill', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-          .attr('opacity', 0.7)
-          .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-      }else if(seg['pre']['t'] == seg['t']-1){}
+      _this.renderGlyph(cellContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(featureObj.feature_index)]['fullName']);
     });
 
-    _container.selectAll('.exist').data(featureObj['topList']).enter().append('circle').attr('class', 'exist')
-      .attr('cx', d=>xScale(d['t'])).attr('cy', featureHeight / 2)
-      .attr('r', 4)
-      .attr('fill', 'white')
-      .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-      .attr('stroke-width', 2);
+    // segContainers.each(function(seg){
+    //   let cellContainer = d3.select(this);
+    //   if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) ||seg['next']['t'] != seg['t']+1){
+    //     cellContainer.append('circle')
+    //       .attr('r', 4)
+    //       .attr('fill', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
+    //       .attr('opacity', 0.7)
+    //       .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
+    //   }else if(seg['pre']['t'] == seg['t']-1){}
+    // });
+    //
+    // _container.selectAll('.exist').data(featureObj['topList']).enter().append('circle').attr('class', 'exist')
+    //   .attr('cx', d=>xScale(d['t'])).attr('cy', featureHeight / 2)
+    //   .attr('r', 4)
+    //   .attr('fill', 'white')
+    //   .attr('stroke', d=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
+    //   .attr('stroke-width', 2);
   });
 
   let glyphContainers = topNFeatureContainers.append('g');
 
-  glyphContainers.append('rect')
-    .attr('x', 5).attr('y', (featureHeight - size) / 2)
-    .attr('width', size).attr('height', size)
-    .attr('fill', featureObj=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
-    .attr('fill-opacity', 0.1);
+  // glyphContainers.append('rect')
+  //   .attr('x', 5).attr('y', (featureHeight - size) / 2)
+  //   .attr('width', size).attr('height', size)
+  //   .attr('fill', featureObj=> _this.get_color_by_index(parseInt(featureObj.feature_index)))
+  //   .attr('fill-opacity', 0.1);
 
   glyphContainers.each(function(d){
     let _glyphContainer = d3.select(this);
-    _this.renderGlyph(_glyphContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
+    // _this.renderGlyph(_glyphContainer, size, size, 5, (featureHeight - size) / 2, _this.features[parseInt(d.feature_index)]['fullName']);
   });
 };
 
@@ -511,7 +496,8 @@ IndividualSequence.prototype.renderGlyph = function(container, width, height, of
     .attr('fill', feature_color(feature))
 
     .attr('stroke', feature_color(feature))
-    .attr('opacity', 0.4)
+    .attr('stroke-width', 0.2)
+    .attr('opacity', 0.2)
 
   let boundary_color = 'white';
   let _rect_out = container.append('rect')
@@ -550,7 +536,20 @@ IndividualSequence.prototype.renderGlyph = function(container, width, height, of
     .attr("y2", center_y + radius * Math.sin(direction_pi))
 
 };
-
+let color = [
+  "#023858",
+  "#045a8d",
+  "#3690c0",
+  "#74a9cf",
+  "#a6bddb",
+  "#ece7f2",
+  "#023858",
+  "#045a8d",
+  "#3690c0",
+  "#74a9cf",
+  "#a6bddb",
+  "#ece7f2"
+]
 IndividualSequence.prototype.parse_feature_name = function(feature_name){
 
   let name_arr = feature_name.split('_');
