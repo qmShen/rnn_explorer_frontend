@@ -11,8 +11,17 @@ let weekDay = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 
 // let gradient_color_list = ["#f9d057", "#f9d057", "#f29e2e", "#e76818","#d7191c", '#67000d'];
-let gradient_color_list = ["#f9d057", "#f9d057", "#fc4e2a", "#e76818","#bd0026", '#67000d'];
+// let gradient_color_list = ["#f9d057", "#f9d057", "#fc4e2a", "#e76818","#bd0026", '#67000d'];
 // gradient_color_list = ["#F6CAD9","#E6A3B6", "#B05E6A", "#984B53", "#6E3132", 'black'];
+let gradient_color_list = [
+        "#ffffcc",
+        "#f9d057",
+        "#e76818",
+        "#e31a1c",
+        "#bd0026",
+        "#67000d"
+    ];
+
 let colorScaleRainbow = d3.scaleLinear()
   .domain([0.0,0.2,0.4,0.5, 0.7, 1])
   .range(gradient_color_list)
@@ -87,15 +96,77 @@ let GradientScatter = function(el){
   this.selecting_points = [];
 
   this.selected_points = [];
-
+  this.colorLegend();
 };
 
+GradientScatter.prototype.colorLegend = function(){
+  // gradient_color_list
+  // colorScaleRainbow
+  let dataList = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+  let max_val = 150;
+  for(let i = 0, ilen  = dataList.length; i < ilen; i++){
+    console.log(i, dataList[i], colorScaleRainbow(dataList[i]))
+  }
+
+  let container =  this.svgChart.append('g').attr('transform', 'translate(40, 10)');
+  var gradient = container.append('defs')
+    .append('linearGradient')
+    .attr('id', 'gradient')
+    .attr('x1', '0%') // bottom
+    .attr('y1', '00%')
+    .attr('x2', '0%') // to top
+    .attr('y2', '100%')
+    .attr('spreadMethod', 'pad');
+  function percentange(start, end, val){
+    return val / (end - start) * 100 + '%'
+  }
+  let start = dataList[0];
+  let end = dataList[dataList.length - 1];
+
+  dataList.forEach((d, i)=>{
+    gradient.append('stop')
+      .attr('offset', percentange(start, end, d))
+      .attr('stop-color', colorScaleRainbow(d))
+      .attr('stop-opacity', 1);
+  });
+  let legendHeight = 150;
+  let legendWidth = 12;
+  container.append('rect')
+    .attr('y', -1)
+    .attr('width', legendWidth)
+    .attr('height', legendHeight + 2)
+    .style('fill', 'url(#gradient)');
+
+  var legendScale = d3.scaleLinear()
+    .domain(d3.extent(dataList))
+    .range([0, legendHeight]);
+
+  // let rects = container.selectAll('rect').data(dataList).enter().append('rect')
+  //   .attr('x', legendWidth).attr('y', d=>legendScale(d))
+  //   .attr('width', 5).attr('height', 5)
+  //   .attr('fill', d=> colorScaleRainbow(d))
+
+  let legendAxis = d3.axisLeft()
+    .scale(legendScale)
+    .tickFormat((d,i)=>(d - start) / (end - start) * max_val)
+  let axisContainer = container.append("g")
+    .attr("class", "legend axis")
+    .attr("transform", "translate(" + -2 + ", 0)")
+    .call(legendAxis);
+  let axisColor = 'grey'
+  axisContainer.selectAll('path').attr('stroke', axisColor);
+  axisContainer.selectAll('line').attr('stroke', axisColor);
+  axisContainer.selectAll('text').attr('fill', axisColor);
+  let text_e = container.append('text').attr('x', -25).attr('y', legendHeight + 22)//.text('PM2.5 ug/m3')
+    .attr('font-size', 11).attr('fill', 'grey');
+  text_e.append('tspan').text('PM25 ug/m').append('tspan').attr("dy", "-2").text(3)
+
+};
 
 GradientScatter.prototype.setData = function(data, targetFeature){
   this.data = data;
   this.targetFeature = targetFeature;
-  console.log('loglog', this.data, this.targetFeature = targetFeature);
-
+  console.log('Data and target feature, gradient scatter', this.data, this.targetFeature = targetFeature);
   this.quadtree = d3.quadtree()
     .x(d=>d.x)
     .y(d=>d.y)

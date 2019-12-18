@@ -63,7 +63,7 @@ let IndividualSequence = function(el, targetFeature){
 
 //  -----------------------------------------------------------------
   this.targetFeature = targetFeature;
-  // console.log('targetFeature', this.targetFeature);
+
 };
 
 
@@ -107,6 +107,7 @@ IndividualSequence.prototype.get_color_by_index = function(index){
 
 
 IndividualSequence.prototype.set_Data = function(data){
+  this.timestamp = data['timestamp'];
   this.date = toDateTime(data['timestamp'])
 
   let featureNames = data['allFeature'];
@@ -277,6 +278,8 @@ IndividualSequence.prototype.renderGradientTrend = function(container, config, d
   seqContainers.append('rect').attr('width', config['width']).attr('height', seqHeight).attr('fill-opacity', 0)
     .attr('stroke', 'grey').attr('stroke-width', 0.2);
 };
+
+
 let sortArrayRI = function(arr, topN){
   if(topN == undefined){topN = arr.length;}
   let indices = new Array(arr.length);
@@ -295,6 +298,7 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
 
   // Data processing -------------------------------------------------------------------------------
   let __start_time = new Date();
+  let _this = this;
   container.append('rect')
     .attr("width", config['width']).attr('height', config['height'])
     .attr('fill', 'none')//.attr('fill-opacity', 0.05)
@@ -309,7 +313,6 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
   for(let i = 0, ilen = dataT.length; i < ilen; i++){
     topNFeatureList.push(sortArrayRI(dataT[i], nTopFeature));
   }
-  // console.log('topNFeatureList', topNFeatureList);
   let FID2Seq = {};
 
   for(let timeI = 0, ilen = topNFeatureList.length; timeI < ilen; timeI++){
@@ -329,14 +332,40 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
   let rankingList = [];
 
   for(let key in FID2Seq){
+
+    let feature_type = _this.features[parseInt(key)]['type'];
+
+    /* hard code*/
+    let top_list = [];
+
+
+    if(parseInt(key) == 205 && parseInt(this.timestamp == 1514872800) ){
+      FID2Seq[key].forEach(d=>{if(d.t > 12){top_list.push(d);}})
+    }else if(parseInt(key) == 206) {
+      FID2Seq[key].forEach(d=>{if(d.t > 8){top_list.push(d);}})
+    }else if(parseInt(key) == 85) {
+      FID2Seq[key].forEach(d=>{if(d.t > 14){top_list.push(d);}})
+    }else if(parseInt(key) == 97) {
+      FID2Seq[key].forEach(d=>{if(d.t > 20){top_list.push(d);}})
+    }else if(parseInt(key) == 77) {
+      FID2Seq[key].forEach(d=>{if(d.t > 18){top_list.push(d);}})
+    }
+    else{
+      top_list = FID2Seq[key];
+    }
+
+
+
     rankingList.push({
+      'feature_name': _this.features[parseInt(key)]['fullName'],
+      'feature_type': feature_type,
       'feature_index': key,
-      'topList': FID2Seq[key],
+      'topList': top_list,
       'gradient_sum': d3.sum(data[key])
     })
   }
 
-  console.log('rankingList', rankingList);
+
   rankingList.sort((a, b)=>{
     // let x = a['topList'].length;
     // let y = b['topList'].length;
@@ -351,7 +380,7 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
   };
 
   //-------------------------------------------------------------------------------------------
-  let _this = this;
+
   let noExtendHeight = 40;
 
 
@@ -456,7 +485,8 @@ IndividualSequence.prototype.renderTopFeatures = function(container, config, dat
       }
     });
 
-    segContainers.each(function(seg){
+
+    segContainers.each(function(seg, i){
       let cellContainer = d3.select(this);
       if(seg['pre'] == null || seg['next'] == null || (seg['pre']['t'] != seg['t']-1) ||seg['next']['t'] != seg['t']+1){
         cellContainer.append('circle')
@@ -585,7 +615,7 @@ IndividualSequence.prototype.on = function(eventName, method){
 IndividualSequence.prototype.onHoverOn = function(featureName){
 
   if(this.featureMap == undefined || this.featureMap[featureName] == undefined){
-    console.log('No featureName hover', featureName);
+
     return
   }
   d3.select(this.featureMap[featureName]['render']['container']).selectAll('path').attr('stroke-width', 2.5).attr('opacity', 1);

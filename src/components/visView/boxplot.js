@@ -11,6 +11,7 @@ let Boxplot = function(el){
   this.canvas_width = this.$el.clientWidth;
   this.canvas_height = this.$el.clientHeight;
   this.svg = d3.select(el).append('svg').attr('width', this.canvas_width).attr('height', this.canvas_height);
+
 };
 
 let color_list_feature = ["#dc3912", "#3366cc", "#ff9900","#0099c6",  "#109618", "#66aa00", "#b82e2e", "#290095", "#994499", "#22aa99", "#aaaa11", "#6633cc", "#e67300", "#8b0707", "#651067", "#329262", "#5574a6", "#3b3eac"];
@@ -24,7 +25,7 @@ let parse_attribute_name = function(attributes_name){
 };
 
 Boxplot.prototype.render_data = function(item){
-
+  console.log('items', item);
   let margin = {top: 10, right: 10, bottom: 20, left: 40};
   this.margin = margin;
   let renderHeight = this.canvas_height - (margin.top + margin.bottom);
@@ -41,7 +42,7 @@ Boxplot.prototype.render_data = function(item){
   let allBoxContainer = rootContainer.append('g').attr('class', 'allboxcontainer')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
   let _this = this;
-
+  this.svg.attr('id', 'feature_' + item.feature_name)
   // allBoxContainer.append('rect')
   //   .attr('width', renderWidth)
   //   .attr('height', renderHeight)

@@ -62,9 +62,9 @@
 
       pipeService.onMouseoverFeature(msg=>{
         if(msg == undefined){
-          console.log('mouse out');
+          // console.log('mouse out');
         }else{
-          console.log('mouse on', msg);
+          // console.log('mouse on', msg);
         }
       });
     },

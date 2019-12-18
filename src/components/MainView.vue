@@ -367,7 +367,7 @@
         let colors = selected_data['colors'];
         let model_id = _this.current_model['model_id'];
 
-        console.log('selected_data', selected_data);
+        console.log('selected_data', selected_data, selected_ids);
         dataService.getFeatureSequenceGradientClusterToEnd(model_id,
           selected_ids, function(records){
 
@@ -508,6 +508,7 @@
 //            1519801200 + 3600 * 47,
 //            1519801200 + 3600 * 48,
 //            1519801200 + 3600 * 24 * 3
+//               1514872800
           ],
           'selected_timestamps': null,
           'colors': _this.colors
@@ -592,9 +593,10 @@
             let y = b['feature_importance'];
             return ((x < y) ? 1 : ((x > y) ? -1 : 0));
           });
+
           console.log('input_feature_gradient_statistics', this.input_feature_gradient_statistics);
         }
-        console.log('gradient statustucs, ', this.input_feature_gradient_statistics)
+        console.log('gradient statistics, ', this.input_feature_gradient_statistics)
         console.log('gradient', gradientList);
         console.log('gradientSum', importanceList);
       },
@@ -617,7 +619,7 @@
               let y = d3.sum(b['temporal_statistics'], d=>d[2]);
               return ((x < y) ? 1 : ((x > y) ? -1 : 0));
             });
-            records['feature_statics'] = records['feature_statics'].slice(0, 100);
+            records['feature_statics'] = records['feature_statics'].slice(0, 10);
             this.input_feature_gradient_statistics = records;
           });
           this.getGradientProjection(this.targetFeature, (records)=>{
